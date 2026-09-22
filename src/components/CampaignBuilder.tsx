@@ -26,11 +26,15 @@ import { verifyLeadList } from '@/lib/utils/verifyEmail';
 interface CampaignBuilderProps {
   onLaunchSuccess: (campaignData: any) => void;
   onCancel: () => void;
+  userEmail?: string | null;
+  userName?: string | null;
 }
 
 export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   onLaunchSuccess,
   onCancel,
+  userEmail,
+  userName,
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
@@ -221,6 +225,8 @@ ${senderName}`
           subject,
           bodyTemplate,
           contacts,
+          userEmail,
+          userName,
         }),
       });
 

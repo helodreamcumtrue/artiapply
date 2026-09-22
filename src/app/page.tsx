@@ -287,6 +287,8 @@ export default function Home() {
             <CampaignBuilder
               onLaunchSuccess={handleLaunchSuccess}
               onCancel={() => setActiveTab('dashboard')}
+              userEmail={userEmail}
+              userName={userName}
             />
           )}
 
