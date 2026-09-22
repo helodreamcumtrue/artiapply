@@ -7,7 +7,11 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const proto = request.headers.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+  const detectedUrl = host ? `${proto}://${host}` : null;
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || detectedUrl || 'http://localhost:3000').replace(/\/+$/, '');
+  const redirectUri = `${appUrl}/auth/callback`;
 
   if (error) {
     console.error('[OAuth Callback] Google auth error:', error);
@@ -21,7 +25,6 @@ export async function GET(request: NextRequest) {
   try {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = `${appUrl}/auth/callback`;
 
     const oauth2Client = new google.auth.OAuth2(
       clientId,

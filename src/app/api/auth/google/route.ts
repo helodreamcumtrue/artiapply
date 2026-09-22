@@ -1,12 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`;
+
+  // Auto-detect base URL from request headers if available, or fall back to env/localhost
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const proto = request.headers.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+  const detectedUrl = host ? `${proto}://${host}` : null;
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || detectedUrl || 'http://localhost:3000').replace(/\/+$/, '');
+  const redirectUri = `${baseUrl}/auth/callback`;
 
   if (!clientId || !clientSecret) {
     return NextResponse.json(
