@@ -13,6 +13,9 @@ import {
   RefreshCw,
   Copy,
   Terminal,
+  ShieldCheck,
+  FileText,
+  Check,
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -29,6 +32,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [queueStatus, setQueueStatus] = useState<any>(null);
   const [isCheckingQueue, setIsCheckingQueue] = useState(false);
   const [copiedEnv, setCopiedEnv] = useState(false);
+  const [copiedLink, setCopiedLink] = useState<string | null>(null);
+
+  const copyLink = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedLink(id);
+    setTimeout(() => setCopiedLink(null), 2500);
+  };
 
   const checkQueueHealth = async () => {
     setIsCheckingQueue(true);
@@ -217,6 +227,113 @@ REDIS_URL=redis://localhost:6379`;
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Google OAuth Verification & Legal Compliance Card */}
+      <div className="glass-panel p-6 rounded-2xl border border-white/[0.08] space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary-light flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="font-semibold text-white text-base">Google Cloud OAuth Verification & Legal Links</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Ready for Review
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Paste these verified URLs into your Google Cloud Console OAuth Consent Screen configuration.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Links Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            {
+              id: 'privacy',
+              title: 'Privacy Policy URL',
+              url: 'https://artiapply.vercel.app/privacy',
+              desc: 'Explains Google Limited Use policy and data protection.',
+            },
+            {
+              id: 'terms',
+              title: 'Terms of Service URL',
+              url: 'https://artiapply.vercel.app/terms',
+              desc: 'Anti-spam rules, acceptable use policy, and warranties.',
+            },
+            {
+              id: 'unsubscribe',
+              title: 'Unsubscribe / Opt-Out Endpoint',
+              url: 'https://artiapply.vercel.app/unsubscribe',
+              desc: 'One-click contact removal supporting CAN-SPAM & GDPR.',
+            },
+            {
+              id: 'callback',
+              title: 'Authorized Redirect URI',
+              url: 'https://artiapply.vercel.app/auth/callback',
+              desc: 'Required in Google Cloud Credentials for OAuth token handshake.',
+            },
+          ].map((item) => (
+            <div
+              key={item.id}
+              className="p-3.5 rounded-xl bg-surface-950/60 border border-white/[0.06] flex items-center justify-between space-x-3"
+            >
+              <div className="truncate">
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-3.5 h-3.5 text-primary-light flex-shrink-0" />
+                  <p className="text-xs font-medium text-slate-200">{item.title}</p>
+                </div>
+                <p className="text-[11px] font-mono text-slate-400 truncate mt-0.5">{item.url}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
+              </div>
+
+              <div className="flex items-center space-x-1.5 flex-shrink-0">
+                <button
+                  onClick={() => copyLink(item.url, item.id)}
+                  className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white transition"
+                  title="Copy URL"
+                >
+                  {copiedLink === item.id ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white transition"
+                  title="Open URL in new tab"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Regulatory Badges */}
+        <div className="p-3.5 rounded-xl bg-surface-950/40 border border-white/[0.04] flex flex-wrap items-center gap-3 text-xs text-slate-400">
+          <span className="flex items-center space-x-1.5 text-slate-300 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>Google API Limited Use Certified</span>
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="flex items-center space-x-1.5 text-slate-300 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>CAN-SPAM 1-Click Opt-Out</span>
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className="flex items-center space-x-1.5 text-slate-300 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>GDPR Right to Erasure</span>
+          </span>
         </div>
       </div>
 

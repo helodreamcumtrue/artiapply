@@ -21,6 +21,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { Contact } from '@/types/database';
+import { verifyLeadList } from '@/lib/utils/verifyEmail';
 
 interface CampaignBuilderProps {
   onLaunchSuccess: (campaignData: any) => void;
@@ -64,6 +65,11 @@ ${senderName}`
   const [contacts, setContacts] = useState<any[]>([]);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [csvError, setCsvError] = useState<string | null>(null);
+  const [verificationStats, setVerificationStats] = useState<{
+    verified: number;
+    risky: number;
+    invalid: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Step 4: Launching
@@ -166,7 +172,15 @@ ${senderName}`
           return;
         }
 
-        setContacts(parsed);
+        const { verified, risky, invalid } = verifyLeadList(parsed);
+        setVerificationStats({
+          verified: verified.length,
+          risky: risky.length,
+          invalid: invalid.length,
+        });
+
+        // Use verified and risky (auto-suggested) leads
+        setContacts([...verified, ...risky]);
       },
       error: (err) => {
         setCsvError(`Failed to parse CSV: ${err.message}`);
@@ -183,6 +197,12 @@ ${senderName}`
       { id: '4', email: 'elena.rostova@devsphere.dev', first_name: 'Elena', company: 'DevSphere', role: 'Director of Outreach' },
       { id: '5', email: 'david.kim@apexleads.com', first_name: 'David', company: 'ApexLeads', role: 'Growth Strategist' },
     ];
+    const { verified, risky, invalid } = verifyLeadList(demo);
+    setVerificationStats({
+      verified: verified.length,
+      risky: risky.length,
+      invalid: invalid.length,
+    });
     setContacts(demo);
     setCsvFileName('demo_contacts_high_growth.csv');
   };
@@ -412,7 +432,7 @@ ${senderName}`
           {/* Variable Chips Toolbar */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <span className="text-xs text-slate-400 font-medium">Insert Variable:</span>
-            {['first_name', 'last_name', 'company', 'role', 'email'].map((varName) => (
+            {['first_name', 'last_name', 'company', 'role', 'email', 'unsubscribe_url'].map((varName) => (
               <button
                 key={varName}
                 type="button"
@@ -529,17 +549,30 @@ ${senderName}`
           {/* Contacts Preview Table */}
           {contacts.length > 0 && (
             <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-emerald-400 flex items-center">
-                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                  {contacts.length} verified contacts ready ({csvFileName || 'CSV'})
-                </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-emerald-400 flex items-center bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                    {verificationStats?.verified ?? contacts.length} Verified Deliverable
+                  </span>
+                  {verificationStats && verificationStats.risky > 0 && (
+                    <span className="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg font-medium">
+                      ⚠️ {verificationStats.risky} Typos Corrected
+                    </span>
+                  )}
+                  {verificationStats && verificationStats.invalid > 0 && (
+                    <span className="text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-lg font-medium">
+                      🛡️ {verificationStats.invalid} Disposable Filtered
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => {
                     setContacts([]);
                     setCsvFileName(null);
+                    setVerificationStats(null);
                   }}
-                  className="text-slate-400 hover:text-rose-400 transition flex items-center space-x-1"
+                  className="text-slate-400 hover:text-rose-400 transition flex items-center space-x-1 self-start sm:self-auto"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Clear</span>

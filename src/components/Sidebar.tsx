@@ -146,6 +146,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {isRedisConnected ? '2/sec Limiter' : 'Local Queue'}
           </span>
         </div>
+
+        {/* Compliance & Legal Links */}
+        <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-slate-400">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition underline underline-offset-2">
+            Privacy Policy
+          </a>
+          <span>•</span>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition underline underline-offset-2">
+            Terms
+          </a>
+          <span>•</span>
+          <a href="/unsubscribe" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition underline underline-offset-2">
+            Opt-out
+          </a>
+        </div>
       </div>
 
       {/* User Account Footer */}

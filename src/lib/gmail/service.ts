@@ -123,15 +123,20 @@ export function createMimeMessage({
 export function replaceVariables(
   template: string,
   contact: {
+    id?: string;
     first_name?: string | null;
     last_name?: string | null;
     company?: string | null;
     role?: string | null;
     email: string;
     custom_fields?: Record<string, any>;
-  }
+  },
+  appendUnsubscribeFooter: boolean = true
 ): string {
   let result = template;
+
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
 
   const replacements: Record<string, string> = {
     first_name: contact.first_name || '',
@@ -142,6 +147,8 @@ export function replaceVariables(
     company: contact.company || 'your company',
     role: contact.role || 'Professional',
     email: contact.email || '',
+    unsubscribe_url: unsubscribeUrl,
+    unsubscribe: unsubscribeUrl,
   };
 
   // Add custom fields
@@ -156,6 +163,11 @@ export function replaceVariables(
     const doubleRegex = new RegExp(`{{\\s*${key}\\s*}}`, 'gi');
     const singleRegex = new RegExp(`{\\s*${key}\\s*}`, 'gi');
     result = result.replace(doubleRegex, value).replace(singleRegex, value);
+  }
+
+  // Append subtle opt-out compliance footer if not already present
+  if (appendUnsubscribeFooter && !result.toLowerCase().includes('unsubscribe')) {
+    result += `\n\n<div style="font-size:11px;color:#888;margin-top:24px;border-top:1px solid #334155;padding-top:8px;">To opt out of future emails, <a href="${unsubscribeUrl}" style="color:#818cf8;text-decoration:underline;">unsubscribe here</a>.</div>`;
   }
 
   return result;
