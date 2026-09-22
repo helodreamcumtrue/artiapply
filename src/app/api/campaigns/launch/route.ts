@@ -41,11 +41,56 @@ export async function POST(request: NextRequest) {
 
     // 1. If Supabase is configured, insert into PostgreSQL
     if (isAdminConfigured()) {
-      // Ensure user exists or use provided userId
+      let resolvedUserId = userId;
+
+      try {
+        // Check if current userId exists in public.users
+        const { data: userRecord } = await supabaseAdmin
+          .from('users')
+          .select('id')
+          .eq('id', resolvedUserId)
+          .maybeSingle();
+
+        if (userRecord?.id) {
+          resolvedUserId = userRecord.id;
+        } else {
+          // Check if any registered user exists in public.users to attribute campaign to
+          const { data: anyUser } = await supabaseAdmin
+            .from('users')
+            .select('id')
+            .limit(1)
+            .maybeSingle();
+
+          if (anyUser?.id) {
+            resolvedUserId = anyUser.id;
+          } else {
+            // Create default user record
+            const { data: createdUser } = await supabaseAdmin
+              .from('users')
+              .upsert(
+                {
+                  id: '00000000-0000-0000-0000-000000000001',
+                  email: 'demo@articleapply.io',
+                  name: 'Campaign Manager',
+                },
+                { onConflict: 'email' }
+              )
+              .select('id')
+              .maybeSingle();
+
+            if (createdUser?.id) {
+              resolvedUserId = createdUser.id;
+            }
+          }
+        }
+      } catch (uErr) {
+        console.warn('[Launch API] Notice during user resolution:', uErr);
+      }
+
       const { data: campaignData, error: campaignError } = await supabaseAdmin
         .from('campaigns')
         .insert({
-          user_id: userId,
+          user_id: resolvedUserId,
           name,
           subject,
           body_template: bodyTemplate,
@@ -59,7 +104,15 @@ export async function POST(request: NextRequest) {
 
       if (campaignError) {
         console.error('[Launch API] Failed to create campaign in Supabase:', campaignError);
-        return NextResponse.json({ error: campaignError.message }, { status: 500 });
+        let errorMsg = campaignError.message;
+        if (errorMsg.includes('Invalid path')) {
+          errorMsg = 'Invalid Supabase URL path. Please ensure NEXT_PUBLIC_SUPABASE_URL in Vercel is just https://<project>.supabase.co (remove /rest/v1 or trailing slashes).';
+        } else if (errorMsg.includes('does not exist')) {
+          errorMsg = 'Database tables not found. Please run the SQL migration in supabase/migrations/0001_initial_schema.sql in your Supabase SQL Editor.';
+        } else if (errorMsg.includes('violates foreign key')) {
+          errorMsg = 'Database foreign key error: No user profile found. Please sign in via Google first or seed public.users.';
+        }
+        return NextResponse.json({ error: errorMsg }, { status: 500 });
       }
 
       campaignId = campaignData.id;
@@ -67,7 +120,7 @@ export async function POST(request: NextRequest) {
       // Prepare contacts for Supabase batch insert
       const contactsToInsert = contacts.map((c) => ({
         campaign_id: campaignId,
-        user_id: userId,
+        user_id: resolvedUserId,
         email: c.email?.trim(),
         first_name: c.first_name || c.firstName || null,
         last_name: c.last_name || c.lastName || null,

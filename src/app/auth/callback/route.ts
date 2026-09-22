@@ -43,9 +43,8 @@ export async function GET(request: NextRequest) {
     console.log('[OAuth Callback] Successfully authenticated user:', userInfo.email);
 
     // If Supabase is configured, upsert into public.users
-    if (isAdminConfigured() && userInfo.id && userInfo.email) {
+    if (isAdminConfigured() && userInfo.email) {
       const updateData: Record<string, any> = {
-        id: userInfo.id, // Or matched Supabase auth UID
         email: userInfo.email,
         name: userInfo.name || null,
         avatar_url: userInfo.picture || null,
@@ -60,7 +59,23 @@ export async function GET(request: NextRequest) {
         updateData.token_expires_at = new Date(tokens.expiry_date).toISOString();
       }
 
-      await supabaseAdmin.from('users').upsert(updateData, { onConflict: 'email' });
+      // Check if user already exists
+      const { data: existingUser } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', userInfo.email)
+        .maybeSingle();
+
+      if (existingUser?.id) {
+        await supabaseAdmin
+          .from('users')
+          .update(updateData)
+          .eq('id', existingUser.id);
+      } else {
+        await supabaseAdmin
+          .from('users')
+          .insert(updateData);
+      }
     }
 
     const response = NextResponse.redirect(`${appUrl}?auth_success=true&email=${encodeURIComponent(userInfo.email || '')}`);

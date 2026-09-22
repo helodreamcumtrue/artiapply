@@ -8,8 +8,8 @@ create extension if not exists "uuid-ossp";
 
 -- 1. Users Table (Synchronized with Supabase auth.users & Google OAuth tokens)
 create table if not exists public.users (
-    id uuid primary key references auth.users(id) on delete cascade,
-    email text not null,
+    id uuid primary key default gen_random_uuid(),
+    email text not null unique,
     name text,
     avatar_url text,
     google_access_token text,
