@@ -43,16 +43,16 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Campaigns</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Campaigns</h1>
+          <p className="text-xs text-slate-600 mt-1">
             Manage your cold email sequences, delivery metrics, and active queues
           </p>
         </div>
         <button
           onClick={onNewCampaign}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-glow transition"
+          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition"
         >
           <Plus className="w-4 h-4" />
           <span>New Sequence</span>
@@ -61,7 +61,7 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
 
       {/* Filters & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center space-x-1.5 bg-surface-950/80 p-1 rounded-xl border border-white/[0.08] overflow-x-auto">
+        <div className="flex items-center space-x-1 bg-white p-1 rounded-full border border-slate-200 shadow-sm overflow-x-auto">
           {[
             { id: 'all', label: 'All' },
             { id: 'in_progress', label: 'In Progress' },
@@ -71,8 +71,10 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                filter === tab.id ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
+                filter === tab.id
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               {tab.label}
@@ -87,17 +89,17 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
             placeholder="Search campaigns..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 pr-4 py-1.5 rounded-xl bg-surface-950/80 border border-white/[0.08] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary transition w-full sm:w-60"
+            className="pl-8 pr-4 py-1.5 rounded-full bg-white border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-sm transition w-full sm:w-60"
           />
         </div>
       </div>
 
       {/* Campaigns Grid */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {filteredCampaigns.length === 0 ? (
-          <div className="glass-panel p-12 text-center rounded-2xl">
-            <MailCheck className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-            <p className="text-sm font-medium text-slate-300">No campaigns found</p>
+          <div className="bg-white p-14 text-center rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)]">
+            <MailCheck className="w-10 h-10 mx-auto text-slate-400 mb-2" />
+            <p className="text-base font-bold text-slate-800 font-poppins">No campaigns found</p>
             <p className="text-xs text-slate-500 mt-1">Try clearing your filters or create a new campaign</p>
           </div>
         ) : (
@@ -107,32 +109,32 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
               : 0;
 
             const statusColors: Record<string, string> = {
-              completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-              in_progress: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-              queued: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-              draft: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+              completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+              in_progress: 'bg-sky-50 text-sky-700 border-sky-200',
+              queued: 'bg-amber-50 text-amber-700 border-amber-200',
+              draft: 'bg-slate-100 text-slate-700 border-slate-200',
             };
 
             return (
               <div
                 key={camp.id}
-                className="glass-panel p-5 rounded-2xl border border-white/[0.06] hover:border-primary/40 transition group space-y-3"
+                className="bg-white p-6 rounded-[26px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 group space-y-3.5"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary-light flex items-center justify-center shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center space-x-3.5">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <MailCheck className="w-4 h-4" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold text-white text-sm group-hover:text-primary-light transition">
+                        <h3 className="font-bold text-slate-900 text-sm group-hover:text-slate-700 transition font-poppins">
                           {camp.name}
                         </h3>
-                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${statusColors[camp.status] || statusColors.draft}`}>
+                        <span className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${statusColors[camp.status] || statusColors.draft}`}>
                           {camp.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 font-mono mt-0.5 truncate max-w-lg">
+                      <p className="text-xs text-slate-500 font-mono mt-0.5 truncate max-w-lg">
                         {camp.subject}
                       </p>
                     </div>
@@ -141,7 +143,7 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
                   <div className="flex items-center space-x-2 self-end sm:self-auto">
                     <button
                       onClick={() => onSelectCampaign(camp)}
-                      className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-medium text-white transition flex items-center space-x-1"
+                      className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200/80 text-xs font-semibold text-slate-800 transition flex items-center space-x-1.5"
                     >
                       <span>View Progress</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -149,7 +151,7 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
                     {onDeleteCampaign && (
                       <button
                         onClick={() => onDeleteCampaign(camp.id)}
-                        className="p-1.5 rounded-xl hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 transition"
+                        className="p-2 rounded-full hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -159,14 +161,14 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
 
                 {/* Progress bar */}
                 <div className="space-y-1.5 pt-1">
-                  <div className="w-full bg-surface-950 rounded-full h-2 overflow-hidden border border-white/[0.04]">
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5">
                     <div
-                      className="h-full bg-gradient-to-r from-primary to-accent-cyan rounded-full transition-all duration-300"
+                      className="h-full bg-slate-900 rounded-full transition-all duration-300"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                    <span>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                    <span className="font-medium">
                       {camp.sent_count} / {camp.total_contacts} contacts ({progress}%)
                     </span>
                     <span suppressHydrationWarning>Created: {formatDate(camp.created_at)}</span>

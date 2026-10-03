@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <linearGradient id="articlo-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="articlo-wing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+    <linearGradient id="articlo-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Circular Base Badge -->
+  <circle cx="24" cy="24" r="22" fill="url(#articlo-bg)" stroke="#334155" stroke-width="1.5" />
+
+  <!-- Aerodynamic 'A' Launch Apex (Article / Outreach) -->
+  <path
+    d="M24 8 L9 37 L24 30 L39 37 Z"
+    fill="url(#articlo-wing)"
+    stroke="#ffffff"
+    stroke-width="1.2"
+    stroke-linejoin="round"
+    filter="url(#glow)"
+  />
+
+  <!-- Inner Split Fold Line -->
+  <line x1="24" y1="8" x2="24" y2="30" stroke="#94a3b8" stroke-width="1" />
+
+  <!-- Radiant 'O' Center Orbital Dot -->
+  <circle cx="24" cy="22" r="4.2" fill="url(#articlo-accent)" stroke="#ffffff" stroke-width="1.2" />
+</svg>

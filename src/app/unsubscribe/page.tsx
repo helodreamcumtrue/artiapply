@@ -41,52 +41,52 @@ function UnsubscribeContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-      <div className="max-w-md w-full glass-panel p-8 rounded-2xl border border-white/[0.08] shadow-2xl text-center space-y-6">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white p-8 sm:p-9 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_12px_36px_-6px_rgba(15,23,42,0.08)] text-center space-y-6">
         {/* Brand Icon */}
-        <div className="w-12 h-12 rounded-2xl bg-surface-900 border border-white/[0.1] text-primary flex items-center justify-center mx-auto shadow-glow">
-          <ShieldOff className="w-6 h-6 text-slate-400" />
+        <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center mx-auto shadow-sm">
+          <ShieldOff className="w-6 h-6 text-slate-600" />
         </div>
 
         {unsubscribed ? (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold text-white tracking-tight">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight font-poppins">
               Unsubscribed Successfully
             </h1>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              <strong className="text-slate-200">{email}</strong> has been permanently removed from this sender’s cold outreach campaigns. You will receive no further emails.
+            <p className="text-xs text-slate-600 leading-relaxed">
+              <strong className="text-slate-900">{email}</strong> has been permanently removed from this sender’s cold outreach campaigns. You will receive no further emails.
             </p>
-            <div className="pt-4 border-t border-white/[0.06] text-[11px] text-slate-500">
-              Powered by ArticleApply Compliance Engine (CAN-SPAM & GDPR)
+            <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-500">
+              Powered by ArticlO Compliance Engine (CAN-SPAM & GDPR)
             </div>
           </div>
         ) : (
           <form onSubmit={handleUnsubscribe} className="space-y-4">
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 Opt-Out of Outreach
               </h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-600 mt-1">
                 Please confirm your email address below to unsubscribe from this sequence.
               </p>
             </div>
 
             <div className="text-left space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block">
+              <label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider block">
                 Your Email Address
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-surface-950/80 border border-white/[0.1] text-white text-xs focus:outline-none focus:border-primary transition"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-slate-900 shadow-sm transition"
                 />
               </div>
             </div>
@@ -94,7 +94,7 @@ function UnsubscribeContent() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2.5 px-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-white font-medium text-xs transition flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full py-2.5 px-4 rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold text-xs transition flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -106,8 +106,8 @@ function UnsubscribeContent() {
               )}
             </button>
 
-            <div className="text-[11px] text-slate-500 pt-2 border-t border-white/[0.06]">
-              ArticleApply enforces strict rate limits and honors immediate opt-outs.
+            <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+              ArticlO enforces strict rate limits and honors immediate opt-outs.
             </div>
           </form>
         )}
@@ -120,10 +120,10 @@ export default function UnsubscribePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-          <div className="max-w-md w-full glass-panel p-8 rounded-2xl border border-white/[0.08] text-center space-y-4">
-            <RefreshCw className="w-6 h-6 animate-spin text-primary mx-auto" />
-            <p className="text-xs text-slate-400">Loading opt-out portal...</p>
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-4">
+            <RefreshCw className="w-6 h-6 animate-spin text-slate-700 mx-auto" />
+            <p className="text-xs text-slate-600">Loading opt-out portal...</p>
           </div>
         </div>
       }

@@ -15,6 +15,10 @@ import {
   RefreshCw,
   Mail,
   Building,
+  Users,
+  BarChart3,
+  Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 import { Campaign, Contact } from '@/types/database';
 import { formatDate } from '@/lib/utils/formatDate';
@@ -25,6 +29,8 @@ interface DashboardProps {
   recentActivity: Contact[];
   onNewCampaign: () => void;
   onSelectCampaign: (campaign: Campaign) => void;
+  onViewContacts?: () => void;
+  onViewAnalytics?: () => void;
   isSimulatingSending?: boolean;
 }
 
@@ -34,6 +40,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   recentActivity,
   onNewCampaign,
   onSelectCampaign,
+  onViewContacts,
+  onViewAnalytics,
   isSimulatingSending = false,
 }) => {
   // Aggregate stats across campaigns
@@ -41,7 +49,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
   const totalContacts = campaigns.reduce((acc, c) => acc + (c.total_contacts || 0), 0);
   const activeCount = campaigns.filter((c) => c.status === 'in_progress' || c.status === 'queued').length;
-  const pendingCount = totalContacts - (totalSent + totalFailed);
 
   const deliveryRate = totalSent + totalFailed > 0
     ? ((totalSent / (totalSent + totalFailed)) * 100).toFixed(1)
@@ -53,156 +60,165 @@ export const Dashboard: React.FC<DashboardProps> = ({
     : 0;
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Top Banner & Quick Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-6 pb-12">
+      {/* Friendly Welcome & Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center space-x-2">
-            <span>Outreach Performance</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
-              Live System
+          <div className="flex items-center space-x-2.5">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              Welcome back 👋
+            </h1>
+            <span className="text-xs px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-medium">
+              Outreach Active
             </span>
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Automating cold emails via Gmail API with BullMQ rate limiter (2 emails/sec)
+          </div>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
+            Automating spam-safe cold outreach directly through your verified email account.
           </p>
         </div>
-        <button
-          onClick={onNewCampaign}
-          className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-700 text-white font-medium text-sm shadow-glow transition-all active:scale-[0.98]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create Campaign</span>
-        </button>
+
+        <div className="flex items-center space-x-2.5">
+          {onViewContacts && (
+            <button
+              onClick={onViewContacts}
+              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-xs font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-sm transition"
+            >
+              <Users className="w-3.5 h-3.5 text-slate-600" />
+              <span>Contacts Directory</span>
+            </button>
+          )}
+
+          <button
+            onClick={onNewCampaign}
+            className="inline-flex items-center space-x-2 px-5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm shadow-[0_2px_8px_rgba(15,23,42,0.18)] transition-all active:scale-[0.98]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Campaign</span>
+          </button>
+        </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover">
-          <div className="flex items-center justify-between text-slate-400 mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Sent</span>
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary-light flex items-center justify-center">
-              <Send className="w-4 h-4" />
+      {/* 4 Unique Elevated KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Sent */}
+        <div className="bg-white p-5 rounded-[24px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-slate-500 mb-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Sent</span>
+            <div className="w-8 h-8 rounded-full bg-slate-100/80 text-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Send className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-white tracking-tight">{totalSent.toLocaleString()}</span>
-            <span className="text-xs font-medium text-emerald-400 flex items-center">
-              <TrendingUp className="w-3 h-3 mr-0.5" /> +12.4%
+            <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-poppins">
+              {totalSent.toLocaleString()}
+            </span>
+            <span className="text-xs font-semibold text-emerald-600 flex items-center">
+              <TrendingUp className="w-3 h-3 mr-0.5" /> +12%
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5">Across all campaigns</p>
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/10 rounded-full blur-xl pointer-events-none" />
+          <p className="text-[11px] text-slate-400 mt-1">Across all campaigns</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover">
-          <div className="flex items-center justify-between text-slate-400 mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider">Deliverability</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+        {/* Deliverability */}
+        <div className="bg-white p-5 rounded-[24px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-slate-500 mb-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Inbox Placement</span>
+            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-white tracking-tight">{deliveryRate}%</span>
-            <span className="text-xs font-medium text-emerald-400">Optimal</span>
+            <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-poppins">
+              {deliveryRate}%
+            </span>
+            <span className="text-xs font-semibold text-emerald-600">Optimal</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5">Zero spam triggers reported</p>
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+          <p className="text-[11px] text-slate-400 mt-1">Primary inboxes reached</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover">
-          <div className="flex items-center justify-between text-slate-400 mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider">Active Queues</span>
-            <div className="w-8 h-8 rounded-lg bg-accent-cyan/10 text-accent-cyan flex items-center justify-center">
-              <Zap className="w-4 h-4" />
+        {/* Active Campaigns */}
+        <div className="bg-white p-5 rounded-[24px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-slate-500 mb-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Active Campaigns</span>
+            <div className="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Zap className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-white tracking-tight">{activeCount}</span>
-            <span className="text-xs font-medium text-accent-cyan">BullMQ</span>
+            <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-poppins">
+              {activeCount}
+            </span>
+            <span className="text-xs font-semibold text-sky-600">Running</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5">Dispatched at 2 emails/sec</p>
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-accent-cyan/10 rounded-full blur-xl pointer-events-none" />
+          <p className="text-[11px] text-slate-400 mt-1">Automated sequences</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover">
-          <div className="flex items-center justify-between text-slate-400 mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider">Pending Contacts</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
+        {/* Total Audience Contacts */}
+        <div className="bg-white p-5 rounded-[24px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group">
+          <div className="flex items-center justify-between text-slate-500 mb-2.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Leads</span>
+            <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Users className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-white tracking-tight">{Math.max(0, pendingCount)}</span>
-            <span className="text-xs font-medium text-slate-400">Scheduled</span>
+            <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-poppins">
+              {totalContacts}
+            </span>
+            <span className="text-xs font-semibold text-slate-500">Contacts</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5">Awaiting queue slot</p>
-          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none" />
+          <p className="text-[11px] text-slate-400 mt-1">Ready for outreach</p>
         </div>
       </div>
 
-      {/* Real-time Active Campaign Queue Tracker */}
+      {/* Active Campaign Spotlight Card */}
       {currentCamp && (
-        <div className="glass-panel p-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-surface-900/90 via-surface-900/60 to-primary/5 relative overflow-hidden shadow-glow">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+        <div className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center space-x-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-                </span>
-                <span className="text-xs uppercase font-bold tracking-wider text-cyan-400">
-                  Live Queue Dispatches
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">
-                  2 emails / sec
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                  {currentCamp.status === 'completed' ? 'Completed Sequence' : 'Active Outreach Sequence'}
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-white mt-1">
-                {currentCamp.name}
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xl">
-                Subject: <span className="text-slate-300 font-mono">{currentCamp.subject}</span>
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-1 font-poppins">{currentCamp.name}</h3>
+              <p className="text-xs text-slate-500 mt-0.5 truncate max-w-lg">
+                Subject: <span className="text-slate-800 font-mono font-medium">{currentCamp.subject}</span>
               </p>
             </div>
 
-            <div className="flex items-center space-x-4 self-start md:self-auto">
+            <div className="flex items-center space-x-4 self-start sm:self-auto">
               <div className="text-right">
-                <span className="text-2xl font-black text-white font-mono">{progressPercent}%</span>
+                <span className="text-2xl sm:text-3xl font-bold text-slate-900 font-mono">{progressPercent}%</span>
                 <p className="text-[11px] text-slate-400">
-                  {currentCamp.sent_count + currentCamp.failed_count} of {currentCamp.total_contacts} sent
+                  {currentCamp.sent_count} of {currentCamp.total_contacts} delivered
                 </p>
               </div>
               <button
                 onClick={() => onSelectCampaign(currentCamp)}
-                className="px-3.5 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-xs font-semibold text-white transition flex items-center space-x-1.5"
+                className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200/80 text-xs font-semibold text-slate-800 transition flex items-center space-x-1.5"
               >
-                <span>Details</span>
+                <span>View Details</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="w-full bg-surface-950/80 rounded-full h-3 overflow-hidden p-0.5 border border-white/[0.06]">
+          {/* Elevated Progress Bar */}
+          <div className="space-y-1.5">
+            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5">
               <div
-                className="h-full bg-gradient-to-r from-primary via-indigo-400 to-accent-cyan rounded-full transition-all duration-500 shadow-glow"
+                className="h-full bg-slate-900 rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-              <span className="text-emerald-400 flex items-center">
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+              <span className="text-emerald-700 flex items-center">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
                 {currentCamp.sent_count} Delivered
               </span>
-              {currentCamp.failed_count > 0 && (
-                <span className="text-rose-400 flex items-center">
-                  <AlertTriangle className="w-3.5 h-3.5 mr-1" />
-                  {currentCamp.failed_count} Failed
-                </span>
-              )}
-              <span className="text-slate-400">
+              <span>
                 {Math.max(0, currentCamp.total_contacts - currentCamp.sent_count - currentCamp.failed_count)} Remaining
               </span>
             </div>
@@ -210,29 +226,67 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Main Grid: Active Campaigns & Live Delivery Feed */}
+      {/* 3-Step Simple Getting Started Workflow */}
+      <div className="p-6 sm:p-7 rounded-[28px] bg-white border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          How to launch your outreach in 3 simple steps
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div className="p-4 rounded-[20px] bg-slate-50/70 border border-slate-200/70 space-y-1.5 hover:bg-slate-50 hover:border-slate-300 transition-all">
+            <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+              1
+            </div>
+            <p className="text-xs font-bold text-slate-900">Add Recipients</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Download our 50-entry verified sample lead file or upload your own CSV list.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-[20px] bg-slate-50/70 border border-slate-200/70 space-y-1.5 hover:bg-slate-50 hover:border-slate-300 transition-all">
+            <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+              2
+            </div>
+            <p className="text-xs font-bold text-slate-900">Personalize with AI</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Use Gemini AI to craft engaging subject lines and custom variable tags.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-[20px] bg-slate-50/70 border border-slate-200/70 space-y-1.5 hover:bg-slate-50 hover:border-slate-300 transition-all">
+            <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+              3
+            </div>
+            <p className="text-xs font-bold text-slate-900">Launch Safely</p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Dispatched automatically at human-like pace to maximize reply rates.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid: Campaigns Overview & Recent Deliveries */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Campaigns List (2 cols) */}
-        <div className="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+        <div className="lg:col-span-2 bg-white rounded-[28px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="font-semibold text-white text-base">Campaigns Overview</h3>
-              <p className="text-xs text-slate-400">All outbound automated email sequences</p>
+              <h3 className="font-bold text-slate-900 text-base font-poppins">Campaigns Overview</h3>
+              <p className="text-xs text-slate-400">Outbound cold email sequences</p>
             </div>
             <button
               onClick={onNewCampaign}
-              className="text-xs text-primary-light hover:text-white font-medium transition flex items-center space-x-1"
+              className="text-xs text-slate-900 hover:text-slate-700 font-semibold transition"
             >
-              <span>+ New Sequence</span>
+              + New Campaign
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {campaigns.length === 0 ? (
               <div className="py-12 text-center text-slate-400">
-                <Mail className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-                <p className="text-sm font-medium">No campaigns created yet</p>
-                <p className="text-xs text-slate-500 mt-1">Start by launching your first cold email campaign</p>
+                <Mail className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                <p className="text-sm font-medium text-slate-800">No campaigns created yet</p>
+                <p className="text-xs text-slate-400 mt-1">Start by launching your first sequence</p>
               </div>
             ) : (
               campaigns.map((camp) => {
@@ -241,38 +295,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   : 0;
 
                 const statusStyles: Record<string, string> = {
-                  completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                  in_progress: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-                  queued: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                  draft: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-                  failed: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+                  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  in_progress: 'bg-sky-50 text-sky-700 border-sky-200',
+                  queued: 'bg-amber-50 text-amber-700 border-amber-200',
+                  draft: 'bg-slate-100 text-slate-700 border-slate-200',
+                  failed: 'bg-rose-50 text-rose-700 border-rose-200',
                 };
 
                 return (
                   <div
                     key={camp.id}
                     onClick={() => onSelectCampaign(camp)}
-                    className="p-4 rounded-xl bg-surface-900/40 hover:bg-surface-900/80 border border-white/[0.04] hover:border-primary/30 transition cursor-pointer group"
+                    className="p-4 rounded-[20px] bg-slate-50/60 hover:bg-slate-100/70 border border-slate-200/70 hover:border-slate-300 transition-all cursor-pointer group"
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center space-x-2">
-                        <span className="font-medium text-sm text-slate-200 group-hover:text-white transition">
+                        <span className="font-semibold text-xs sm:text-sm text-slate-900 group-hover:text-slate-800 transition">
                           {camp.name}
                         </span>
-                        <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full border ${statusStyles[camp.status] || statusStyles.draft}`}>
+                        <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded-full border ${statusStyles[camp.status] || statusStyles.draft}`}>
                           {camp.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <span className="text-xs font-mono text-slate-400">{pct}%</span>
+                      <span className="text-xs font-mono text-slate-500 font-semibold">{pct}%</span>
                     </div>
 
-                    <p className="text-xs text-slate-400 truncate mb-3 font-mono">
-                      {camp.subject}
-                    </p>
-
-                    <div className="flex items-center justify-between text-xs text-slate-500">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
                       <span>{camp.total_contacts} Contacts</span>
-                      <span className="text-slate-400" suppressHydrationWarning>
+                      <span className="text-slate-500" suppressHydrationWarning>
                         {camp.sent_count} sent • {formatDate(camp.created_at)}
                       </span>
                     </div>
@@ -284,66 +334,79 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Live Delivery Stream (1 col) */}
-        <div className="glass-panel rounded-2xl p-6 space-y-4 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+        <div className="bg-white rounded-[28px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4 flex flex-col">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="font-semibold text-white text-base flex items-center space-x-2">
-                <span>Live Feed</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <h3 className="font-bold text-slate-900 text-base font-poppins flex items-center space-x-2">
+                <span>Recent Deliveries</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </h3>
-              <p className="text-xs text-slate-400">Real-time status dispatches</p>
+              <p className="text-xs text-slate-400">Live recipient status feed</p>
             </div>
-            <RefreshCw className="w-3.5 h-3.5 text-slate-500 animate-spin" style={{ animationDuration: '4s' }} />
           </div>
 
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[420px] pr-1">
+          <div className="space-y-2 flex-1 overflow-y-auto max-h-[380px] pr-1">
             {recentActivity.length === 0 ? (
-              <div className="py-12 text-center text-slate-500">
-                <Clock className="w-8 h-8 mx-auto text-slate-600 mb-2" />
+              <div className="py-12 text-center text-slate-400">
+                <Clock className="w-8 h-8 mx-auto text-slate-300 mb-2" />
                 <p className="text-xs">Waiting for dispatches...</p>
               </div>
             ) : (
               recentActivity.map((activity, idx) => (
                 <div
                   key={activity.id || idx}
-                  className="p-3 rounded-xl bg-surface-900/40 border border-white/[0.04] text-xs space-y-1"
+                  className="p-3 rounded-[16px] bg-slate-50/60 border border-slate-200/70 text-xs space-y-1"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-slate-200 truncate max-w-[150px]">
+                    <span className="font-semibold text-slate-900 truncate max-w-[150px]">
                       {activity.first_name ? `${activity.first_name} ${activity.last_name || ''}` : activity.email}
                     </span>
                     <span
-                      className={`text-[9px] uppercase px-1.5 py-0.5 rounded font-bold ${
+                      className={`text-[9px] uppercase px-2 py-0.5 rounded-full font-bold ${
                         activity.status === 'sent'
-                          ? 'bg-emerald-500/10 text-emerald-400'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                           : activity.status === 'sending'
-                          ? 'bg-cyan-500/10 text-cyan-400 animate-pulse'
-                          : 'bg-amber-500/10 text-amber-400'
+                          ? 'bg-sky-50 text-sky-700 border border-sky-200 animate-pulse'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}
                     >
                       {activity.status}
                     </span>
                   </div>
                   <div className="flex items-center text-slate-400 text-[11px] truncate">
-                    <Mail className="w-3 h-3 mr-1 text-slate-500 shrink-0" />
+                    <Mail className="w-3 h-3 mr-1 text-slate-400 shrink-0" />
                     <span className="truncate">{activity.email}</span>
                   </div>
-                  {activity.company && (
-                    <div className="flex items-center text-slate-500 text-[10px]">
-                      <Building className="w-3 h-3 mr-1 text-slate-600 shrink-0" />
-                      <span>{activity.company}</span>
-                    </div>
-                  )}
                 </div>
               ))
             )}
           </div>
-
-          <div className="pt-3 border-t border-white/[0.06] text-[11px] text-slate-400 text-center">
-            Queue rate-limited to avoid Gmail API quotas
-          </div>
         </div>
       </div>
+
+      {/* Advanced Analytics Link Banner */}
+      {onViewAnalytics && (
+        <div className="p-5 sm:p-6 rounded-[28px] bg-white border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-full bg-sky-50 text-sky-700 flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-slate-900 font-poppins">Need deep-dive charts & hourly throughput?</p>
+              <p className="text-[11px] text-slate-500">
+                Explore spam score tests, hourly dispatch charts, and domain reputation analysis in Advanced Analytics.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onViewAnalytics}
+            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-900 text-xs font-semibold transition self-start sm:self-auto flex-shrink-0"
+          >
+            <span>Open Advanced Analytics</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

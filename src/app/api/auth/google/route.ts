@@ -15,10 +15,7 @@ export async function GET(request: NextRequest) {
   const redirectUri = `${baseUrl}/auth/callback`;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.json(
-      { error: 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.' },
-      { status: 500 }
-    );
+    return NextResponse.redirect(`${baseUrl}?auth_notice=demo_mode`);
   }
 
   const oauth2Client = new google.auth.OAuth2(

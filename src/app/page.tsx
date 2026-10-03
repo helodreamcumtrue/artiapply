@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sidebar, NavTab } from '@/components/Sidebar';
+import { Navbar, NavTab } from '@/components/Navbar';
 import { Dashboard } from '@/components/Dashboard';
 import { CampaignBuilder } from '@/components/CampaignBuilder';
 import { CampaignsList } from '@/components/CampaignsList';
@@ -21,7 +21,7 @@ export default function Home() {
       user_id: 'user-1',
       name: 'Y-Combinator Tech Founders Cold Outreach',
       subject: 'Quick question regarding {{company}} outreach workflow',
-      body_template: 'Hi {{first_name}},\n\nLoved your recent launch at {{company}}. Would love to share how ArticleApply scales outreach with zero spam flags.\n\nBest,\nAlex',
+      body_template: 'Hi {{first_name}},\n\nLoved your recent launch at {{company}}. Would love to share how ArticlO scales outreach with zero spam flags.\n\nBest,\nAlex',
       status: 'in_progress',
       total_contacts: 24,
       sent_count: 14,
@@ -122,6 +122,12 @@ export default function Home() {
   const [isRedisConnected, setIsRedisConnected] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>('marketer@articleapply.io');
   const [userName, setUserName] = useState<string | null>('Alex Outreach');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  };
 
   // Supabase Realtime Hook integration
   const { isRealtimeConnected } = useRealtimeCampaign({
@@ -152,11 +158,16 @@ export default function Home() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const authSuccess = params.get('auth_success');
+      const authNotice = params.get('auth_notice');
       const email = params.get('email');
+
       if (authSuccess === 'true') {
         setIsGoogleConnected(true);
         if (email) setUserEmail(decodeURIComponent(email));
-        // Clean URL
+        showToast('Google Workspace connected successfully!');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (authNotice === 'demo_mode') {
+        showToast('Demo Mode Active: Set GOOGLE_CLIENT_ID & SECRET in .env.local for live Gmail sending.');
         window.history.replaceState({}, '', window.location.pathname);
       }
 
@@ -255,9 +266,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
-      {/* Fixed Sidebar */}
-      <Sidebar
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col">
+      {/* Floating Pill Top Navbar matching reference UI */}
+      <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isGoogleConnected={isGoogleConnected}
@@ -268,8 +279,8 @@ export default function Home() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 ml-64 p-8 min-h-screen">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 min-h-screen">
+        <div className="max-w-5xl mx-auto">
           {activeTab === 'dashboard' && (
             <Dashboard
               campaigns={campaigns}
@@ -280,6 +291,8 @@ export default function Home() {
                 setActiveCampaign(c);
                 setActiveTab('campaigns');
               }}
+              onViewContacts={() => setActiveTab('contacts')}
+              onViewAnalytics={() => setActiveTab('analytics')}
             />
           )}
 
@@ -305,11 +318,21 @@ export default function Home() {
           )}
 
           {activeTab === 'contacts' && (
-            <ContactsDirectory contacts={contacts} />
+            <ContactsDirectory
+              contacts={contacts}
+              onAddContacts={(newContacts) => {
+                setContacts((prev) => [...newContacts, ...prev]);
+              }}
+              onClearContacts={() => setContacts([])}
+              onNewCampaign={() => setActiveTab('builder')}
+            />
           )}
 
           {activeTab === 'analytics' && (
-            <AnalyticsView campaigns={campaigns} />
+            <AnalyticsView
+              campaigns={campaigns}
+              onBack={() => setActiveTab('dashboard')}
+            />
           )}
 
           {activeTab === 'settings' && (
@@ -317,10 +340,19 @@ export default function Home() {
               isGoogleConnected={isGoogleConnected}
               isRedisConnected={isRedisConnected}
               userEmail={userEmail}
+              userName={userName}
             />
           )}
         </div>
       </main>
+
+      {/* Floating System Notification Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 text-xs font-medium animate-in fade-in slide-in-from-bottom-3 duration-200 border border-slate-800">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

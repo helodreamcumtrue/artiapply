@@ -3,19 +3,29 @@ import { GoogleGenAI } from '@google/genai';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, subject, body, tone = 'persuasive', targetAudience = 'general' } = await request.json();
+    const reqBody = await request.json();
+    const prompt = reqBody.prompt || reqBody.customPrompt;
+    const subject = reqBody.subject;
+    const body = reqBody.body || reqBody.bodyTemplate;
+    const tone = reqBody.tone || 'persuasive';
+    const targetAudience = reqBody.targetAudience || 'general';
 
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       // High-quality smart fallback generator if API key is not yet set
+      const fallbackSubjects = [
+        `Quick idea for {{company}}'s outreach strategy`,
+        `Hi {{first_name}}, loved your recent work at {{company}}`,
+        `Scaling cold outreach for {{company}} (quick question)`,
+      ];
+      const fallbackBody = `Hi {{first_name}},\n\nI noticed the impressive milestones {{company}} has reached lately. In leading your team as {{role}}, I imagine optimizing outreach deliverability and engagement remains top of mind.\n\nWe built ArticlO to help high-growth teams automate personalized cold outreach through Gmail with built-in rate-limiting (2 emails/sec) to keep your domain 100% spam-free.\n\nWould you be open to a 5-minute chat this Thursday to see how this could save your team 10+ hours a week?\n\nBest regards,\n[Your Name]`;
+
       return NextResponse.json({
-        subjects: [
-          `Quick idea for {{company}}'s outreach strategy`,
-          `Hi {{first_name}}, loved your recent work at {{company}}`,
-          `Scaling cold outreach for {{company}} (quick question)`,
-        ],
-        body: `Hi {{first_name}},\n\nI noticed the impressive milestones {{company}} has reached lately. In leading your team as {{role}}, I imagine optimizing outreach deliverability and engagement remains top of mind.\n\nWe built ArticleApply to help high-growth teams automate personalized cold outreach through Gmail with built-in rate-limiting (2 emails/sec) to keep your domain 100% spam-free.\n\nWould you be open to a 5-minute chat this Thursday to see how this could save your team 10+ hours a week?\n\nBest regards,\n[Your Name]`,
+        subjects: fallbackSubjects,
+        subjectSuggestions: fallbackSubjects,
+        body: fallbackBody,
+        enhancedBody: fallbackBody,
         isFallback: true,
         message: 'Generated using built-in smart template engine. Add GEMINI_API_KEY in .env.local to enable live Gemini AI inference.',
       });
@@ -69,21 +79,30 @@ Please return ONLY raw JSON matching:
       }
     }
 
+    const generatedSubjects = parsedData.subjects || [subject];
+    const generatedBody = parsedData.body || body;
+
     return NextResponse.json({
-      subjects: parsedData.subjects || [subject],
-      body: parsedData.body || body,
+      subjects: generatedSubjects,
+      subjectSuggestions: generatedSubjects,
+      body: generatedBody,
+      enhancedBody: generatedBody,
       isFallback: false,
     });
   } catch (error: any) {
     console.error('[API /api/ai/enhance] Error:', error);
+    const errorSubjects = [
+      `Quick question regarding {{company}}`,
+      `Idea for {{first_name}} at {{company}}`,
+    ];
+    const errorBody = `Hi {{first_name}},\n\nReaching out because I've been following {{company}}'s recent growth. As {{role}}, would you be open to a quick 5-min intro on automating your cold outreach with zero spam flags?\n\nBest,\n[Your Name]`;
     return NextResponse.json(
       {
         error: error.message || 'Failed to enhance email with Gemini AI',
-        subjects: [
-          `Quick question regarding {{company}}`,
-          `Idea for {{first_name}} at {{company}}`,
-        ],
-        body: `Hi {{first_name}},\n\nReaching out because I've been following {{company}}'s recent growth. As {{role}}, would you be open to a quick 5-min intro on automating your cold outreach with zero spam flags?\n\nBest,\n[Your Name]`,
+        subjects: errorSubjects,
+        subjectSuggestions: errorSubjects,
+        body: errorBody,
+        enhancedBody: errorBody,
       },
       { status: 500 }
     );
