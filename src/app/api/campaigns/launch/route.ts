@@ -177,6 +177,10 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
       },
       contacts: insertedContacts,
+      subject,
+      bodyTemplate,
+      senderName: body.senderName || body.userName,
+      senderEmail: body.senderEmail || body.userEmail,
     });
   } catch (error: any) {
     console.error('[Launch API] Error launching campaign:', error);

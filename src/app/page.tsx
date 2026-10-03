@@ -68,8 +68,8 @@ export default function Home() {
       last_name: 'Bell',
       company: 'StrataSys',
       role: 'Chief Technology Officer',
-      status: 'sent',
-      sent_at: '2026-09-22T12:15:00.000Z',
+      status: 'pending',
+      sent_at: null,
       created_at: '2026-09-22T12:00:00.000Z',
       updated_at: '2026-09-22T12:15:00.000Z',
     },
@@ -82,8 +82,8 @@ export default function Home() {
       last_name: 'Vance',
       company: 'NovaTech',
       role: 'VP Marketing',
-      status: 'sent',
-      sent_at: '2026-09-22T12:14:00.000Z',
+      status: 'pending',
+      sent_at: null,
       created_at: '2026-09-22T12:00:00.000Z',
       updated_at: '2026-09-22T12:14:00.000Z',
     },
@@ -219,43 +219,119 @@ export default function Home() {
     // Switch to dashboard so user can watch the live queue
     setActiveTab('dashboard');
 
-    // Simulate BullMQ dispatch at 2 emails/sec if Redis is not running locally
-    let sentCount = 0;
-    const interval = setInterval(() => {
-      sentCount += 1;
+    // Dispatch real emails sequentially with 500ms delay (2 emails/second rate limiter)
+    const contactsList = Array.isArray(data.contacts) ? data.contacts : [];
+    let processedIndex = 0;
+    let actualSentCount = 0;
+    let actualFailedCount = 0;
+
+    let savedSmtpConfig: any = null;
+    try {
+      const stored = localStorage.getItem('artiapply_smtp_config');
+      if (stored) savedSmtpConfig = JSON.parse(stored);
+    } catch {}
+
+    const dispatchNextEmail = async () => {
+      if (processedIndex >= contactsList.length) return;
+      const target = contactsList[processedIndex];
+      processedIndex++;
+
+      // Set target contact to 'sending'
+      setContacts((prev) =>
+        prev.map((c) =>
+          c.id === target.id || c.email === target.email ? { ...c, status: 'sending' } : c
+        )
+      );
+
+      try {
+        const res = await fetch('/api/campaigns/send-direct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            campaignId: newCamp.id,
+            contact: target,
+            subject: data.subject || newCamp.subject,
+            bodyTemplate: data.bodyTemplate || newCamp.body_template,
+            senderName: data.senderName || userName,
+            senderEmail: data.senderEmail || userEmail,
+            smtpConfig: savedSmtpConfig,
+          }),
+        });
+
+        const sendResult = await res.json();
+
+        if (sendResult.success) {
+          actualSentCount++;
+          setContacts((prev) =>
+            prev.map((c) =>
+              c.id === target.id || c.email === target.email
+                ? {
+                    ...c,
+                    status: 'sent',
+                    sent_at: new Date().toISOString(),
+                  }
+                : c
+            )
+          );
+        } else {
+          actualFailedCount++;
+          setContacts((prev) =>
+            prev.map((c) =>
+              c.id === target.id || c.email === target.email
+                ? {
+                    ...c,
+                    status: 'failed',
+                  }
+                : c
+            )
+          );
+
+          if (processedIndex === 1) {
+            showToast(
+              sendResult.error ||
+                'Email sending failed. Please configure your Gmail App Password or SMTP in Settings.'
+            );
+          }
+        }
+      } catch (err: any) {
+        actualFailedCount++;
+        setContacts((prev) =>
+          prev.map((c) =>
+            c.id === target.id || c.email === target.email ? { ...c, status: 'failed' } : c
+          )
+        );
+      }
+
+      // Update campaign stats
       setCampaigns((prev) =>
         prev.map((c) => {
           if (c.id === newCamp.id) {
-            const nextSent = Math.min(c.total_contacts, c.sent_count + 1);
-            const isFinished = nextSent >= c.total_contacts;
+            const isFinished = processedIndex >= contactsList.length;
             return {
               ...c,
-              sent_count: nextSent,
-              status: isFinished ? 'completed' : 'in_progress',
+              sent_count: actualSentCount,
+              failed_count: actualFailedCount,
+              status: isFinished ? (actualSentCount > 0 ? 'completed' : 'failed') : 'in_progress',
             };
           }
           return c;
         })
       );
 
-      // Update contacts list in real time
-      setContacts((prev) => {
-        const next = [...prev];
-        const pendingIdx = next.findIndex((c) => c.status === 'pending' || c.status === 'queued');
-        if (pendingIdx >= 0) {
-          next[pendingIdx] = {
-            ...next[pendingIdx],
-            status: 'sent',
-            sent_at: new Date().toISOString(),
-          };
+      if (processedIndex < contactsList.length) {
+        setTimeout(dispatchNextEmail, 500); // 2 emails/sec pace
+      } else {
+        if (actualSentCount > 0) {
+          showToast(`Campaign dispatch finished: ${actualSentCount} emails delivered!`);
+        } else {
+          showToast('Delivery alert: No email credentials configured. Go to Settings > Email Setup.');
         }
-        return next;
-      });
-
-      if (sentCount >= data.totalContacts) {
-        clearInterval(interval);
       }
-    }, 500); // 500ms = 2 emails / sec rate limit!
+    };
+
+    if (contactsList.length > 0) {
+      setTimeout(dispatchNextEmail, 250);
+    }
   };
 
   const handleDeleteCampaign = (id: string) => {
@@ -325,6 +401,11 @@ export default function Home() {
               }}
               onClearContacts={() => setContacts([])}
               onNewCampaign={() => setActiveTab('builder')}
+              onUpdateContact={(updated) => {
+                setContacts((prev) =>
+                  prev.map((c) => (c.id === updated.id || c.email === updated.email ? updated : c))
+                );
+              }}
             />
           )}
 

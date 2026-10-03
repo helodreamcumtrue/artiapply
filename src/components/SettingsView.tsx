@@ -9,6 +9,7 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   ExternalLink,
   RefreshCw,
   Copy,
@@ -21,6 +22,11 @@ import {
   Bell,
   Download,
   Code2,
+  Eye,
+  EyeOff,
+  Send,
+  KeyRound,
+  HelpCircle,
 } from 'lucide-react';
 import { downloadSampleCSVFile } from '@/lib/data/sampleContacts';
 
@@ -47,6 +53,104 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [autoPauseReplies, setAutoPauseReplies] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Real Email Sending (SMTP / Gmail App Password) State
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPass, setSmtpPass] = useState('');
+  const [smtpHost, setSmtpHost] = useState('smtp.gmail.com');
+  const [smtpPort, setSmtpPort] = useState('465');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showHowTo, setShowHowTo] = useState(false);
+  const [smtpSavedSuccess, setSmtpSavedSuccess] = useState(false);
+
+  // Live Test Email State
+  const [testEmailTo, setTestEmailTo] = useState('lakshayjain148@gmail.com');
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null);
+
+  // Load saved SMTP configuration on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('artiapply_smtp_config');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.user) setSmtpUser(parsed.user);
+        if (parsed.pass) setSmtpPass(parsed.pass);
+        if (parsed.host) setSmtpHost(parsed.host);
+        if (parsed.port) setSmtpPort(String(parsed.port));
+      }
+    } catch {}
+  }, []);
+
+  const handleSaveSmtp = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const config = {
+      user: smtpUser.trim(),
+      pass: smtpPass.trim(),
+      host: smtpHost.trim() || 'smtp.gmail.com',
+      port: Number(smtpPort) || 465,
+      fromEmail: smtpUser.trim() || email,
+      fromName: name || 'ArticlO Outreach',
+    };
+    localStorage.setItem('artiapply_smtp_config', JSON.stringify(config));
+    setSmtpSavedSuccess(true);
+    setTimeout(() => setSmtpSavedSuccess(false), 3000);
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!testEmailTo.trim()) {
+      alert('Please enter a recipient email address.');
+      return;
+    }
+    setIsSendingTest(true);
+    setTestResult(null);
+
+    const config = {
+      user: smtpUser.trim(),
+      pass: smtpPass.trim(),
+      host: smtpHost.trim() || 'smtp.gmail.com',
+      port: Number(smtpPort) || 465,
+      fromEmail: smtpUser.trim() || email,
+      fromName: name || 'ArticlO Outreach',
+    };
+
+    if (config.user && config.pass) {
+      localStorage.setItem('artiapply_smtp_config', JSON.stringify(config));
+    }
+
+    try {
+      const res = await fetch('/api/email/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: testEmailTo.trim(),
+          subject: 'ArticlO Live Dispatch Test',
+          message: 'Success! Your ArticlO email sending service is verified and delivering real messages.',
+          smtpConfig: config.user && config.pass ? config : undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTestResult({
+          success: true,
+          message: data.message || `Test email successfully delivered to ${testEmailTo}! Check your inbox.`,
+        });
+      } else {
+        setTestResult({
+          success: false,
+          error: data.error || 'Failed to dispatch email. Please check your credentials.',
+        });
+      }
+    } catch (err: any) {
+      setTestResult({
+        success: false,
+        error: err.message || 'Network error occurred while sending test email.',
+      });
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
 
   // Advanced Settings State
   const [queueStatus, setQueueStatus] = useState<any>(null);
@@ -197,7 +301,189 @@ REDIS_URL=redis://localhost:6379`;
             )}
           </div>
 
-          {/* 2. Sender Profile Information Form */}
+          {/* 2. Direct SMTP / Gmail App Password (Easiest way to send real emails!) */}
+          <div className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <KeyRound className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-bold text-slate-900 text-base font-poppins">
+                      Gmail App Password & Real Delivery
+                    </h3>
+                    <span
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                        smtpUser && smtpPass
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}
+                    >
+                      {smtpUser && smtpPass ? 'Live Sending Active' : 'Setup Required'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                    Connect your Gmail directly using a 16-character Google App Password to dispatch genuine emails to real recipient inboxes.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowHowTo((prev) => !prev)}
+                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center space-x-1.5 self-start sm:self-auto bg-indigo-50/70 hover:bg-indigo-100/70 px-3.5 py-1.5 rounded-full border border-indigo-200/60 transition"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>{showHowTo ? 'Hide 60-Sec Guide' : '60-Sec Setup Guide'}</span>
+              </button>
+            </div>
+
+            {/* Step by step guide accordion */}
+            {showHowTo && (
+              <div className="p-4 rounded-[20px] bg-indigo-50/50 border border-indigo-200/80 text-xs text-slate-700 space-y-2 animate-in fade-in duration-150">
+                <p className="font-bold text-slate-900">How to get a Gmail App Password in 60 seconds:</p>
+                <ol className="list-decimal list-inside space-y-1 text-slate-600 leading-relaxed text-[11px]">
+                  <li>
+                    Go to your Google Account at{' '}
+                    <a
+                      href="https://myaccount.google.com/security"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 underline font-semibold"
+                    >
+                      myaccount.google.com/security
+                    </a>
+                  </li>
+                  <li>Ensure <strong>2-Step Verification</strong> is switched ON.</li>
+                  <li>In the top search bar, search for <strong>"App passwords"</strong>.</li>
+                  <li>Enter app name as <strong>"ArticlO"</strong> and click <strong>Create</strong>.</li>
+                  <li>Copy the 16-character code (e.g. <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono font-bold text-slate-900">abcd efgh ijkl mnop</code>) and paste it below!</li>
+                </ol>
+              </div>
+            )}
+
+            {/* SMTP Input Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
+                  Your Gmail Address <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={smtpUser}
+                  onChange={(e) => setSmtpUser(e.target.value)}
+                  placeholder="e.g. yourname@gmail.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-sm transition"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700 block mb-1.5">
+                  16-Character Gmail App Password <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={smtpPass}
+                    onChange={(e) => setSmtpPass(e.target.value)}
+                    placeholder="e.g. abcd efgh ijkl mnop"
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 font-mono placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-sm transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-slate-500">
+                Encrypted locally in browser and used directly for authenticated dispatches.
+              </span>
+              <button
+                type="button"
+                onClick={() => handleSaveSmtp()}
+                className="px-5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition"
+              >
+                {smtpSavedSuccess ? '✓ Credentials Saved' : 'Save Email Credentials'}
+              </button>
+            </div>
+
+            {/* Live Test Email Section */}
+            <div className="pt-4 border-t border-slate-100 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 font-poppins flex items-center space-x-1.5">
+                  <Send className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Send a Live Test Email to Verify Delivery</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Instant Test</span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <input
+                  type="email"
+                  value={testEmailTo}
+                  onChange={(e) => setTestEmailTo(e.target.value)}
+                  placeholder="Recipient email to test (e.g. lakshayjain148@gmail.com)"
+                  className="w-full sm:flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-sm transition"
+                />
+                <button
+                  type="button"
+                  onClick={handleSendTestEmail}
+                  disabled={isSendingTest}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center space-x-1.5 disabled:opacity-50 flex-shrink-0"
+                >
+                  {isSendingTest ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending Test Email...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Send Test Email</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {testResult && (
+                <div
+                  className={`p-3.5 rounded-[18px] text-xs flex items-start space-x-2.5 animate-in fade-in duration-150 ${
+                    testResult.success
+                      ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                      : 'bg-rose-50 border border-rose-200 text-rose-800'
+                  }`}
+                >
+                  {testResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="font-semibold">
+                      {testResult.success ? 'Email Delivered Successfully!' : 'Email Delivery Failed'}
+                    </p>
+                    <p className="text-[11px] mt-0.5 leading-relaxed opacity-90">
+                      {testResult.message || testResult.error}
+                    </p>
+                    {!testResult.success && (
+                      <p className="text-[10px] mt-1 font-medium text-rose-700">
+                        Tip: In Google Account, make sure 2-Step Verification is active, and generate a dedicated 16-character App Password (search "App passwords").
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 3. Sender Profile Information Form */}
           <form onSubmit={handleSaveSimple} className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-5">
             <div className="flex items-center space-x-2 pb-3 border-b border-slate-100">
               <User className="w-4 h-4 text-slate-600" />

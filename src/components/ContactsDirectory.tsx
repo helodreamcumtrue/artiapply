@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   RefreshCw,
   Trash2,
+  Send,
 } from 'lucide-react';
 import { Contact } from '@/types/database';
 import { formatTime } from '@/lib/utils/formatDate';
@@ -36,6 +37,7 @@ interface ContactsDirectoryProps {
   onAddContacts?: (newContacts: Contact[]) => void;
   onClearContacts?: () => void;
   onNewCampaign?: () => void;
+  onUpdateContact?: (updated: Contact) => void;
 }
 
 export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
@@ -43,6 +45,7 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
   onAddContacts,
   onClearContacts,
   onNewCampaign,
+  onUpdateContact,
 }) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'pending' | 'failed' | 'sending'>('all');
@@ -58,9 +61,55 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [sendingContactId, setSendingContactId] = useState<string | null>(null);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleDispatchSingle = async (contact: Contact) => {
+    setSendingContactId(contact.id);
+    let savedSmtp: any = null;
+    try {
+      const stored = localStorage.getItem('artiapply_smtp_config');
+      if (stored) savedSmtp = JSON.parse(stored);
+    } catch {}
+
+    try {
+      const res = await fetch('/api/campaigns/send-direct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contact,
+          subject: `Outreach regarding ${contact.company || 'your team'}`,
+          bodyTemplate: `Hi ${contact.first_name || 'there'},\n\nReaching out directly from ArticlO to test and confirm live email deliverability.\n\nBest regards,\nArticlO Team`,
+          smtpConfig: savedSmtp,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const updatedContact: Contact = {
+          ...contact,
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+        };
+        if (onUpdateContact) onUpdateContact(updatedContact);
+        showToast(`Email delivered to ${contact.email}! Check inbox.`);
+      } else {
+        const updatedContact: Contact = {
+          ...contact,
+          status: 'failed',
+        };
+        if (onUpdateContact) onUpdateContact(updatedContact);
+        showToast(data.error || 'Dispatch failed. Please configure Gmail in Settings.');
+      }
+    } catch (err: any) {
+      showToast('Network error while dispatching email.');
+    } finally {
+      setSendingContactId(null);
+    }
   };
 
   // Filter contacts
@@ -362,12 +411,13 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
                 <th className="py-3.5 px-5 font-semibold">Company & Role</th>
                 <th className="py-3.5 px-5 font-semibold">Status</th>
                 <th className="py-3.5 px-5 font-semibold">Dispatched At</th>
+                <th className="py-3.5 px-5 font-semibold text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-14 text-center text-slate-500">
+                  <td colSpan={5} className="py-14 text-center text-slate-500">
                     <Users className="w-8 h-8 mx-auto text-slate-400 mb-2" />
                     <p className="font-semibold text-slate-800 font-poppins">No contacts found</p>
                     <p className="text-xs text-slate-500 mt-1">
@@ -414,6 +464,22 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
 
                     <td className="py-3.5 px-5 text-slate-500 font-mono text-[11px]" suppressHydrationWarning>
                       {formatTime(contact.sent_at)}
+                    </td>
+
+                    <td className="py-3.5 px-5 text-right">
+                      <button
+                        onClick={() => handleDispatchSingle(contact)}
+                        disabled={sendingContactId === contact.id}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-semibold transition active:scale-95 disabled:opacity-50"
+                        title={`Send real email to ${contact.email}`}
+                      >
+                        {sendingContactId === contact.id ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3 text-slate-600" />
+                        )}
+                        <span>{sendingContactId === contact.id ? 'Sending...' : 'Send Email'}</span>
+                      </button>
                     </td>
                   </tr>
                 ))
