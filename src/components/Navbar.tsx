@@ -35,6 +35,7 @@ interface NavbarProps {
   userAvatar?: string | null;
   activeCampaignCount?: number;
   onOpenTour?: () => void;
+  onSignOut?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -47,6 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userAvatar,
   activeCampaignCount = 0,
   onOpenTour,
+  onSignOut,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -360,11 +362,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {/* Google OAuth Connect */}
                   <a
                     href="/api/auth/google"
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-50 transition"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                   >
                     <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                     <span>{isGoogleConnected ? 'Switch Google Account' : 'Connect Google Workspace'}</span>
                   </a>
+
+                  {onSignOut && (
+                    <>
+                      <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          onSignOut();
+                        }}
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition font-medium"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-rose-500" />
+                        <span>Sign Out / Back to Home</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

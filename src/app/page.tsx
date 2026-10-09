@@ -9,6 +9,7 @@ import { SimpleContactsList } from '@/components/SimpleContactsList';
 import { SettingsView } from '@/components/SettingsView';
 import { OnboardingTourModal } from '@/components/OnboardingTourModal';
 import { TakeFollowUpModal } from '@/components/TakeFollowUpModal';
+import { LandingPage } from '@/components/LandingPage';
 import { useRealtimeCampaign } from '@/hooks/useRealtimeCampaign';
 import { Campaign, Contact } from '@/types/database';
 
@@ -122,6 +123,7 @@ export default function Home() {
   ]);
 
   const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(campaigns[0]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [isRedisConnected, setIsRedisConnected] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>('marketer@articleapply.io');
@@ -131,6 +133,30 @@ export default function Home() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4500);
+  };
+
+  const handleLogin = (customEmail?: string, customName?: string) => {
+    setIsLoggedIn(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('artiapply_session', 'true');
+      if (customEmail) {
+        setUserEmail(customEmail);
+        localStorage.setItem('artiapply_user_email', customEmail);
+      }
+      if (customName) {
+        setUserName(customName);
+        localStorage.setItem('artiapply_user_name', customName);
+      }
+    }
+    showToast('Welcome to ArticlO Command Center!');
+  };
+
+  const handleSignOut = () => {
+    setIsLoggedIn(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('artiapply_session');
+    }
+    showToast('Signed out. See you soon!');
   };
 
   // Supabase Realtime Hook integration
@@ -160,17 +186,35 @@ export default function Home() {
   // Check URL params for OAuth results or inspect cookies
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('artiapply_session');
+      const storedEmail = localStorage.getItem('artiapply_user_email');
+      const storedName = localStorage.getItem('artiapply_user_name');
+      if (storedEmail) setUserEmail(storedEmail);
+      if (storedName) setUserName(storedName);
+
       const params = new URLSearchParams(window.location.search);
       const authSuccess = params.get('auth_success');
       const authNotice = params.get('auth_notice');
       const email = params.get('email');
 
       if (authSuccess === 'true') {
+        setIsLoggedIn(true);
+        localStorage.setItem('artiapply_session', 'true');
         setIsGoogleConnected(true);
-        if (email) setUserEmail(decodeURIComponent(email));
+        if (email) {
+          const cleanEmail = decodeURIComponent(email);
+          setUserEmail(cleanEmail);
+          localStorage.setItem('artiapply_user_email', cleanEmail);
+        }
         showToast('Google Workspace connected successfully!');
         window.history.replaceState({}, '', window.location.pathname);
-      } else if (authNotice === 'demo_mode') {
+      } else if (session === 'true') {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+
+      if (authNotice === 'demo_mode') {
         showToast('Demo Mode Active: Set GOOGLE_CLIENT_ID & SECRET in .env.local for live Gmail sending.');
         window.history.replaceState({}, '', window.location.pathname);
       }
@@ -382,6 +426,18 @@ export default function Home() {
     showToast(`Follow-up sent successfully to ${updatedContactsList.length} contact${updatedContactsList.length === 1 ? '' : 's'}!`);
   };
 
+  // If user is not logged in, render the high-converting Landing Page
+  if (!isLoggedIn) {
+    return (
+      <LandingPage
+        onLogin={() => handleLogin()}
+        onConnectGoogle={() => {
+          window.location.href = '/api/auth/google';
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
       {/* Floating Pill Top Navbar matching reference UI */}
@@ -394,6 +450,7 @@ export default function Home() {
         userName={userName}
         activeCampaignCount={campaigns.filter((c) => c.status === 'in_progress').length}
         onOpenTour={() => setIsTourOpen(true)}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Content Area */}
