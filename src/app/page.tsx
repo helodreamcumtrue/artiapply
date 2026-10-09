@@ -5,14 +5,18 @@ import { Navbar, NavTab } from '@/components/Navbar';
 import { Dashboard } from '@/components/Dashboard';
 import { CampaignBuilder } from '@/components/CampaignBuilder';
 import { CampaignsList } from '@/components/CampaignsList';
-import { ContactsDirectory } from '@/components/ContactsDirectory';
-import { AnalyticsView } from '@/components/AnalyticsView';
+import { SimpleContactsList } from '@/components/SimpleContactsList';
 import { SettingsView } from '@/components/SettingsView';
+import { OnboardingTourModal } from '@/components/OnboardingTourModal';
+import { TakeFollowUpModal } from '@/components/TakeFollowUpModal';
 import { useRealtimeCampaign } from '@/hooks/useRealtimeCampaign';
 import { Campaign, Contact } from '@/types/database';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [followUpCampaign, setFollowUpCampaign] = useState<Campaign | null>(null);
 
   // Initial seed campaigns for instant demonstration
   const [campaigns, setCampaigns] = useState<Campaign[]>([
@@ -189,6 +193,14 @@ export default function Home() {
           }
         })
         .catch(() => {});
+
+      // Auto-show onboarding tour pop-up for first-time visitors
+      try {
+        const hasOnboarded = localStorage.getItem('artiapply_onboarded_v2');
+        if (!hasOnboarded) {
+          setIsTourOpen(true);
+        }
+      } catch {}
     }
   }, []);
 
@@ -204,6 +216,8 @@ export default function Home() {
       total_contacts: data.totalContacts,
       sent_count: 0,
       failed_count: 0,
+      attachments: data.attachments,
+      follow_ups: data.follow_ups,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -255,6 +269,7 @@ export default function Home() {
             senderName: data.senderName || userName,
             senderEmail: data.senderEmail || userEmail,
             smtpConfig: savedSmtpConfig,
+            attachments: data.attachments || newCamp.attachments,
           }),
         });
 
@@ -341,8 +356,34 @@ export default function Home() {
     }
   };
 
+  const handleOpenFollowUp = (camp: Campaign) => {
+    setFollowUpCampaign(camp);
+    setIsFollowUpOpen(true);
+  };
+
+  const handleFollowUpSuccess = (campaignId: string, updatedContactsList: Contact[]) => {
+    setContacts((prev) => {
+      const updatedMap = new Map(updatedContactsList.map((c) => [c.id, c]));
+      return prev.map((c) => updatedMap.get(c.id) || c);
+    });
+
+    setCampaigns((prev) =>
+      prev.map((c) => {
+        if (c.id === campaignId) {
+          return {
+            ...c,
+            status: 'in_progress',
+          };
+        }
+        return c;
+      })
+    );
+
+    showToast(`Follow-up sent successfully to ${updatedContactsList.length} contact${updatedContactsList.length === 1 ? '' : 's'}!`);
+  };
+
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
       {/* Floating Pill Top Navbar matching reference UI */}
       <Navbar
         activeTab={activeTab}
@@ -352,6 +393,7 @@ export default function Home() {
         userEmail={userEmail}
         userName={userName}
         activeCampaignCount={campaigns.filter((c) => c.status === 'in_progress').length}
+        onOpenTour={() => setIsTourOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -368,7 +410,8 @@ export default function Home() {
                 setActiveTab('campaigns');
               }}
               onViewContacts={() => setActiveTab('contacts')}
-              onViewAnalytics={() => setActiveTab('analytics')}
+              onTakeFollowUp={handleOpenFollowUp}
+              onOpenTour={() => setIsTourOpen(true)}
             />
           )}
 
@@ -389,30 +432,29 @@ export default function Home() {
                 setActiveTab('dashboard');
               }}
               onNewCampaign={() => setActiveTab('builder')}
+              onTakeFollowUp={handleOpenFollowUp}
               onDeleteCampaign={handleDeleteCampaign}
             />
           )}
 
           {activeTab === 'contacts' && (
-            <ContactsDirectory
+            <SimpleContactsList
               contacts={contacts}
-              onAddContacts={(newContacts) => {
-                setContacts((prev) => [...newContacts, ...prev]);
-              }}
-              onClearContacts={() => setContacts([])}
-              onNewCampaign={() => setActiveTab('builder')}
               onUpdateContact={(updated) => {
                 setContacts((prev) =>
                   prev.map((c) => (c.id === updated.id || c.email === updated.email ? updated : c))
                 );
+                showToast(`Contact updated successfully.`);
               }}
-            />
-          )}
-
-          {activeTab === 'analytics' && (
-            <AnalyticsView
-              campaigns={campaigns}
-              onBack={() => setActiveTab('dashboard')}
+              onDeleteContact={(id) => {
+                setContacts((prev) => prev.filter((c) => c.id !== id));
+                showToast(`Contact deleted.`);
+              }}
+              onAddContact={(newContact) => {
+                setContacts((prev) => [newContact, ...prev]);
+                showToast(`Contact added to platform.`);
+              }}
+              onNewCampaign={() => setActiveTab('builder')}
             />
           )}
 
@@ -426,6 +468,30 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Step-by-Step Interactive Onboarding Pop-up */}
+      <OnboardingTourModal
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onNavigateToTab={(tab) => {
+          setActiveTab(tab as NavTab);
+          setIsTourOpen(false);
+        }}
+      />
+
+      {/* Follow-up Sequence Dispatcher Modal */}
+      <TakeFollowUpModal
+        isOpen={isFollowUpOpen}
+        campaign={followUpCampaign}
+        contacts={contacts.filter((c) => !followUpCampaign || c.campaign_id === followUpCampaign.id)}
+        onClose={() => {
+          setIsFollowUpOpen(false);
+          setFollowUpCampaign(null);
+        }}
+        onFollowUpSuccess={handleFollowUpSuccess}
+        userEmail={userEmail}
+        userName={userName}
+      />
 
       {/* Floating System Notification Toast */}
       {toastMessage && (

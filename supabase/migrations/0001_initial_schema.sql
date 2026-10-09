@@ -179,3 +179,4 @@ create policy "Users can delete own contacts"
 -- Enable Supabase Realtime for table changes on contacts and campaigns
 alter publication supabase_realtime add table public.campaigns;
 alter publication supabase_realtime add table public.contacts;
+

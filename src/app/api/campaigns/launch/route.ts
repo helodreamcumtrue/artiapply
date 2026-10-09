@@ -6,7 +6,15 @@ import { EmailJobData } from '@/types/database';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, subject, bodyTemplate, contacts, userId = '00000000-0000-0000-0000-000000000001' } = body;
+    const {
+      name,
+      subject,
+      bodyTemplate,
+      contacts,
+      attachments = [],
+      follow_ups = [],
+      userId = '00000000-0000-0000-0000-000000000001',
+    } = body;
 
     if (!name || !subject || !bodyTemplate) {
       return NextResponse.json(
@@ -174,11 +182,15 @@ export async function POST(request: NextRequest) {
         sent_count: 0,
         failed_count: 0,
         status: 'in_progress',
+        attachments,
+        follow_ups,
         created_at: new Date().toISOString(),
       },
       contacts: insertedContacts,
       subject,
       bodyTemplate,
+      attachments,
+      follow_ups,
       senderName: body.senderName || body.userName,
       senderEmail: body.senderEmail || body.userEmail,
     });

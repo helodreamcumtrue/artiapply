@@ -6,7 +6,7 @@ import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { contact, subject, bodyTemplate, senderName, senderEmail, smtpConfig, campaignId } = body;
+    const { contact, subject, bodyTemplate, senderName, senderEmail, smtpConfig, campaignId, attachments, isFollowUp } = body;
 
     if (!contact || !contact.email) {
       return NextResponse.json(
@@ -26,40 +26,55 @@ export async function POST(request: NextRequest) {
     const personalizedSubject = replaceVariables(subject, contact);
     const personalizedBody = replaceVariables(bodyTemplate, contact);
 
-    // 2. Dispatch real email
+    // 2. Dispatch real email with attachments if present
     const result = await dispatchRealEmail({
       to: contact.email,
       subject: personalizedSubject,
       htmlBody: personalizedBody,
       fromName: senderName,
       fromEmail: senderEmail,
+      attachments,
       smtpConfig,
     });
 
     // 3. Update in Supabase if configured
     if (isAdminConfigured() && contact.id) {
       try {
+        const contactUpdates: Record<string, any> = {
+          status: result.success ? 'sent' : 'failed',
+          sent_at: result.success ? (contact.sent_at || new Date().toISOString()) : null,
+          error_message: result.error || null,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (isFollowUp && result.success) {
+          contactUpdates.followup_sent_at = new Date().toISOString();
+          contactUpdates.followup_count = (contact.followup_count || 0) + 1;
+        }
+
         await supabaseAdmin
           .from('contacts')
-          .update({
-            status: result.success ? 'sent' : 'failed',
-            sent_at: result.success ? new Date().toISOString() : null,
-            error_message: result.error || null,
-            updated_at: new Date().toISOString(),
-          })
+          .update(contactUpdates)
           .eq('id', contact.id);
 
         if (result.success && campaignId) {
           const { data: camp } = await supabaseAdmin
             .from('campaigns')
-            .select('sent_count')
+            .select('sent_count, followup_count')
             .eq('id', campaignId)
             .single();
 
           if (camp) {
+            const campUpdates: Record<string, any> = {
+              sent_count: (camp.sent_count || 0) + 1,
+            };
+            if (isFollowUp) {
+              campUpdates.followup_count = (camp.followup_count || 0) + 1;
+              campUpdates.last_followup_at = new Date().toISOString();
+            }
             await supabaseAdmin
               .from('campaigns')
-              .update({ sent_count: (camp.sent_count || 0) + 1 })
+              .update(campUpdates)
               .eq('id', campaignId);
           }
         }

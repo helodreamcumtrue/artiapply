@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { supabaseAdmin } from '../supabase/admin';
+import { EmailAttachment } from '@/types/database';
 
 export interface GoogleTokens {
   access_token?: string | null;
@@ -15,6 +16,7 @@ export interface SendEmailParams {
   htmlBody: string;
   fromName?: string;
   fromEmail?: string;
+  attachments?: EmailAttachment[];
 }
 
 /**
@@ -90,12 +92,14 @@ export function createMimeMessage({
   htmlBody,
   fromName,
   fromEmail,
+  attachments,
 }: {
   to: string;
   subject: string;
   htmlBody: string;
   fromName?: string;
   fromEmail?: string;
+  attachments?: EmailAttachment[];
 }): string {
   const senderHeader = fromName && fromEmail
     ? `"${fromName.replace(/"/g, '')}" <${fromEmail}>`
@@ -103,18 +107,63 @@ export function createMimeMessage({
 
   const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
 
-  const messageParts = [
+  if (!attachments || attachments.length === 0) {
+    const messageParts = [
+      `From: ${senderHeader}`,
+      `To: ${to}`,
+      `Subject: ${utf8Subject}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset=utf-8',
+      'Content-Transfer-Encoding: base64',
+      '',
+      Buffer.from(htmlBody).toString('base64'),
+    ];
+
+    return base64UrlEncode(messageParts.join('\r\n'));
+  }
+
+  // Multipart/mixed message for attachments
+  const boundary = `====boundary_${Date.now()}_${Math.random().toString(36).substring(2, 9)}====`;
+  const headerParts = [
     `From: ${senderHeader}`,
     `To: ${to}`,
     `Subject: ${utf8Subject}`,
     'MIME-Version: 1.0',
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    '',
+  ];
+
+  const bodyPart = [
+    `--${boundary}`,
     'Content-Type: text/html; charset=utf-8',
     'Content-Transfer-Encoding: base64',
     '',
     Buffer.from(htmlBody).toString('base64'),
+    '',
   ];
 
-  return base64UrlEncode(messageParts.join('\r\n'));
+  const attachmentParts: string[] = [];
+  for (const att of attachments) {
+    const cleanBase64 = att.data.replace(/^data:.*?;base64,/, '');
+    attachmentParts.push(
+      `--${boundary}`,
+      `Content-Type: ${att.contentType || 'application/octet-stream'}; name="${att.filename}"`,
+      'Content-Transfer-Encoding: base64',
+      `Content-Disposition: attachment; filename="${att.filename}"`,
+      '',
+      cleanBase64,
+      ''
+    );
+  }
+
+  const finalMessage = [
+    ...headerParts,
+    ...bodyPart,
+    ...attachmentParts,
+    `--${boundary}--`,
+  ].join('\r\n');
+
+  return base64UrlEncode(finalMessage);
 }
 
 /**
@@ -184,6 +233,7 @@ export async function sendEmail({
   htmlBody,
   fromName,
   fromEmail,
+  attachments,
 }: SendEmailParams): Promise<{ messageId?: string; success: boolean; error?: string }> {
   try {
     const auth = getOAuth2Client(tokens, userId);
@@ -195,6 +245,7 @@ export async function sendEmail({
       htmlBody,
       fromName,
       fromEmail,
+      attachments,
     });
 
     const res = await gmail.users.messages.send({

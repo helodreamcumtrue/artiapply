@@ -20,10 +20,27 @@ import {
   Send,
   HelpCircle,
   Download,
+  Paperclip,
+  Image as ImageIcon,
+  FileText,
+  RotateCcw,
+  Plus,
+  Check,
+  Minus,
+  Maximize2,
+  Minimize2,
+  X,
+  Smile,
+  Link as LinkIcon,
+  PenTool,
+  MoreVertical,
+  ChevronDown,
 } from 'lucide-react';
-import { Contact } from '@/types/database';
+import { Contact, EmailAttachment, CampaignFollowUp } from '@/types/database';
 import { verifyLeadList } from '@/lib/utils/verifyEmail';
 import { RAW_50_SAMPLE_CONTACTS, downloadSampleCSVFile } from '@/lib/data/sampleContacts';
+import { EmailTemplatesModal } from './EmailTemplatesModal';
+import { EmailTemplate } from '@/lib/data/emailTemplates';
 
 interface CampaignBuilderProps {
   onLaunchSuccess: (campaignData: any) => void;
@@ -62,10 +79,64 @@ ${senderName}`
   const [activeEditorTab, setActiveEditorTab] = useState<'editor' | 'preview'>('editor');
   const [isEnhancingWithAI, setIsEnhancingWithAI] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [aiTone, setAiTone] = useState<'persuasive' | 'executive' | 'casual' | 'direct'>('persuasive');
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const bodyTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Gmail Compose UI States
+  const [showSnippetsMenu, setShowSnippetsMenu] = useState(false);
+  const [showVariablesMenu, setShowVariablesMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+
+  // Quick Inline AI Draft Handler (triggers from the Gmail Describe your message pill)
+  const handleQuickAiDraft = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsEnhancingWithAI(true);
+    try {
+      const response = await fetch('/api/ai/enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: subject || 'Quick question',
+          bodyTemplate: bodyTemplate,
+          tone: 'persuasive',
+          customPrompt: aiPrompt,
+        }),
+      });
+      const data = await response.json();
+      if (data.enhancedBody || data.body) {
+        setBodyTemplate(data.enhancedBody || data.body);
+      }
+      if (data.subjectSuggestions?.[0] || data.subjects?.[0]) {
+        setSubject(data.subjectSuggestions?.[0] || data.subjects?.[0]);
+      }
+      setAiPrompt('');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsEnhancingWithAI(false);
+    }
+  };
+
+  // Step 2 Attachments (Photos and Files)
+  const [attachments, setAttachments] = useState<EmailAttachment[]>([]);
+
+  // Step 2 Follow-Up Sequencing
+  const [enableFollowUps, setEnableFollowUps] = useState(false);
+  const [followUps, setFollowUps] = useState<CampaignFollowUp[]>([
+    {
+      id: 'step-fu-1',
+      step_number: 1,
+      delay_days: 3,
+      subject: '',
+      body_template: `Hi {{first_name}},\n\nFollowing up briefly on my previous email in case it got buried in your inbox.\n\nWould you be open to a 5-minute chat this week?\n\nBest regards,\n${senderName}`,
+    },
+  ]);
 
   // Step 3: Contacts CSV
   const [contacts, setContacts] = useState<any[]>([]);
@@ -95,6 +166,91 @@ ${senderName}`
       textarea.focus();
       textarea.setSelectionRange(start + variable.length + 4, start + variable.length + 4);
     }, 0);
+  };
+
+  // Helper Snippets Insertion
+  const insertSnippet = (snippet: string) => {
+    if (!bodyTextareaRef.current) return;
+    const textarea = bodyTextareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = bodyTemplate;
+    const newText = text.substring(0, start) + snippet + text.substring(end);
+    setBodyTemplate(newText);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + snippet.length, start + snippet.length);
+    }, 0);
+  };
+
+  // Attachment Handler
+  const handleAttachmentFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 8 * 1024 * 1024) {
+        alert(`File "${file.name}" is over 8MB. Maximum attachment size is 8MB.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const isImage = file.type.startsWith('image/');
+        const newAtt: EmailAttachment = {
+          id: `att-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          filename: file.name,
+          contentType: file.type || 'application/octet-stream',
+          size: file.size,
+          data: result,
+          isImage,
+        };
+        setAttachments((prev) => [...prev, newAtt]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = '';
+  };
+
+  const removeAttachment = (id?: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleApplyTemplate = (tmpl: EmailTemplate) => {
+    setSubject(tmpl.subject);
+    setBodyTemplate(tmpl.body.replace(/\{\{\s*sender_name\s*\}\}/g, senderName));
+  };
+
+  // Follow-up Step Management
+  const addFollowUpStep = () => {
+    const nextStepNum = followUps.length + 1;
+    const nextDelay = nextStepNum === 2 ? 5 : 7;
+    const newStep: CampaignFollowUp = {
+      id: `step-fu-${Date.now()}`,
+      step_number: nextStepNum,
+      delay_days: nextDelay,
+      subject: `Re: ${subject}`,
+      body_template: `Hi {{first_name}},\n\nWanted to quickly circle back on my previous email regarding {{company}}.\n\nBest,\n${senderName}`,
+    };
+    setFollowUps((prev) => [...prev, newStep]);
+  };
+
+  const removeFollowUpStep = (id: string) => {
+    setFollowUps((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const updateFollowUpStep = (id: string, updates: Partial<CampaignFollowUp>) => {
+    setFollowUps((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
+    );
   };
 
   // AI Enhancement Handler
@@ -221,8 +377,11 @@ ${senderName}`
           subject,
           bodyTemplate,
           contacts,
+          attachments,
+          follow_ups: enableFollowUps ? followUps : [],
           userEmail,
-          userName,
+          userName: senderName,
+          senderName,
         }),
       });
 
@@ -231,7 +390,11 @@ ${senderName}`
         throw new Error(data.error || 'Failed to launch campaign');
       }
 
-      onLaunchSuccess(data);
+      onLaunchSuccess({
+        ...data,
+        attachments,
+        follow_ups: enableFollowUps ? followUps : [],
+      });
     } catch (err: any) {
       setLaunchError(err.message || 'An error occurred while launching.');
       setIsLaunching(false);
@@ -303,7 +466,10 @@ ${senderName}`
       {/* STEP 1: CAMPAIGN SETUP */}
       {currentStep === 1 && (
         <div className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-5 animate-in fade-in duration-200">
-          <h2 className="text-lg font-bold text-slate-900 font-poppins">Campaign Details</h2>
+          <div className="border-b border-slate-100 pb-3">
+            <h2 className="text-lg font-bold text-slate-900 font-poppins">Campaign Details</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Name your sequence to begin crafting your outreach message.</p>
+          </div>
           
           <div className="space-y-4">
             <div>
@@ -314,37 +480,22 @@ ${senderName}`
                 type="text"
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
-                placeholder="e.g. Q4 SaaS Growth Leaders Outreach"
+                placeholder="e.g. Q4 SaaS Founders Outreach"
                 className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900 shadow-sm transition"
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Sender Display Name
-                </label>
-                <input
-                  type="text"
-                  value={senderName}
-                  onChange={(e) => setSenderName(e.target.value)}
-                  placeholder="e.g. Alex from ArticlO"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900 shadow-sm transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Target Audience
-                </label>
-                <input
-                  type="text"
-                  value={targetAudience}
-                  onChange={(e) => setTargetAudience(e.target.value)}
-                  placeholder="e.g. B2B CEOs, Growth Directors"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900 shadow-sm transition"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Target Audience <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={targetAudience}
+                onChange={(e) => setTargetAudience(e.target.value)}
+                placeholder="e.g. B2B CEOs, Growth Directors"
+                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900 shadow-sm transition"
+              />
             </div>
           </div>
 
@@ -357,147 +508,426 @@ ${senderName}`
                 }
                 setCurrentStep(2);
               }}
-              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-sm flex items-center space-x-2"
+              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-sm flex items-center space-x-2 active:scale-95"
             >
-              <span>Next: Email & AI Crafter</span>
+              <span>Next: Compose Email</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: EMAIL TEMPLATE & AI */}
+      {/* STEP 2: GMAIL-STYLE EMAIL CRAFTER */}
       {currentStep === 2 && (
-        <div className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-5 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Top helper header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
             <div>
-              <h2 className="text-lg font-bold text-slate-900 font-poppins">Email Template & Personalization</h2>
-              <p className="text-xs text-slate-500">Use variable chips or let Gemini AI polish your copy</p>
+              <h2 className="text-lg font-bold text-slate-900 font-poppins">Craft Email</h2>
+              <p className="text-xs text-slate-500">
+                Compose in a clean Gmail-style editor. Attach files, prompt AI, or apply battle-tested formats.
+              </p>
             </div>
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => setShowAiModal(true)}
-                className="px-3.5 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm"
+                type="button"
+                onClick={() => setShowTemplatesModal(true)}
+                className="px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm active:scale-95"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Enhance with Gemini AI</span>
+                <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+                <span>10 Pro Formats</span>
               </button>
-              <div className="flex rounded-full bg-slate-100 p-0.5 border border-slate-200">
+            </div>
+          </div>
+
+          {/* Clean Gmail Compose Window Frame (matches user reference image) */}
+          <div
+            className={`bg-white rounded-2xl border border-slate-200 shadow-[0_2px_16px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col transition-all ${
+              isMaximized ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : 'min-h-[500px]'
+            }`}
+          >
+            {/* Top Blue Window Bar (#f2f6fc) */}
+            <div className="bg-[#f2f6fc] px-4 py-2.5 flex items-center justify-between border-b border-slate-200/80 select-none">
+              <span className="text-xs sm:text-sm font-semibold text-[#041e49]">
+                New Message
+              </span>
+              <div className="flex items-center space-x-1.5 text-slate-500">
                 <button
-                  onClick={() => setActiveEditorTab('editor')}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                    activeEditorTab === 'editor' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  title="Minimize / Back to Step 1"
+                  className="p-1 hover:text-slate-800 rounded hover:bg-slate-200/60 transition"
                 >
-                  Editor
+                  <Minus className="w-3.5 h-3.5" />
                 </button>
                 <button
-                  onClick={() => setActiveEditorTab('preview')}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                    activeEditorTab === 'preview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  type="button"
+                  onClick={() => setIsMaximized((prev) => !prev)}
+                  title={isMaximized ? 'Restore down' : 'Full screen'}
+                  className="p-1 hover:text-slate-800 rounded hover:bg-slate-200/60 transition"
                 >
-                  Preview
+                  {isMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  title="Close"
+                  className="p-1 hover:text-slate-800 rounded hover:bg-slate-200/60 transition"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* 'To' Field Row */}
+            <div className="flex items-center px-4 py-2.5 border-b border-slate-200/70 text-xs">
+              <span className="text-[#444746] font-medium w-12 shrink-0">To</span>
+              <div className="flex-1 flex items-center space-x-1.5 overflow-hidden">
+                <span className="bg-[#e8f0fe] text-[#1a73e8] px-2.5 py-0.5 rounded-full font-medium text-xs flex items-center">
+                  Campaign Contacts (&#123;&#123;email&#125;&#125;)
+                </span>
+              </div>
+              <div className="flex items-center space-x-2.5 text-xs text-slate-500 font-medium">
+                <span
+                  onClick={() => insertVariable('first_name')}
+                  className="hover:text-[#0b57d0] cursor-pointer transition select-none"
+                  title="Add personalized first name"
+                >
+                  Cc
+                </span>
+                <span
+                  onClick={() => insertVariable('company')}
+                  className="hover:text-[#0b57d0] cursor-pointer transition select-none"
+                  title="Add company variable"
+                >
+                  Bcc
+                </span>
+              </div>
+            </div>
+
+            {/* 'Subject' Field Row */}
+            <div className="px-4 py-2 border-b border-slate-200/70">
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Subject"
+                className="w-full text-sm text-slate-900 placeholder-[#747775] bg-transparent outline-none font-normal"
+              />
+            </div>
+
+            {/* Message Body Canvas */}
+            <div className="p-4 flex-1 flex flex-col min-h-[260px] bg-white">
+              <textarea
+                ref={bodyTextareaRef}
+                rows={11}
+                value={bodyTemplate}
+                onChange={(e) => setBodyTemplate(e.target.value)}
+                placeholder="Write your email here..."
+                className="w-full flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent outline-none resize-none leading-relaxed font-sans"
+              />
+
+              {/* Attached Files & Photos Chips */}
+              {attachments.length > 0 && (
+                <div className="pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+                  {attachments.map((att) => (
+                    <div
+                      key={att.id}
+                      className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center space-x-2 text-xs shadow-sm"
+                    >
+                      {att.isImage ? (
+                        <div className="w-5 h-5 rounded overflow-hidden shrink-0 border border-slate-200">
+                          <img src={att.data} alt={att.filename} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <FileText className="w-4 h-4 text-rose-500 shrink-0" />
+                      )}
+                      <span className="font-medium text-slate-700 truncate max-w-[140px] text-[11px]">
+                        {att.filename}
+                      </span>
+                      <span className="text-[10px] text-slate-400">({formatFileSize(att.size)})</span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(att.id)}
+                        className="text-slate-400 hover:text-rose-500 p-0.5 rounded transition"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* AI Prompt Pill (matching user attached reference screenshot) */}
+            <div className="mx-4 mb-3 rounded-full bg-[#f0f4f9] px-4 py-2 flex items-center space-x-2 border border-slate-200/60 shadow-inner group focus-within:border-[#0b57d0]/40">
+              <Sparkles className="w-4 h-4 text-[#0b57d0] shrink-0" />
+              <input
+                type="text"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleQuickAiDraft();
+                  }
+                }}
+                placeholder="Describe your message"
+                className="w-full text-xs sm:text-sm bg-transparent outline-none text-slate-800 placeholder-[#444746]"
+              />
+              <button
+                type="button"
+                onClick={handleQuickAiDraft}
+                disabled={isEnhancingWithAI || !aiPrompt.trim()}
+                className="px-3.5 py-1 rounded-full bg-white text-[#0b57d0] hover:bg-slate-50 disabled:opacity-40 font-semibold text-xs border border-slate-200 shrink-0 shadow-sm transition active:scale-95"
+              >
+                {isEnhancingWithAI ? 'Drafting...' : '✨ Draft'}
+              </button>
+            </div>
+
+            {/* Gmail Bottom Action Toolbar (matching reference screenshot) */}
+            <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between bg-white rounded-b-2xl relative">
+              {/* Left Side: Send Button & Action Icons */}
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
+                {/* Send Pill Button */}
+                <div className="flex rounded-full overflow-hidden shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!subject.trim() || !bodyTemplate.trim()) {
+                        alert('Please enter both subject and email body.');
+                        return;
+                      }
+                      setCurrentStep(3);
+                    }}
+                    className="px-5 py-2 bg-[#0b57d0] hover:bg-[#0842a0] text-white text-xs sm:text-sm font-semibold transition active:scale-95"
+                  >
+                    Send
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!subject.trim() || !bodyTemplate.trim()) {
+                        alert('Please enter both subject and email body.');
+                        return;
+                      }
+                      setCurrentStep(3);
+                    }}
+                    className="px-2 py-2 bg-[#0b57d0] hover:bg-[#0842a0] text-white border-l border-blue-400/30 transition"
+                    title="Next Step: Contacts"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Aa Formatting Snippets */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowSnippetsMenu((prev) => !prev)}
+                    title="Formatting & Writing Snippets"
+                    className={`p-2 rounded-full hover:bg-slate-100 text-slate-600 transition ${
+                      showSnippetsMenu ? 'bg-slate-100 text-slate-900' : ''
+                    }`}
+                  >
+                    <span className="font-bold text-xs font-serif leading-none">Aa</span>
+                  </button>
+                  {showSnippetsMenu && (
+                    <div className="absolute bottom-11 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 w-52 z-30 text-xs space-y-1">
+                      <p className="px-2.5 py-1 text-[10px] font-bold uppercase text-slate-400">Quick Snippets</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          insertSnippet(`\n\nBest regards,\n${senderName}`);
+                          setShowSnippetsMenu(false);
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700"
+                      >
+                        ✍️ Signature
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          insertSnippet('\n• Key point 1: \n• Key point 2: \n• Key point 3: \n');
+                          setShowSnippetsMenu(false);
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700"
+                      >
+                        📋 3-Bullet Points
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          insertSnippet('\nWould you be open to a quick 5-minute chat this week?\n');
+                          setShowSnippetsMenu(false);
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700"
+                      >
+                        💬 Meeting Call CTA
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* ✨ Templates Browser */}
+                <button
+                  type="button"
+                  onClick={() => setShowTemplatesModal(true)}
+                  title="Browse 10 Professional Email Formats"
+                  className="p-2 rounded-full hover:bg-slate-100 text-[#0b57d0] hover:text-[#0842a0] transition"
+                >
+                  <Sparkles className="w-4 h-4" />
+                </button>
+
+                {/* 📎 Attach Documents/Files */}
+                <button
+                  type="button"
+                  onClick={() => attachmentInputRef.current?.click()}
+                  title="Attach files (PDF, DOCX, XLSX, max 8MB)"
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
+
+                {/* 🔗 Insert Unsubscribe Link */}
+                <button
+                  type="button"
+                  onClick={() => insertVariable('unsubscribe_url')}
+                  title="Insert Unsubscribe Link"
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                </button>
+
+                {/* 😊 Insert Variables */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowVariablesMenu((prev) => !prev)}
+                    title="Insert Personalization Variables"
+                    className={`p-2 rounded-full hover:bg-slate-100 text-slate-600 transition ${
+                      showVariablesMenu ? 'bg-slate-100 text-slate-900' : ''
+                    }`}
+                  >
+                    <Smile className="w-4 h-4" />
+                  </button>
+                  {showVariablesMenu && (
+                    <div className="absolute bottom-11 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 w-48 z-30 text-xs space-y-1">
+                      <p className="px-2.5 py-1 text-[10px] font-bold uppercase text-slate-400">Insert Variable</p>
+                      {['first_name', 'last_name', 'company', 'role', 'email'].map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => {
+                            insertVariable(v);
+                            setShowVariablesMenu(false);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-mono text-[11px]"
+                        >
+                          &#123;&#123;{v}&#125;&#125;
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 🖼️ Attach Photos */}
+                <button
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                  title="Attach photos or screenshots"
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </button>
+
+                {/* ✍️ Signature */}
+                <button
+                  type="button"
+                  onClick={() => insertSnippet(`\n\nBest regards,\n${senderName}`)}
+                  title="Insert Professional Signature"
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition"
+                >
+                  <PenTool className="w-4 h-4" />
+                </button>
+
+                {/* Hidden Inputs */}
+                <input
+                  type="file"
+                  ref={attachmentInputRef}
+                  multiple
+                  accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.pptx"
+                  className="hidden"
+                  onChange={handleAttachmentFiles}
+                />
+                <input
+                  type="file"
+                  ref={photoInputRef}
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAttachmentFiles}
+                />
+              </div>
+
+              {/* Right Side: Clear draft */}
+              <div className="flex items-center space-x-1 text-slate-500">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('Clear email draft?')) {
+                      setBodyTemplate('');
+                      setAttachments([]);
+                    }
+                  }}
+                  title="Discard draft"
+                  className="p-2 rounded-full hover:bg-slate-100 hover:text-rose-600 transition"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Subject Line */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700">
-              Subject Line
+          {/* Simple Follow-Up Sequence Checkbox */}
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between text-xs">
+            <label className="flex items-center space-x-2.5 cursor-pointer text-slate-700 font-medium">
+              <input
+                type="checkbox"
+                checked={enableFollowUps}
+                onChange={(e) => setEnableFollowUps(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-0"
+              />
+              <span>Schedule an automated follow-up sequence if contact doesn&apos;t reply in 3 days</span>
             </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. Quick question regarding {{company}}"
-              className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-mono focus:outline-none focus:border-slate-900 shadow-sm transition"
-            />
-            {aiSuggestions.length > 0 && (
-              <div className="pt-1.5 flex flex-wrap gap-2">
-                <span className="text-[11px] text-slate-500 self-center">AI Suggestions:</span>
-                {aiSuggestions.map((sug, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSubject(sug)}
-                    className="text-xs px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition"
-                  >
-                    {sug}
-                  </button>
-                ))}
-              </div>
+            {enableFollowUps && (
+              <span className="text-[11px] text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                Follow-up Enabled (Day 3)
+              </span>
             )}
           </div>
 
-          {/* Variable Chips Toolbar */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs text-slate-500 font-medium">Insert Variable:</span>
-            {['first_name', 'last_name', 'company', 'role', 'email', 'unsubscribe_url'].map((varName) => (
-              <button
-                key={varName}
-                type="button"
-                onClick={() => insertVariable(varName)}
-                className="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-800 hover:bg-slate-100 text-xs font-mono transition"
-              >
-                {`{{${varName}}}`}
-              </button>
-            ))}
-          </div>
-
-          {/* Editor or Preview */}
-          {activeEditorTab === 'editor' ? (
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">
-                Email Body (HTML/Plain Text)
-              </label>
-              <textarea
-                ref={bodyTextareaRef}
-                rows={10}
-                value={bodyTemplate}
-                onChange={(e) => setBodyTemplate(e.target.value)}
-                className="w-full p-4 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm font-mono focus:outline-none focus:border-slate-900 shadow-sm transition leading-relaxed"
-              />
-            </div>
-          ) : (
-            <div className="p-5 sm:p-6 rounded-[22px] bg-slate-50/80 border border-slate-200/80 space-y-3">
-              <div className="text-xs text-slate-500 pb-2 border-b border-slate-200">
-                <span className="font-semibold text-slate-700">Previewing for: </span>
-                <span className="text-slate-900 font-mono">
-                  {sampleContact.first_name} ({sampleContact.email}) at {sampleContact.company}
-                </span>
-              </div>
-              <div className="text-sm font-bold text-slate-900 font-mono">
-                Subject: {previewSubject}
-              </div>
-              <div className="text-sm text-slate-800 font-sans whitespace-pre-line leading-relaxed pt-2">
-                {previewBody}
-              </div>
-            </div>
-          )}
-
-          {/* Step Actions */}
-          <div className="pt-4 flex items-center justify-between">
+          {/* Navigation Actions */}
+          <div className="flex items-center justify-between pt-1">
             <button
               onClick={() => setCurrentStep(1)}
-              className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium transition flex items-center space-x-2"
+              className="px-5 py-2.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Setup</span>
             </button>
             <button
               onClick={() => {
                 if (!subject.trim() || !bodyTemplate.trim()) {
-                  alert('Please enter both subject and body template');
+                  alert('Please enter both subject and email body.');
                   return;
                 }
                 setCurrentStep(3);
               }}
-              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-sm flex items-center space-x-2"
+              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm active:scale-95"
             >
               <span>Next: Contacts CSV</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -679,6 +1109,24 @@ ${senderName}`
                   <span className="text-slate-500">Recipients:</span>
                   <span className="text-emerald-700 font-bold">{contacts.length} Contacts</span>
                 </div>
+                {attachments.length > 0 && (
+                  <div className="flex justify-between text-slate-700">
+                    <span className="text-slate-500">Attachments:</span>
+                    <span className="text-indigo-700 font-semibold flex items-center">
+                      <Paperclip className="w-3 h-3 mr-1" />
+                      {attachments.length} files ({formatFileSize(attachments.reduce((acc, a) => acc + a.size, 0))})
+                    </span>
+                  </div>
+                )}
+                {enableFollowUps && (
+                  <div className="flex justify-between text-slate-700">
+                    <span className="text-slate-500">Sequenced Steps:</span>
+                    <span className="text-sky-700 font-semibold flex items-center">
+                      <RotateCcw className="w-3 h-3 mr-1" />
+                      Initial + {followUps.length} Follow-up{followUps.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -700,7 +1148,7 @@ ${senderName}`
             </div>
           </div>
 
-          {/* Email Preview Snippet */}
+          {/* Email Preview Snippet with attachments list */}
           <div className="p-5 rounded-[22px] bg-slate-50/80 border border-slate-200/80 space-y-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               Live Sample Render
@@ -711,6 +1159,18 @@ ${senderName}`
             <div className="text-xs text-slate-700 whitespace-pre-line leading-relaxed border-t border-slate-200 pt-2 font-sans">
               {previewBody}
             </div>
+            {attachments.length > 0 && (
+              <div className="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5 items-center">
+                <span className="text-[11px] text-slate-500 flex items-center font-medium">
+                  <Paperclip className="w-3 h-3 mr-1" /> Attachments:
+                </span>
+                {attachments.map((att) => (
+                  <span key={att.id} className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">
+                    {att.filename}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {launchError && (
@@ -841,6 +1301,14 @@ ${senderName}`
           </div>
         </div>
       )}
+
+      {/* PROFESSIONAL EMAIL FORMATS MODAL */}
+      <EmailTemplatesModal
+        isOpen={showTemplatesModal}
+        onClose={() => setShowTemplatesModal(false)}
+        onSelectTemplate={handleApplyTemplate}
+        senderName={senderName}
+      />
     </div>
   );
 };

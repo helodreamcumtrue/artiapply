@@ -19,6 +19,9 @@ import {
   BarChart3,
   Sparkles,
   ArrowRight,
+  RotateCcw,
+  Paperclip,
+  BookOpen,
 } from 'lucide-react';
 import { Campaign, Contact } from '@/types/database';
 import { formatDate } from '@/lib/utils/formatDate';
@@ -30,7 +33,8 @@ interface DashboardProps {
   onNewCampaign: () => void;
   onSelectCampaign: (campaign: Campaign) => void;
   onViewContacts?: () => void;
-  onViewAnalytics?: () => void;
+  onTakeFollowUp?: (campaign: Campaign) => void;
+  onOpenTour?: () => void;
   isSimulatingSending?: boolean;
 }
 
@@ -41,13 +45,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onNewCampaign,
   onSelectCampaign,
   onViewContacts,
-  onViewAnalytics,
+  onTakeFollowUp,
+  onOpenTour,
   isSimulatingSending = false,
 }) => {
   // Aggregate stats across campaigns
   const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
   const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
-  const totalContacts = campaigns.reduce((acc, c) => acc + (c.total_contacts || 0), 0);
   const activeCount = campaigns.filter((c) => c.status === 'in_progress' || c.status === 'queued').length;
 
   const deliveryRate = totalSent + totalFailed > 0
@@ -77,14 +81,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {onOpenTour && (
+            <button
+              onClick={onOpenTour}
+              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold shadow-sm transition active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Tour</span>
+            </button>
+          )}
+
           {onViewContacts && (
             <button
               onClick={onViewContacts}
               className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-xs font-semibold shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-sm transition"
             >
               <Users className="w-3.5 h-3.5 text-slate-600" />
-              <span>Contacts Directory</span>
+              <span>Contacts</span>
             </button>
           )}
 
@@ -98,8 +112,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* 4 Unique Elevated KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 3 Streamlined Metric Cards (Total Leads removed as requested) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Sent */}
         <div className="bg-white p-5 rounded-[24px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-center justify-between text-slate-500 mb-2.5">
@@ -152,23 +166,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
           <p className="text-[11px] text-slate-400 mt-1">Automated sequences</p>
         </div>
-
-        {/* Total Audience Contacts */}
-        <div className="bg-white p-5 rounded-[24px] border border-slate-200/85 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_4px_16px_-2px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_8px_rgba(15,23,42,0.04),0_12px_24px_-4px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group">
-          <div className="flex items-center justify-between text-slate-500 mb-2.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Leads</span>
-            <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Users className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-poppins">
-              {totalContacts}
-            </span>
-            <span className="text-xs font-semibold text-slate-500">Contacts</span>
-          </div>
-          <p className="text-[11px] text-slate-400 mt-1">Ready for outreach</p>
-        </div>
       </div>
 
       {/* Active Campaign Spotlight Card */}
@@ -176,11 +173,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
                   {currentCamp.status === 'completed' ? 'Completed Sequence' : 'Active Outreach Sequence'}
                 </span>
+                {currentCamp.attachments && currentCamp.attachments.length > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex items-center">
+                    <Paperclip className="w-2.5 h-2.5 mr-1" />
+                    {currentCamp.attachments.length} attached
+                  </span>
+                )}
+                {currentCamp.followup_count && currentCamp.followup_count > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 flex items-center">
+                    <RotateCcw className="w-2.5 h-2.5 mr-1" />
+                    {currentCamp.followup_count} follow-up{currentCamp.followup_count > 1 ? 's' : ''} sent
+                  </span>
+                )}
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-1 font-poppins">{currentCamp.name}</h3>
               <p className="text-xs text-slate-500 mt-0.5 truncate max-w-lg">
@@ -188,13 +197,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center space-x-4 self-start sm:self-auto">
-              <div className="text-right">
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+              <div className="text-right mr-2">
                 <span className="text-2xl sm:text-3xl font-bold text-slate-900 font-mono">{progressPercent}%</span>
                 <p className="text-[11px] text-slate-400">
                   {currentCamp.sent_count} of {currentCamp.total_contacts} delivered
                 </p>
               </div>
+
+              {onTakeFollowUp && (
+                <button
+                  onClick={() => onTakeFollowUp(currentCamp)}
+                  className="px-4 py-2 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm active:scale-95"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-sky-600" />
+                  <span>Take Follow-up</span>
+                </button>
+              )}
+
               <button
                 onClick={() => onSelectCampaign(currentCamp)}
                 className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200/80 text-xs font-semibold text-slate-800 transition flex items-center space-x-1.5"
@@ -226,43 +246,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* 3-Step Simple Getting Started Workflow */}
-      <div className="p-6 sm:p-7 rounded-[28px] bg-white border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-          How to launch your outreach in 3 simple steps
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          <div className="p-4 rounded-[20px] bg-slate-50/70 border border-slate-200/70 space-y-1.5 hover:bg-slate-50 hover:border-slate-300 transition-all">
-            <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
-              1
-            </div>
-            <p className="text-xs font-bold text-slate-900">Add Recipients</p>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              Download our 50-entry verified sample lead file or upload your own CSV list.
-            </p>
-          </div>
 
-          <div className="p-4 rounded-[20px] bg-slate-50/70 border border-slate-200/70 space-y-1.5 hover:bg-slate-50 hover:border-slate-300 transition-all">
-            <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
-              2
-            </div>
-            <p className="text-xs font-bold text-slate-900">Personalize with AI</p>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              Use Gemini AI to craft engaging subject lines and custom variable tags.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-[20px] bg-slate-50/70 border border-slate-200/70 space-y-1.5 hover:bg-slate-50 hover:border-slate-300 transition-all">
-            <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
-              3
-            </div>
-            <p className="text-xs font-bold text-slate-900">Launch Safely</p>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
-              Dispatched automatically at human-like pace to maximize reply rates.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Main Grid: Campaigns Overview & Recent Deliveries */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -383,30 +367,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Advanced Analytics Link Banner */}
-      {onViewAnalytics && (
-        <div className="p-5 sm:p-6 rounded-[28px] bg-white border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-full bg-sky-50 text-sky-700 flex items-center justify-center flex-shrink-0">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-slate-900 font-poppins">Need deep-dive charts & hourly throughput?</p>
-              <p className="text-[11px] text-slate-500">
-                Explore spam score tests, hourly dispatch charts, and domain reputation analysis in Advanced Analytics.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onViewAnalytics}
-            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-900 text-xs font-semibold transition self-start sm:self-auto flex-shrink-0"
-          >
-            <span>Open Advanced Analytics</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };

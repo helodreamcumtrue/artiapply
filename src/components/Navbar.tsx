@@ -20,9 +20,10 @@ import {
   Clock,
   X,
   ChevronDown,
+  BookOpen,
 } from 'lucide-react';
 
-export type NavTab = 'dashboard' | 'builder' | 'campaigns' | 'contacts' | 'analytics' | 'settings';
+export type NavTab = 'dashboard' | 'builder' | 'campaigns' | 'contacts' | 'settings';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -33,6 +34,7 @@ interface NavbarProps {
   userName?: string | null;
   userAvatar?: string | null;
   activeCampaignCount?: number;
+  onOpenTour?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -44,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   userName = 'John Smith',
   userAvatar,
   activeCampaignCount = 0,
+  onOpenTour,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -52,10 +55,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  // Initialize theme: bright light theme by default
+  // Initialize theme from localStorage or document
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isDark = document.documentElement.classList.contains('dark');
+      const storedTheme = localStorage.getItem('artiapply_theme');
+      const isDark = storedTheme === 'dark' || document.documentElement.classList.contains('dark');
+      if (storedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else if (storedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
       setIsDarkMode(isDark);
     }
   }, []);
@@ -66,8 +75,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       if (typeof window !== 'undefined') {
         if (next) {
           document.documentElement.classList.add('dark');
+          localStorage.setItem('artiapply_theme', 'dark');
         } else {
           document.documentElement.classList.remove('dark');
+          localStorage.setItem('artiapply_theme', 'light');
         }
       }
       return next;
@@ -236,6 +247,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
+            {/* Onboarding Tour Trigger */}
+            {onOpenTour && (
+              <button
+                onClick={onOpenTour}
+                title="Start interactive walkthrough"
+                className="hidden sm:inline-flex items-center space-x-1 px-3 py-1.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition active:scale-95 shadow-sm border border-indigo-100"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Tour</span>
+              </button>
+            )}
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -253,7 +276,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={() => setShowUserMenu((prev) => !prev)}
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#6366f1] text-white font-bold flex items-center justify-center text-xs shadow-sm hover:ring-2 hover:ring-indigo-300 transition-all cursor-pointer"
-                title="Account Menu & Advanced Features"
+                title="Account Menu"
               >
                 {userAvatar ? (
                   <img src={userAvatar} alt="User" className="w-full h-full rounded-full object-cover" />
@@ -281,27 +304,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   </div>
 
-                  {/* ADVANCED ANALYTICS (Moved here as requested!) */}
-                  <button
-                    onClick={() => {
-                      setActiveTab('analytics');
-                      setShowUserMenu(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
-                      activeTab === 'analytics'
-                        ? 'bg-slate-100 text-slate-900 font-semibold'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2.5">
-                      <BarChart3 className="w-4 h-4 text-sky-600" />
-                      <span>Advanced Analytics</span>
-                    </div>
-                    <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
-                      Deep Dive
-                    </span>
-                  </button>
-
                   {/* Settings & Preferences */}
                   <button
                     onClick={() => {
@@ -316,9 +318,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <div className="flex items-center space-x-2.5">
                       <Settings className="w-4 h-4 text-slate-500" />
-                      <span>Settings & Integrations</span>
+                      <span>Settings & Email Setup</span>
                     </div>
                   </button>
+
+                  {/* Interactive Walkthrough Tour */}
+                  {onOpenTour && (
+                    <button
+                      onClick={() => {
+                        onOpenTour();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <span>Restart Onboarding Tour</span>
+                      </div>
+                    </button>
+                  )}
 
                   <div className="my-1 border-t border-slate-100" />
 

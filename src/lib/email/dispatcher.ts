@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { sendEmail as sendGmailOAuthEmail } from '../gmail/service';
+import { EmailAttachment } from '@/types/database';
 
 export interface SmtpConfig {
   host?: string;
@@ -18,6 +19,7 @@ export interface SendEmailPayload {
   textBody?: string;
   fromName?: string;
   fromEmail?: string;
+  attachments?: EmailAttachment[];
   smtpConfig?: SmtpConfig;
   googleTokens?: {
     access_token?: string | null;
@@ -102,6 +104,7 @@ export async function dispatchRealEmail({
   textBody,
   fromName,
   fromEmail,
+  attachments,
   smtpConfig,
   googleTokens,
   userId = '00000000-0000-0000-0000-000000000001',
@@ -124,13 +127,23 @@ export async function dispatchRealEmail({
       const senderDisplayName = fromName || smtp.fromName || 'ArticlO Outreach';
       const senderAddress = fromEmail || smtp.fromEmail || smtp.user;
 
-      const info = await transporter.sendMail({
+      const mailOptions: any = {
         from: `"${senderDisplayName.replace(/"/g, '')}" <${senderAddress}>`,
         to,
         subject,
         html: htmlBody,
         text: textBody || htmlBody.replace(/<[^>]*>/g, ''),
-      });
+      };
+
+      if (attachments && attachments.length > 0) {
+        mailOptions.attachments = attachments.map((att) => ({
+          filename: att.filename,
+          content: Buffer.from(att.data.replace(/^data:.*?;base64,/, ''), 'base64'),
+          contentType: att.contentType,
+        }));
+      }
+
+      const info = await transporter.sendMail(mailOptions);
 
       console.log(`[EmailDispatcher] Real email sent via SMTP to ${to}. Message ID: ${info.messageId}`);
       return {
@@ -159,6 +172,7 @@ export async function dispatchRealEmail({
         htmlBody,
         fromName,
         fromEmail,
+        attachments,
       });
 
       return {

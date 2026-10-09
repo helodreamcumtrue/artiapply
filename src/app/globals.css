@@ -9,6 +9,11 @@
   --foreground: #0f172a;
 }
 
+.dark {
+  --background: #090d16;
+  --foreground: #f8fafc;
+}
+
 body {
   color: var(--foreground);
   background-color: var(--background);
@@ -16,6 +21,100 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   letter-spacing: -0.01em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Dark Mode Universal Classes */
+.dark body {
+  background-color: #090d16;
+  color: #f8fafc;
+}
+
+.dark .bg-\[\#f8fafc\] {
+  background-color: #090d16 !important;
+}
+
+.dark .bg-white,
+.dark .glass-panel,
+.dark .app-card {
+  background-color: #111827 !important;
+  color: #f8fafc;
+}
+
+.dark .bg-white\/95 {
+  background-color: rgba(17, 24, 39, 0.95) !important;
+}
+
+.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-200\/90,
+.dark .border-slate-200\/85,
+.dark .border-slate-200\/80,
+.dark .border-slate-200\/70,
+.dark .border-slate-100 {
+  border-color: #1f293d !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/80,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/60,
+.dark .bg-slate-100,
+.dark .bg-slate-100\/80 {
+  background-color: #162032 !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-200\/80:hover {
+  background-color: #1e2c44 !important;
+}
+
+.dark .bg-\[\#f2f6fc\] {
+  background-color: #1a2438 !important;
+}
+
+.dark .text-\[\#041e49\] {
+  color: #93c5fd !important;
+}
+
+.dark .text-\[\#444746\] {
+  color: #94a3b8 !important;
+}
+
+.dark .bg-\[\#f0f4f9\] {
+  background-color: #1a263c !important;
+  border-color: #2b3a55 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color: #f8fafc !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
 }
 
 /* Custom Scrollbars */
@@ -28,9 +127,17 @@ body {
   background: #f1f5f9;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
 ::-webkit-scrollbar-thumb:hover {

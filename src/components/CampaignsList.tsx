@@ -12,6 +12,8 @@ import {
   Filter,
   Plus,
   Play,
+  RotateCcw,
+  Paperclip,
 } from 'lucide-react';
 import { Campaign } from '@/types/database';
 import { formatDate } from '@/lib/utils/formatDate';
@@ -20,6 +22,7 @@ interface CampaignsListProps {
   campaigns: Campaign[];
   onSelectCampaign: (campaign: Campaign) => void;
   onNewCampaign: () => void;
+  onTakeFollowUp?: (campaign: Campaign) => void;
   onDeleteCampaign?: (id: string) => void;
 }
 
@@ -27,6 +30,7 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
   campaigns,
   onSelectCampaign,
   onNewCampaign,
+  onTakeFollowUp,
   onDeleteCampaign,
 }) => {
   const [filter, setFilter] = useState<'all' | 'in_progress' | 'completed' | 'queued'>('all');
@@ -126,13 +130,25 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
                       <MailCheck className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-bold text-slate-900 text-sm group-hover:text-slate-700 transition font-poppins">
                           {camp.name}
                         </h3>
                         <span className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${statusColors[camp.status] || statusColors.draft}`}>
                           {camp.status.replace('_', ' ')}
                         </span>
+                        {camp.attachments && camp.attachments.length > 0 && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex items-center">
+                            <Paperclip className="w-2.5 h-2.5 mr-1 text-slate-500" />
+                            {camp.attachments.length} attached
+                          </span>
+                        )}
+                        {camp.followup_count && camp.followup_count > 0 && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 flex items-center">
+                            <RotateCcw className="w-2.5 h-2.5 mr-1 text-sky-600" />
+                            {camp.followup_count} follow-up{camp.followup_count > 1 ? 's' : ''} sent
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-slate-500 font-mono mt-0.5 truncate max-w-lg">
                         {camp.subject}
@@ -141,6 +157,15 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-2 self-end sm:self-auto">
+                    {onTakeFollowUp && (
+                      <button
+                        onClick={() => onTakeFollowUp(camp)}
+                        className="px-3.5 py-2 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm active:scale-95"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-sky-600" />
+                        <span>Take Follow-up</span>
+                      </button>
+                    )}
                     <button
                       onClick={() => onSelectCampaign(camp)}
                       className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200/80 text-xs font-semibold text-slate-800 transition flex items-center space-x-1.5"
