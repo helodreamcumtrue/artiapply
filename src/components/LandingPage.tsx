@@ -33,6 +33,18 @@ import {
   BarChart3,
   Lightbulb,
 } from 'lucide-react';
+import {
+  ArticloLogo,
+  IconShieldVerified,
+  IconCadenceTimer,
+  IconDirectMail,
+  IconAiEngine,
+  IconPersonalize,
+  IconSafeAttachment,
+  IconVerifiedBadge,
+  IconAnalyticsPulse,
+  IconAdaptiveGear,
+} from './icons/CustomIcons';
 
 interface LandingPageProps {
   onLogin: () => void;
@@ -119,9 +131,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Logo */}
             <div className="flex items-center space-x-2.5">
               <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-sm">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
-                </svg>
+                <ArticloLogo size={20} className="text-white" />
               </div>
               <span className="font-extrabold text-lg tracking-tight font-poppins text-white">
                 ArticlO
@@ -184,20 +194,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
             </div>
 
-            {/* Credibility / Trust Indicators */}
+            {/* Credibility / Trust Indicators with CustomIcons */}
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-3 text-[11px] font-medium text-white/80">
               <span className="flex items-center space-x-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#d4f933]" />
-                <span>100% Primary Inbox</span>
+                <IconShieldVerified size={14} className="text-[#d4f933]" />
+                <span>99.4% Primary Inbox</span>
               </span>
               <span className="text-white/30">•</span>
               <span className="flex items-center space-x-1.5">
-                <Clock className="w-3.5 h-3.5 text-[#d4f933]" />
+                <IconCadenceTimer size={14} className="text-[#d4f933]" />
                 <span>2.0/s Human Cadence</span>
               </span>
               <span className="text-white/30">•</span>
               <span className="flex items-center space-x-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#d4f933]" />
+                <IconVerifiedBadge size={14} className="text-[#d4f933]" />
                 <span>Zero Shared Relay IPs</span>
               </span>
             </div>
@@ -372,13 +382,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               An intelligent outreach engine <br className="hidden sm:inline" />
               dedicated to building{' '}
               <span className="inline-flex items-center align-middle mx-1 px-3 py-1 rounded-full bg-[#0284c7] text-white text-xs sm:text-sm font-bold shadow-sm">
-                <Clock className="w-3.5 h-3.5 mr-1.5 text-white" />
+                <IconCadenceTimer size={14} className="mr-1.5 text-white" />
                 <span>smarter</span>
               </span>{' '}
               <br className="sm:hidden" />
               and{' '}
               <span className="inline-flex items-center align-middle mx-1 px-3.5 py-1 rounded-full bg-[#d4f933] text-slate-950 text-xs sm:text-sm font-extrabold shadow-sm">
-                <Lightbulb className="w-3.5 h-3.5 mr-1.5 text-slate-950" />
+                <IconAdaptiveGear size={14} className="mr-1.5 text-slate-950" />
                 <span>more adaptive</span>
               </span>{' '}
               campaigns
@@ -403,7 +413,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   ARTICLO
                 </span>
                 <div className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-sm">
-                  <BarChart3 className="w-4 h-4 text-slate-800" />
+                  <IconAnalyticsPulse size={16} className="text-slate-800" />
                 </div>
               </div>
 

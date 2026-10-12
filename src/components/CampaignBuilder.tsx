@@ -41,12 +41,14 @@ import { verifyLeadList } from '@/lib/utils/verifyEmail';
 import { RAW_50_SAMPLE_CONTACTS, downloadSampleCSVFile } from '@/lib/data/sampleContacts';
 import { EmailTemplatesModal } from './EmailTemplatesModal';
 import { EmailTemplate } from '@/lib/data/emailTemplates';
+import { LaunchAuthRequiredModal } from './LaunchAuthRequiredModal';
 
 interface CampaignBuilderProps {
   onLaunchSuccess: (campaignData: any) => void;
   onCancel: () => void;
   userEmail?: string | null;
   userName?: string | null;
+  onNavigateToSettings?: () => void;
 }
 
 export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
@@ -54,8 +56,10 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   onCancel,
   userEmail,
   userName,
+  onNavigateToSettings,
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
 
   // Step 1: Details
   const [campaignName, setCampaignName] = useState('');
@@ -399,6 +403,19 @@ ${senderName}`
       setLaunchError(err.message || 'An error occurred while launching.');
       setIsLaunching(false);
     }
+  };
+
+  // Launch Button Interceptor: Requires login & settings configuration
+  const handleLaunchClick = () => {
+    const session = typeof window !== 'undefined' ? localStorage.getItem('artiapply_session') : null;
+    const smtp = typeof window !== 'undefined' ? localStorage.getItem('artiapply_smtp_config') : null;
+
+    if (!smtp || !session || !userEmail) {
+      setShowAuthRequiredModal(true);
+      return;
+    }
+
+    handleLaunch();
   };
 
   // Sample contact preview render
@@ -1193,7 +1210,7 @@ ${senderName}`
               <span>Back</span>
             </button>
             <button
-              onClick={handleLaunch}
+              onClick={handleLaunchClick}
               disabled={isLaunching}
               className="px-8 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-sm shadow-lg shadow-[#d4f933]/30 transition-all duration-200 active:scale-95 flex items-center space-x-2 disabled:opacity-50"
             >
@@ -1314,6 +1331,25 @@ ${senderName}`
         onClose={() => setShowTemplatesModal(false)}
         onSelectTemplate={handleApplyTemplate}
         senderName={senderName}
+      />
+
+      {/* LOGIN & SETTINGS CONFIGURATION REQUIRED POPUP */}
+      <LaunchAuthRequiredModal
+        isOpen={showAuthRequiredModal}
+        onClose={() => setShowAuthRequiredModal(false)}
+        onNavigateToSettings={() => {
+          setShowAuthRequiredModal(false);
+          onNavigateToSettings?.();
+        }}
+        onLoginSuccess={(newEmail, newName) => {
+          setShowAuthRequiredModal(false);
+          if (newName) setSenderName(newName);
+          handleLaunch();
+        }}
+        currentEmail={userEmail}
+        currentName={userName}
+        campaignName={campaignName}
+        totalContacts={contacts.length}
       />
     </div>
   );

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, ShieldOff, Mail, RefreshCw } from 'lucide-react';
+import { ArticloLogo } from '@/components/icons/CustomIcons';
 
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
@@ -46,9 +47,7 @@ function UnsubscribeContent() {
         {/* Brand Mark */}
         <div className="flex items-center justify-center space-x-2">
           <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800">
-            <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
-              <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
-            </svg>
+            <ArticloLogo size={18} className="text-white" />
           </div>
           <span className="font-extrabold text-base tracking-tight text-slate-950 font-poppins flex items-center">
             ArticlO

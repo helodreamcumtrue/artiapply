@@ -435,6 +435,7 @@ export default function Home() {
               onCancel={() => setActiveTab('dashboard')}
               userEmail={userEmail}
               userName={userName}
+              onNavigateToSettings={() => setActiveTab('settings')}
             />
           )}
 

@@ -22,6 +22,7 @@ import {
   ChevronDown,
   BookOpen,
 } from 'lucide-react';
+import { ArticloLogo } from './icons/CustomIcons';
 
 export type NavTab = 'dashboard' | 'builder' | 'campaigns' | 'contacts' | 'settings';
 
@@ -132,9 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             {/* ArticlO Brand Logo Mark Matching Landing Page */}
             <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800 flex-shrink-0 group-hover:scale-105 transition-transform">
-              <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
-                <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
-              </svg>
+              <ArticloLogo size={18} className="text-white" />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-base tracking-tight text-slate-950 font-poppins flex items-center">

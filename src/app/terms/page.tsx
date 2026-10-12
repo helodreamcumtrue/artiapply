@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { FileText, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
+import { ArticloLogo } from '@/components/icons/CustomIcons';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -16,9 +17,7 @@ export default function TermsOfService() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2.5 group">
             <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800 group-hover:scale-105 transition-transform">
-              <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
-                <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
-              </svg>
+              <ArticloLogo size={18} className="text-white" />
             </div>
             <span className="font-extrabold text-base tracking-tight text-slate-950 font-poppins flex items-center">
               ArticlO
