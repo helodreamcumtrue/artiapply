@@ -100,57 +100,64 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-[#d4f933] selection:text-black font-sans antialiased overflow-x-hidden">
       {/* ========================================================================= */}
-      {/* 1. HERO SECTION: RADIANT SKY + 3D FLOATING ARCS CAROUSEL                    */}
+      {/* 1. HERO SECTION: REFINED SAPPHIRE-SKY ATMOSPHERE + CONTAINED 5-CARD ARC   */}
       {/* ========================================================================= */}
-      <section className="relative w-full bg-gradient-to-b from-[#0b82f4] via-[#2196f3] to-[#42a5f5] text-white pt-5 pb-20 sm:pb-28 overflow-hidden">
-        {/* Real Cloud Horizon Background Texture Overlay */}
+      <section className="relative w-full bg-gradient-to-b from-[#0b3366] via-[#134e8d] to-[#2575c0] text-white pt-5 pb-20 sm:pb-28 overflow-hidden">
+        {/* Soft Natural Atmospheric Cloud Texture (Balanced Opacity & Depth) */}
         <div 
-          className="absolute inset-0 bg-cover bg-bottom opacity-90 pointer-events-none mix-blend-screen"
+          className="absolute inset-0 bg-cover bg-bottom opacity-35 pointer-events-none mix-blend-overlay"
           style={{ backgroundImage: `url('/images/hero-sky.jpg')` }}
         />
 
-        {/* Ambient Top Glow Orbs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[350px] bg-white/15 blur-[120px] rounded-full pointer-events-none" />
+        {/* Ambient Top & Center Glow (Soft Depth without Harsh Glare) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[360px] bg-sky-300/10 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-white/10 blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          {/* Header Navigation Bar */}
-          <header className="flex items-center justify-between py-3 mb-12 sm:mb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+          {/* Header Navigation Bar - Floating Sleek Glass Capsule */}
+          <header className="flex items-center justify-between py-2.5 px-5 sm:px-6 mb-12 sm:mb-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-lg shadow-black/5">
             {/* Logo */}
             <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-sm">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-sm">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
                 </svg>
               </div>
-              <span className="font-extrabold text-xl tracking-tight font-poppins text-white">
+              <span className="font-extrabold text-lg tracking-tight font-poppins text-white">
                 ArticlO
               </span>
             </div>
 
             {/* Nav Links */}
-            <nav className="hidden md:flex items-center space-x-8 text-xs font-bold uppercase tracking-wider text-white/90">
+            <nav className="hidden md:flex items-center space-x-8 text-xs font-semibold uppercase tracking-wider text-white/90">
               <a href="#hero" className="hover:text-white transition">Home</a>
               <a href="#about" className="hover:text-white transition">Services</a>
               <a href="#deliverability" className="hover:text-white transition">About Us</a>
               <a href="#preview" className="hover:text-white transition flex items-center space-x-1">
-                <span>More Links</span>
-                <ChevronDown className="w-3.5 h-3.5" />
+                <span>Features</span>
+                <ChevronDown className="w-3 h-3 text-white/70" />
               </a>
             </nav>
 
             {/* Right Header Action Button */}
             <button
               onClick={() => setShowAuthModal(true)}
-              className="px-5 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-[#d4f933]/20 active:scale-95"
+              className="px-5 py-2 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-[#d4f933]/20 active:scale-95"
             >
               Get Started
             </button>
           </header>
 
           {/* Hero Typography */}
-          <div className="text-center max-w-4xl mx-auto space-y-4 pt-2 pb-6">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight font-poppins text-white leading-[1.08] drop-shadow-sm">
-              Building the future with <br />
+          <div className="text-center max-w-4xl mx-auto space-y-4 pt-1 pb-6">
+            {/* Executive Badge */}
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs font-semibold shadow-sm mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#d4f933] animate-pulse" />
+              <span>Next-Gen Outreach Engine • Powered by Gmail API & AI</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-poppins text-white leading-[1.1] drop-shadow-sm">
+              Building the future with <br className="hidden sm:inline" />
               AI and strategy
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-2xl mx-auto font-normal leading-relaxed pt-1">
@@ -161,14 +168,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex flex-row items-center justify-center gap-3.5 pt-4">
               <a
                 href="#preview"
-                className="px-6 py-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-sm active:scale-95"
+                className="px-6 py-3 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-sm active:scale-95"
               >
                 View Demo
               </a>
 
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="px-6 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#d4f933]/30 flex items-center space-x-2 active:scale-95"
+                className="px-6 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#d4f933]/25 flex items-center space-x-2 active:scale-95"
               >
                 <span>Get Started</span>
                 <span className="w-5 h-5 rounded-full bg-slate-950 text-[#d4f933] flex items-center justify-center text-xs font-bold leading-none">
@@ -176,115 +183,104 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               </button>
             </div>
+
+            {/* Credibility / Trust Indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-3 text-[11px] font-medium text-white/80">
+              <span className="flex items-center space-x-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#d4f933]" />
+                <span>100% Primary Inbox</span>
+              </span>
+              <span className="text-white/30">•</span>
+              <span className="flex items-center space-x-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#d4f933]" />
+                <span>2.0/s Human Cadence</span>
+              </span>
+              <span className="text-white/30">•</span>
+              <span className="flex items-center space-x-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#d4f933]" />
+                <span>Zero Shared Relay IPs</span>
+              </span>
+            </div>
           </div>
 
           {/* ========================================================================= */}
-          {/* SIGNATURE 3D FLOATING CARDS ARC (Hoverable Curved Deck)                   */}
+          {/* SIGNATURE 3D FLOATING CARDS ARC - PERFECTLY CONTAINED & BALANCED          */}
+          {/* (5 Curated Cards: Deliverability, Portrait, Obsidian AI, Curve, 520k+)   */}
           {/* ========================================================================= */}
-          <div className="relative pt-10 sm:pt-14 pb-8 max-w-6xl mx-auto">
-            <div className="flex items-center justify-center -space-x-4 sm:-space-x-3 overflow-x-auto py-8 px-2 scrollbar-none perspective-1200 preserve-3d">
+          <div className="relative pt-8 sm:pt-12 pb-10 max-w-5xl mx-auto">
+            {/* The 5-Card Deck: Perfectly centered, never cut off on sides or bottom */}
+            <div className="flex items-center justify-center -space-x-3 sm:-space-x-4 md:-space-x-5 py-4 perspective-1200 preserve-3d scale-[0.72] sm:scale-90 md:scale-100 origin-center">
               
-              {/* CARD 1: Far Left (Bar Chart) */}
+              {/* CARD 1: Deliverability ($4,900/mo + Breakdown) */}
               <div 
-                className="arc-card w-32 sm:w-36 h-48 sm:h-52 rounded-2xl bg-white p-3.5 shadow-xl border border-white/60 shrink-0 transform -rotate-12 translate-y-7 cursor-pointer"
-                title="Intelligence Analytics"
+                className="arc-card w-40 sm:w-44 md:w-48 h-56 sm:h-64 rounded-2xl bg-white p-4 shadow-xl border border-white/90 shrink-0 transform -rotate-6 translate-y-3 cursor-pointer text-slate-800"
               >
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Intelligence in</div>
-                <div className="text-xs font-extrabold text-slate-800">Every Decision</div>
-                <div className="flex items-end space-x-1.5 h-24 pt-4 mt-2 border-t border-slate-100">
-                  <div className="w-3 bg-emerald-400 rounded-t h-10" />
-                  <div className="w-3 bg-sky-400 rounded-t h-16" />
-                  <div className="w-3 bg-indigo-500 rounded-t h-20" />
-                  <div className="w-3 bg-indigo-300 rounded-t h-12" />
-                  <div className="w-3 bg-teal-400 rounded-t h-14" />
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Deliverability</div>
+                <div className="text-base sm:text-lg font-black font-poppins text-slate-900 mt-0.5">
+                  $4,900 <span className="text-[10px] text-slate-400 font-normal">/mo</span>
                 </div>
-                <div className="text-[9px] text-slate-400 mt-2 font-mono">100% Pacing</div>
-              </div>
-
-              {/* CARD 2: Left ($4,900 Revenue / Metrics) */}
-              <div 
-                className="arc-card w-36 sm:w-40 h-52 sm:h-56 rounded-2xl bg-white p-4 shadow-xl border border-white/60 shrink-0 transform -rotate-6 translate-y-3 cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Deliverability</div>
-                <div className="text-lg font-black font-poppins text-slate-900">$4,900 <span className="text-[10px] text-slate-400 font-normal">/mo</span></div>
-                <div className="space-y-2 mt-4 text-[10px] text-slate-600">
+                
+                <div className="space-y-1.5 mt-3 text-[10px] text-slate-600">
                   <div className="flex justify-between pb-1 border-b border-slate-100">
                     <span>Delivered</span>
-                    <span className="font-bold text-slate-900">$300</span>
+                    <span className="font-bold text-slate-900">99.4%</span>
                   </div>
                   <div className="flex justify-between pb-1 border-b border-slate-100">
                     <span>Active Queue</span>
-                    <span className="font-bold text-slate-900">$20</span>
+                    <span className="font-bold text-slate-900">2.0 /sec</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Primary</span>
-                    <span className="font-bold text-slate-900">$500</span>
+                    <span className="font-bold text-emerald-600">Guaranteed</span>
                   </div>
+                </div>
+
+                <div className="flex items-end space-x-1.5 h-12 pt-2 mt-2 border-t border-slate-100">
+                  <div className="w-2.5 bg-emerald-400 rounded-t h-6" />
+                  <div className="w-2.5 bg-sky-400 rounded-t h-9" />
+                  <div className="w-2.5 bg-indigo-500 rounded-t h-12" />
+                  <div className="w-2.5 bg-indigo-300 rounded-t h-7" />
+                  <div className="w-2.5 bg-teal-400 rounded-t h-8" />
                 </div>
               </div>
 
-              {/* CARD 3: Mid-Left (Customer Photo Card with $2,670 Badge) */}
+              {/* CARD 2: Customer Portrait Card with Floating Revenue Pill */}
               <div 
-                className="arc-card w-40 sm:w-44 h-56 sm:h-60 rounded-2xl overflow-hidden shadow-2xl border border-white/80 shrink-0 transform -rotate-2 relative cursor-pointer group"
+                className="arc-card w-40 sm:w-44 md:w-48 h-60 sm:h-68 rounded-2xl overflow-hidden shadow-2xl border border-white/90 shrink-0 transform -rotate-2 translate-y-1 relative cursor-pointer group"
               >
                 <img
                   src="/images/portrait-customer.jpg"
                   alt="Customer"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 bg-white/95 backdrop-blur-md rounded-xl p-2 flex items-center justify-between text-[10px] font-bold text-slate-900 shadow-md">
                   <div>
-                    <span className="text-slate-400 block text-[8px]">Revenue</span>
+                    <span className="text-slate-400 block text-[8px] uppercase tracking-wider">Revenue</span>
                     <span>$2,670</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-400 block text-[8px]">Invoiced</span>
+                    <span className="text-slate-400 block text-[8px] uppercase tracking-wider">Invoiced</span>
                     <span className="text-emerald-600">$1,200</span>
                   </div>
                 </div>
               </div>
 
-              {/* CARD 4: Center-Left (White Intelligence Graph) */}
+              {/* CARD 3: Obsidian Centerpiece (Hero Anchor Card) */}
               <div 
-                className="arc-card w-44 sm:w-48 h-60 sm:h-64 rounded-2xl bg-white p-4 shadow-2xl border border-white/90 shrink-0 transform rotate-0 cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Intelligence in</div>
-                <div className="text-sm font-extrabold text-slate-900">Every Decision</div>
-                
-                {/* Visual Spline Curve Graphic */}
-                <div className="mt-4 h-24 relative flex items-end">
-                  <svg className="w-full h-20 text-sky-400" viewBox="0 0 100 50" preserveAspectRatio="none">
-                    <path
-                      d="M0,45 Q20,35 40,25 T70,15 T100,5 L100,50 L0,50 Z"
-                      fill="currentColor"
-                      fillOpacity="0.18"
-                    />
-                    <path
-                      d="M0,45 Q20,35 40,25 T70,15 T100,5"
-                      fill="none"
-                      stroke="#0284c7"
-                      strokeWidth="2.5"
-                    />
-                  </svg>
-                </div>
-                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                  <span className="text-slate-400">Pacing Velocity</span>
-                  <span className="text-emerald-600 font-bold">2.0 emails/sec</span>
-                </div>
-              </div>
-
-              {/* CARD 5: Center-Right (Pitch Black Modern Tile with Lime Icon) */}
-              <div 
-                className="arc-card w-44 sm:w-48 h-60 sm:h-64 rounded-2xl bg-[#0c1017] p-5 shadow-2xl border border-white/20 shrink-0 transform rotate-0 text-white cursor-pointer flex flex-col justify-between"
+                className="arc-card w-44 sm:w-48 md:w-52 h-64 sm:h-72 rounded-2xl bg-[#0c1017] p-5 shadow-2xl border border-white/20 shrink-0 transform rotate-0 scale-105 z-20 text-white cursor-pointer flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center space-x-1.5 text-xs font-bold text-[#d4f933] mb-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#d4f933] inline-block" />
+                  <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-[#d4f933]/15 text-[#d4f933] text-[10px] font-bold mb-3">
+                    <span className="w-2 h-2 rounded-full bg-[#d4f933] inline-block animate-pulse" />
                     <span>Expertise</span>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-100 leading-snug">
+                  <h3 className="text-sm sm:text-base font-extrabold text-slate-100 leading-snug">
                     That Combines Strategy, Data, and Artificial Intelligence
                   </h3>
+                  <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">
+                    Automated personalization with native Gmail rate limiting.
+                  </p>
                 </div>
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
                   <span>Gemini AI Engine</span>
@@ -292,63 +288,82 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              {/* CARD 6: Mid-Right (Cyan Glass Data Training Card) */}
+              {/* CARD 4: Intelligence Curve & Human Pacing Velocity */}
               <div 
-                className="arc-card w-40 sm:w-44 h-56 sm:h-60 rounded-2xl bg-gradient-to-br from-[#0284c7] via-[#0369a1] to-[#075985] p-4 shadow-2xl border border-white/40 shrink-0 transform rotate-3 relative cursor-pointer text-white flex flex-col justify-between"
+                className="arc-card w-40 sm:w-44 md:w-48 h-60 sm:h-68 rounded-2xl bg-white p-4 shadow-2xl border border-white/90 shrink-0 transform rotate-2 translate-y-1 cursor-pointer text-slate-800 flex flex-col justify-between"
               >
-                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold text-sm">
-                  +
-                </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Data training</h4>
-                  <p className="text-[10px] text-sky-200 mt-1">Uploaded lead list & personalization</p>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Intelligence in</div>
+                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">Every Decision</div>
+                  
+                  {/* Visual Spline Curve Graphic */}
+                  <div className="mt-3 h-20 relative flex items-end">
+                    <svg className="w-full h-16 text-sky-400" viewBox="0 0 100 50" preserveAspectRatio="none">
+                      <path
+                        d="M0,45 Q20,35 40,25 T70,15 T100,5 L100,50 L0,50 Z"
+                        fill="currentColor"
+                        fillOpacity="0.18"
+                      />
+                      <path
+                        d="M0,45 Q20,35 40,25 T70,15 T100,5"
+                        fill="none"
+                        stroke="#0284c7"
+                        strokeWidth="2.5"
+                      />
+                    </svg>
+                  </div>
                 </div>
-                <div className="text-[10px] bg-black/20 rounded-lg p-1.5 text-center text-white font-mono">
-                  Rate Limit: 2/sec
+                
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                  <span className="text-slate-400">Pacing Velocity</span>
+                  <span className="text-emerald-600 font-bold">2.0 /sec</span>
                 </div>
               </div>
 
-              {/* CARD 7: Right (520k+ Metric Card) */}
+              {/* CARD 5: 520k+ Data Points & Inbox Guarantee */}
               <div 
-                className="arc-card w-36 sm:w-40 h-52 sm:h-56 rounded-2xl bg-white p-4 shadow-xl border border-white/60 shrink-0 transform rotate-7 translate-y-3 cursor-pointer"
+                className="arc-card w-40 sm:w-44 md:w-48 h-56 sm:h-64 rounded-2xl bg-white p-4 shadow-xl border border-white/90 shrink-0 transform rotate-6 translate-y-3 cursor-pointer text-slate-800 flex flex-col justify-between"
               >
-                <div className="flex space-x-1 mb-2">
-                  <span className="text-[8px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">Initial</span>
-                  <span className="text-[8px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-semibold">Strategic</span>
+                <div>
+                  <div className="flex space-x-1 mb-1.5">
+                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">Initial</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-semibold">Strategic</span>
+                  </div>
+                  <div className="text-[9px] text-slate-400 uppercase font-semibold">Data Points</div>
+                  <div className="text-lg sm:text-xl font-black font-poppins text-slate-900 mt-0.5">520k+</div>
+                  
+                  <div className="mt-3 text-[9px] text-slate-500">
+                    <div className="flex justify-between mb-1">
+                      <span>Primary Reply</span>
+                      <span className="font-bold text-slate-800">4.8%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-[#d4f933] h-full w-4/5" />
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Data Points</div>
-                <div className="text-xl font-black font-poppins text-slate-900 mt-1">520k+</div>
-                <div className="mt-4 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium">
-                  Analyzed monthly for domain safety
-                </div>
-              </div>
 
-              {/* CARD 8: Far Right (Mobile Preview Card) */}
-              <div 
-                className="arc-card w-32 sm:w-36 h-48 sm:h-52 rounded-2xl bg-white p-3.5 shadow-xl border border-white/60 shrink-0 transform rotate-12 translate-y-7 cursor-pointer"
-              >
-                <div className="w-6 h-1 rounded-full bg-slate-300 mx-auto mb-2" />
-                <div className="text-[9px] font-bold text-slate-400 uppercase">Primary Reply</div>
-                <div className="text-base font-extrabold text-slate-900">4.8%</div>
-                <div className="w-full bg-slate-100 rounded-full h-1.5 my-3 overflow-hidden">
-                  <div className="bg-[#d4f933] h-full w-3/4" />
+                <div className="pt-2 border-t border-slate-100 text-[9px] text-emerald-600 font-bold flex items-center space-x-1">
+                  <span>✓</span>
+                  <span>Inbox Guaranteed</span>
                 </div>
-                <div className="text-[9px] text-emerald-600 font-bold">Inbox Guaranteed</div>
               </div>
 
             </div>
 
-            {/* Rating Tag Beneath the Arc */}
-            <div className="text-center pt-2 space-y-1">
-              <p className="text-xs font-bold text-white tracking-wide">
-                Rated 4.9/5 by 4,900+ clients
-              </p>
-              <div className="flex items-center justify-center space-x-1 text-[#f59e0b]">
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <Star className="w-3.5 h-3.5 fill-current" />
+            {/* Social Proof Star Rating Tag - Elegantly Spaced Underneath */}
+            <div className="text-center pt-6 space-y-1.5">
+              <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+                <div className="flex items-center space-x-0.5 text-amber-300">
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                </div>
+                <span className="text-xs font-bold text-white tracking-wide">
+                  Rated 4.9/5 by 4,900+ verified clients
+                </span>
               </div>
             </div>
           </div>
