@@ -190,3 +190,21 @@ body {
     0 10px 30px -5px rgba(15, 23, 42, 0.08),
     0 4px 12px -2px rgba(15, 23, 42, 0.04);
 }
+
+/* 3D Arc Card Transform utilities matching modern Framer/Aeline style */
+.perspective-1200 {
+  perspective: 1200px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.arc-card {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, z-index 0.2s ease;
+  will-change: transform;
+}
+.arc-card:hover {
+  transform: translateY(-16px) scale(1.06) rotate(0deg) !important;
+  z-index: 50 !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
