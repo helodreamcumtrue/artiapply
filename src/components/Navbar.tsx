@@ -130,43 +130,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('dashboard')}
             className="flex items-center space-x-2.5 cursor-pointer group"
           >
-            {/* ArticlO Logo Mark: Aerodynamic 'A' dispatch apex with electric indigo 'O' orbit */}
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-[0_2px_8px_rgba(15,23,42,0.18)] flex-shrink-0 group-hover:scale-105 transition-transform border border-slate-800">
-              <svg
-                className="w-4 h-4 text-white"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Aerodynamic send paper/quill apex for Articl */}
-                <path
-                  d="M12 2.5L3.5 20.5L12 16.5L20.5 20.5L12 2.5Z"
-                  fill="url(#articlo-gradient)"
-                  stroke="white"
-                  strokeWidth="1.2"
-                  strokeLinejoin="round"
-                />
-                {/* Vibrant 'O' circle center */}
-                <circle cx="12" cy="11.5" r="2.2" fill="#6366f1" />
-                <defs>
-                  <linearGradient id="articlo-gradient" x1="12" y1="2.5" x2="12" y2="20.5" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#ffffff" />
-                    <stop offset="1" stopColor="#cbd5e1" />
-                  </linearGradient>
-                </defs>
+            {/* ArticlO Brand Logo Mark Matching Landing Page */}
+            <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
+                <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm sm:text-base tracking-tight text-slate-900 leading-none font-poppins flex items-center">
-                Articl<span className="text-indigo-600">O</span>
+              <span className="font-extrabold text-base tracking-tight text-slate-950 font-poppins flex items-center">
+                Articl<span className="text-slate-950">O</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] ml-1" />
               </span>
-              <span className="text-[10px] text-slate-500 tracking-wide font-medium">
-                Article & Outreach Engine
+              <span className="text-[10px] text-slate-400 tracking-wide font-medium">
+                Outreach Engine
               </span>
             </div>
           </div>
 
-          {/* Center Navigation Tabs (Analytics removed from here!) */}
+          {/* Center Navigation Tabs with Electric Lime Active Indicator */}
           <nav className="flex items-center space-x-1 sm:space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
             {navTabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -174,12 +155,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
+                  className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center ${
                     isActive
-                      ? 'bg-slate-900 text-white shadow-sm'
+                      ? 'bg-slate-950 text-white shadow-sm ring-1 ring-white/10'
+                      : tab.id === 'builder'
+                      ? 'text-slate-900 bg-[#d4f933]/15 hover:bg-[#d4f933]/25 font-bold border border-[#d4f933]/40'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] mr-1.5 animate-pulse" />
+                  )}
                   {tab.label}
                 </button>
               );

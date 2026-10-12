@@ -119,10 +119,13 @@ export const SimpleContactsList: React.FC<SimpleContactsListProps> = ({
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition active:scale-95"
+            className="inline-flex items-center space-x-1.5 px-5 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 text-xs font-extrabold shadow-md shadow-[#d4f933]/25 transition active:scale-95"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-slate-950" />
             <span>Add Contact</span>
+            <span className="w-4 h-4 rounded-full bg-slate-950 text-[#d4f933] flex items-center justify-center text-[10px] font-bold">
+              +
+            </span>
           </button>
         </div>
       </div>

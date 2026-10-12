@@ -12,14 +12,29 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-700 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-12">
-        {/* Back navigation */}
-        <Link
-          href="/"
-          className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to ArticlO Dashboard</span>
-        </Link>
+        {/* Top Header & Brand Bar */}
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center space-x-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800 group-hover:scale-105 transition-transform">
+              <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
+                <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
+              </svg>
+            </div>
+            <span className="font-extrabold text-base tracking-tight text-slate-950 font-poppins flex items-center">
+              ArticlO
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] ml-1" />
+            </span>
+          </Link>
+
+          {/* Back navigation */}
+          <Link
+            href="/"
+            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition shadow-sm"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Dashboard</span>
+          </Link>
+        </div>
 
         {/* Header */}
         <div className="space-y-4 border-b border-slate-200 pb-8">

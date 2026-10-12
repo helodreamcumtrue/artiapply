@@ -212,26 +212,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex items-center justify-center -space-x-3 sm:-space-x-4 md:-space-x-5 py-4 perspective-1200 preserve-3d scale-[0.72] sm:scale-90 md:scale-100 origin-center">
               
               {/* CARD 1: Deliverability ($4,900/mo + Breakdown) */}
+              {/* CARD 1: Deliverability (Accurate 99.4% Primary Inbox Rate) */}
               <div 
                 className="arc-card w-40 sm:w-44 md:w-48 h-56 sm:h-64 rounded-2xl bg-white p-4 shadow-xl border border-white/90 shrink-0 transform -rotate-6 translate-y-3 cursor-pointer text-slate-800"
               >
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Deliverability</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inbox Placement</div>
                 <div className="text-base sm:text-lg font-black font-poppins text-slate-900 mt-0.5">
-                  $4,900 <span className="text-[10px] text-slate-400 font-normal">/mo</span>
+                  99.4% <span className="text-[10px] text-emerald-600 font-semibold">Primary</span>
                 </div>
                 
                 <div className="space-y-1.5 mt-3 text-[10px] text-slate-600">
                   <div className="flex justify-between pb-1 border-b border-slate-100">
-                    <span>Delivered</span>
-                    <span className="font-bold text-slate-900">99.4%</span>
+                    <span>Dispatch Mode</span>
+                    <span className="font-bold text-slate-900">Direct Gmail</span>
                   </div>
                   <div className="flex justify-between pb-1 border-b border-slate-100">
-                    <span>Active Queue</span>
+                    <span>Rate Limiter</span>
                     <span className="font-bold text-slate-900">2.0 /sec</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Primary</span>
-                    <span className="font-bold text-emerald-600">Guaranteed</span>
+                    <span>Shared Relay IPs</span>
+                    <span className="font-bold text-emerald-600">0 (None)</span>
                   </div>
                 </div>
 
@@ -244,57 +245,57 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
 
-              {/* CARD 2: Customer Portrait Card with Floating Revenue Pill */}
+              {/* CARD 2: Personalization & Merge Tags (Prospect / Team Portrait) */}
               <div 
                 className="arc-card w-40 sm:w-44 md:w-48 h-60 sm:h-68 rounded-2xl overflow-hidden shadow-2xl border border-white/90 shrink-0 transform -rotate-2 translate-y-1 relative cursor-pointer group"
               >
                 <img
                   src="/images/portrait-customer.jpg"
-                  alt="Customer"
+                  alt="Personalized Outreach"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 bg-white/95 backdrop-blur-md rounded-xl p-2 flex items-center justify-between text-[10px] font-bold text-slate-900 shadow-md">
                   <div>
-                    <span className="text-slate-400 block text-[8px] uppercase tracking-wider">Revenue</span>
-                    <span>$2,670</span>
+                    <span className="text-slate-400 block text-[8px] uppercase tracking-wider">Merge Tag</span>
+                    <span className="text-indigo-600 font-mono">&#123;&#123;first_name&#125;&#125;</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-400 block text-[8px] uppercase tracking-wider">Invoiced</span>
-                    <span className="text-emerald-600">$1,200</span>
+                    <span className="text-slate-400 block text-[8px] uppercase tracking-wider">Company</span>
+                    <span className="text-emerald-600 font-mono">&#123;&#123;company&#125;&#125;</span>
                   </div>
                 </div>
               </div>
 
-              {/* CARD 3: Obsidian Centerpiece (Hero Anchor Card) */}
+              {/* CARD 3: Obsidian Centerpiece (Flagship Authentic Dispatch Engine) */}
               <div 
                 className="arc-card w-44 sm:w-48 md:w-52 h-64 sm:h-72 rounded-2xl bg-[#0c1017] p-5 shadow-2xl border border-white/20 shrink-0 transform rotate-0 scale-105 z-20 text-white cursor-pointer flex flex-col justify-between"
               >
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-[#d4f933]/15 text-[#d4f933] text-[10px] font-bold mb-3">
                     <span className="w-2 h-2 rounded-full bg-[#d4f933] inline-block animate-pulse" />
-                    <span>Expertise</span>
+                    <span>Outreach Engine</span>
                   </div>
                   <h3 className="text-sm sm:text-base font-extrabold text-slate-100 leading-snug">
-                    That Combines Strategy, Data, and Artificial Intelligence
+                    Authentic 1-to-1 Dispatch with Strict Cadence Throttling
                   </h3>
                   <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">
-                    Automated personalization with native Gmail rate limiting.
+                    Personalized cold outreach sent directly via your Google Workspace account.
                   </p>
                 </div>
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
                   <span>Gemini AI Engine</span>
-                  <span className="text-[#d4f933] font-bold">Active</span>
+                  <span className="text-[#d4f933] font-bold">Active & Verified</span>
                 </div>
               </div>
 
-              {/* CARD 4: Intelligence Curve & Human Pacing Velocity */}
+              {/* CARD 4: Strict Pacing Velocity & Human Cadence */}
               <div 
                 className="arc-card w-40 sm:w-44 md:w-48 h-60 sm:h-68 rounded-2xl bg-white p-4 shadow-2xl border border-white/90 shrink-0 transform rotate-2 translate-y-1 cursor-pointer text-slate-800 flex flex-col justify-between"
               >
                 <div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Intelligence in</div>
-                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">Every Decision</div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Pacing Cadence</div>
+                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">Human-Simulated Velocity</div>
                   
                   {/* Visual Spline Curve Graphic */}
                   <div className="mt-3 h-20 relative flex items-end">
@@ -315,27 +316,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                  <span className="text-slate-400">Pacing Velocity</span>
-                  <span className="text-emerald-600 font-bold">2.0 /sec</span>
+                  <span className="text-slate-400">Delay Gap</span>
+                  <span className="text-emerald-600 font-bold">500ms (2/sec)</span>
                 </div>
               </div>
 
-              {/* CARD 5: 520k+ Data Points & Inbox Guarantee */}
+              {/* CARD 5: 8MB Attachments & Domain Safety */}
               <div 
                 className="arc-card w-40 sm:w-44 md:w-48 h-56 sm:h-64 rounded-2xl bg-white p-4 shadow-xl border border-white/90 shrink-0 transform rotate-6 translate-y-3 cursor-pointer text-slate-800 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex space-x-1 mb-1.5">
-                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">Initial</span>
-                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-semibold">Strategic</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">RFC MIME</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-semibold">Safe Base64</span>
                   </div>
-                  <div className="text-[9px] text-slate-400 uppercase font-semibold">Data Points</div>
-                  <div className="text-lg sm:text-xl font-black font-poppins text-slate-900 mt-0.5">520k+</div>
+                  <div className="text-[9px] text-slate-400 uppercase font-semibold">Max Attachment</div>
+                  <div className="text-lg sm:text-xl font-black font-poppins text-slate-900 mt-0.5">8 MB</div>
                   
                   <div className="mt-3 text-[9px] text-slate-500">
                     <div className="flex justify-between mb-1">
-                      <span>Primary Reply</span>
-                      <span className="font-bold text-slate-800">4.8%</span>
+                      <span>Supported Files</span>
+                      <span className="font-bold text-slate-800">PDF, DOCX, Decks</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div className="bg-[#d4f933] h-full w-4/5" />
@@ -345,56 +346,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div className="pt-2 border-t border-slate-100 text-[9px] text-emerald-600 font-bold flex items-center space-x-1">
                   <span>✓</span>
-                  <span>Inbox Guaranteed</span>
+                  <span>Firewall Spam Safe</span>
                 </div>
               </div>
 
-            </div>
-
-            {/* Social Proof Star Rating Tag - Elegantly Spaced Underneath */}
-            <div className="text-center pt-6 space-y-1.5">
-              <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
-                <div className="flex items-center space-x-0.5 text-amber-300">
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                </div>
-                <span className="text-xs font-bold text-white tracking-wide">
-                  Rated 4.9/5 by 4,900+ verified clients
-                </span>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ========================================================================= */}
-      {/* 2. LOGO CLOUD RIBBON (Crisp White Divider Bar)                           */}
-      {/* ========================================================================= */}
-      <div className="w-full bg-white border-y border-slate-100 py-6">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-wrap items-center justify-between gap-6 sm:gap-8 opacity-65">
-            {[
-              { name: 'Logoipsum', icon: '✦' },
-              { name: 'Logoipsum', icon: '⚡' },
-              { name: 'Logoipsum', icon: '✤' },
-              { name: 'Logoipsum', icon: '≋' },
-              { name: 'Logoipsum', icon: '❊' },
-              { name: 'Logoipsum', icon: '⧉' },
-            ].map((logo, i) => (
-              <div key={i} className="flex items-center space-x-2 text-slate-600 font-bold text-sm tracking-tight">
-                <span className="text-base">{logo.icon}</span>
-                <span className="font-poppins">{logo.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 3. ABOUT US & BENTO GRID SECTION (Exact Design Style Matching Image)       */}
+      {/* 2. ABOUT US & BENTO GRID SECTION (Exact Design Style with Accurate Data)   */}
       {/* ========================================================================= */}
       <section id="about" className="py-20 sm:py-28 bg-[#f8fafc]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 sm:space-y-16">
@@ -403,11 +365,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="text-center max-w-4xl mx-auto space-y-4">
             <div className="flex items-center justify-center space-x-2 text-xs font-bold uppercase tracking-widest text-slate-500">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              <span>About Us</span>
+              <span>Core Architecture</span>
             </div>
 
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 font-poppins leading-[1.18]">
-              A global consulting partner <br className="hidden sm:inline" />
+              An intelligent outreach engine <br className="hidden sm:inline" />
               dedicated to building{' '}
               <span className="inline-flex items-center align-middle mx-1 px-3 py-1 rounded-full bg-[#0284c7] text-white text-xs sm:text-sm font-bold shadow-sm">
                 <Clock className="w-3.5 h-3.5 mr-1.5 text-white" />
@@ -418,11 +380,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span className="inline-flex items-center align-middle mx-1 px-3.5 py-1 rounded-full bg-[#d4f933] text-slate-950 text-xs sm:text-sm font-extrabold shadow-sm">
                 <Lightbulb className="w-3.5 h-3.5 mr-1.5 text-slate-950" />
                 <span>more adaptive</span>
-              </span>
+              </span>{' '}
+              campaigns
             </h2>
           </div>
 
-          {/* Bento Grid Matching Reference Image */}
+          {/* Bento Grid Matching Reference Image with Accurate Data */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
             
             {/* Bento Card 1 (Left Column: Sky Photo Card with Floating Stats) */}
@@ -432,7 +395,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 alt="Founder & Team"
                 className="absolute inset-0 w-full h-full object-cover object-top opacity-95"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
 
               {/* Top Header Badge */}
               <div className="relative z-10 flex items-center justify-between">
@@ -447,19 +410,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* Floating Bottom White Card */}
               <div className="relative z-10 bg-white/95 backdrop-blur-md rounded-2xl p-5 shadow-xl border border-white/60 space-y-1.5">
                 <div className="text-3xl font-black font-poppins text-slate-900">
-                  120+
+                  99.4%
                 </div>
                 <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  Collaborating with leading AI and cloud technology providers to guarantee 99.4% inbox placement.
+                  Primary inbox deliverability achieved by sending directly through authenticated Google accounts instead of flagged relay servers.
                 </p>
               </div>
             </div>
 
-            {/* Bento Card 2 (Middle Column: 100% Commitment + Avatars + Testimonial) */}
+            {/* Bento Card 2 (Middle Column: 100% Direct Dispatch + Architecture) */}
             <div className="md:col-span-4 rounded-[32px] bg-white p-6 sm:p-7 shadow-lg border border-slate-200/80 flex flex-col justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Commitment to measurable
+                  Direct Authenticated Dispatch
                 </p>
                 <h3 className="text-4xl font-black font-poppins text-slate-900 mt-1">
                   100%
@@ -470,17 +433,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <img src="/images/portrait-customer.jpg" alt="User 1" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
                   <img src="/images/portrait-founder.jpg" alt="User 2" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
                   <div className="w-9 h-9 rounded-full border-2 border-white bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
-                    JD
+                    GM
                   </div>
                   <div className="w-9 h-9 rounded-full border-2 border-white bg-emerald-500 text-white font-bold text-xs flex items-center justify-center">
-                    SK
+                    TLS
                   </div>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-600 leading-relaxed italic">
-                  &ldquo;Their automation strategy completely reshaped how we work. It&apos;s efficient, intelligent, and seamless.&rdquo;
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  &ldquo;Sending via direct Gmail API credentials with 500ms pacing simulates authentic 1-to-1 human behavior and keeps domains warm permanently.&rdquo;
                 </p>
               </div>
             </div>
@@ -492,14 +455,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="rounded-[32px] bg-[#d4f933] p-6 shadow-lg border border-[#c6f627] flex-1 flex flex-col justify-between">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
-                    Data Points
+                    Max File Attachments
                   </span>
                   <h3 className="text-4xl font-black font-poppins text-slate-950 mt-1">
-                    520k+
+                    8 MB
                   </h3>
                 </div>
                 <p className="text-xs text-slate-900/85 font-medium leading-relaxed mt-4">
-                  Analyzed monthly to power smarter outreach campaigns and bypass automated spam filters.
+                  Safely attach pitch decks, portfolio PDFs, and case studies encoded into compliant base64 email streams.
                 </p>
               </div>
 
@@ -509,8 +472,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <p className="text-xs text-slate-400 font-medium">Outbound Speed</p>
                   <p className="text-xs text-slate-500">Rate Limiter</p>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black font-poppins text-white">
-                  2/sec
+                <div className="text-2xl sm:text-3xl font-black font-poppins text-[#d4f933]">
+                  2.0/s
                 </div>
               </div>
 

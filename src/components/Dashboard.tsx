@@ -104,10 +104,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={onNewCampaign}
-            className="inline-flex items-center space-x-2 px-5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm shadow-[0_2px_8px_rgba(15,23,42,0.18)] transition-all active:scale-[0.98]"
+            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-[#d4f933]/25 transition-all duration-200 active:scale-95"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-slate-950" />
             <span>Create Campaign</span>
+            <span className="w-4 h-4 rounded-full bg-slate-950 text-[#d4f933] flex items-center justify-center text-[10px] font-bold">
+              ↗
+            </span>
           </button>
         </div>
       </div>
@@ -227,14 +230,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Elevated Progress Bar */}
           <div className="space-y-1.5">
-            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5">
+            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-200/60">
               <div
-                className="h-full bg-slate-900 rounded-full transition-all duration-500"
+                className="h-full bg-[#d4f933] rounded-full transition-all duration-500 shadow-sm"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-              <span className="text-emerald-700 flex items-center">
+              <span className="text-emerald-700 flex items-center font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
                 {currentCamp.sent_count} Delivered
               </span>
@@ -245,10 +248,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-[28px] shadow-lg border border-indigo-900/40 flex flex-col sm:flex-row items-center justify-between gap-5">
+        <div className="bg-[#0c1017] text-white p-6 sm:p-8 rounded-[28px] shadow-xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-5">
           <div className="space-y-1 text-center sm:text-left">
-            <div className="inline-flex items-center space-x-2 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-1">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#d4f933]/15 text-[#d4f933] text-xs font-bold uppercase tracking-wider mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#d4f933] animate-pulse" />
               <span>Workspace Ready</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-bold font-poppins text-white">Ready to Launch Your Outreach</h3>
@@ -258,10 +261,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
           <button
             onClick={onNewCampaign}
-            className="px-6 py-3 rounded-full bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition active:scale-95 whitespace-nowrap flex items-center space-x-2 shrink-0"
+            className="px-6 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-md shadow-[#d4f933]/25 transition-all duration-200 active:scale-95 whitespace-nowrap flex items-center space-x-2 shrink-0"
           >
-            <Plus className="w-4 h-4 text-slate-900" />
+            <Plus className="w-4 h-4 text-slate-950" />
             <span>Create First Campaign</span>
+            <span className="w-4 h-4 rounded-full bg-slate-950 text-[#d4f933] flex items-center justify-center text-[10px] font-bold">
+              ↗
+            </span>
           </button>
         </div>
       )}

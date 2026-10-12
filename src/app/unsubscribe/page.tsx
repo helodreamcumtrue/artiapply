@@ -43,9 +43,17 @@ function UnsubscribeContent() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white p-8 sm:p-9 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_12px_36px_-6px_rgba(15,23,42,0.08)] text-center space-y-6">
-        {/* Brand Icon */}
-        <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center mx-auto shadow-sm">
-          <ShieldOff className="w-6 h-6 text-slate-600" />
+        {/* Brand Mark */}
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800">
+            <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
+              <path d="M12 2L2 19.5h20L12 2zm0 4.2l6.5 11.3H5.5L12 6.2z" />
+            </svg>
+          </div>
+          <span className="font-extrabold text-base tracking-tight text-slate-950 font-poppins flex items-center">
+            ArticlO
+            <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] ml-1" />
+          </span>
         </div>
 
         {unsubscribed ? (

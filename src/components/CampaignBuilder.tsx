@@ -450,14 +450,17 @@ ${senderName}`
         ].map((item) => (
           <div
             key={item.step}
-            className={`py-2 px-3 rounded-full border text-center transition-all ${
+            className={`py-2 px-3 rounded-full border text-center transition-all flex items-center justify-center space-x-1.5 ${
               currentStep === item.step
-                ? 'bg-slate-900 border-slate-900 text-white font-medium shadow-sm'
+                ? 'bg-slate-950 border-slate-950 text-white font-bold shadow-sm'
                 : currentStep > item.step
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-700 font-medium'
                 : 'bg-white border-slate-200 text-slate-500'
             }`}
           >
+            {currentStep === item.step && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] animate-pulse" />
+            )}
             <span className="text-xs">{item.label}</span>
           </div>
         ))}
@@ -508,10 +511,10 @@ ${senderName}`
                 }
                 setCurrentStep(2);
               }}
-              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-sm flex items-center space-x-2 active:scale-95"
+              className="px-6 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 text-xs sm:text-sm font-extrabold transition shadow-md shadow-[#d4f933]/25 flex items-center space-x-2 active:scale-95"
             >
               <span>Next: Compose Email</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-slate-950" />
             </button>
           </div>
         </div>
@@ -924,10 +927,10 @@ ${senderName}`
                 }
                 setCurrentStep(3);
               }}
-              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm active:scale-95"
+              className="px-6 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 text-xs font-extrabold transition flex items-center space-x-1.5 shadow-md shadow-[#d4f933]/25 active:scale-95"
             >
               <span>Next: Contacts CSV</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
             </button>
           </div>
         </div>
@@ -1069,10 +1072,10 @@ ${senderName}`
                 }
                 setCurrentStep(4);
               }}
-              className="px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-sm flex items-center space-x-2"
+              className="px-6 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 text-xs sm:text-sm font-extrabold transition shadow-md shadow-[#d4f933]/25 flex items-center space-x-2 active:scale-95"
             >
               <span>Next: Review & Launch</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-slate-950" />
             </button>
           </div>
         </div>
@@ -1192,17 +1195,20 @@ ${senderName}`
             <button
               onClick={handleLaunch}
               disabled={isLaunching}
-              className="px-8 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-[0_2px_8px_rgba(15,23,42,0.18)] transition-all active:scale-[0.98] flex items-center space-x-2 disabled:opacity-50"
+              className="px-8 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-sm shadow-lg shadow-[#d4f933]/30 transition-all duration-200 active:scale-95 flex items-center space-x-2 disabled:opacity-50"
             >
               {isLaunching ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
                   <span>Enqueuing Campaign...</span>
                 </>
               ) : (
                 <>
-                  <Rocket className="w-4 h-4" />
+                  <Rocket className="w-4 h-4 text-slate-950" />
                   <span>Launch Campaign ({contacts.length} Emails)</span>
+                  <span className="w-4 h-4 rounded-full bg-slate-950 text-[#d4f933] flex items-center justify-center text-[10px] font-bold">
+                    ↗
+                  </span>
                 </>
               )}
             </button>

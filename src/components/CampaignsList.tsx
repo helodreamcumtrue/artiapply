@@ -56,10 +56,13 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
         </div>
         <button
           onClick={onNewCampaign}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition"
+          className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-xs shadow-md shadow-[#d4f933]/25 transition active:scale-95"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-slate-950" />
           <span>New Sequence</span>
+          <span className="w-4 h-4 rounded-full bg-slate-950 text-[#d4f933] flex items-center justify-center text-[10px] font-bold">
+            ↗
+          </span>
         </button>
       </div>
 
@@ -75,12 +78,15 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id as any)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center ${
                 filter === tab.id
-                  ? 'bg-slate-900 text-white shadow-sm'
+                  ? 'bg-slate-950 text-white shadow-sm ring-1 ring-white/10'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
+              {filter === tab.id && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] mr-1.5 animate-pulse" />
+              )}
               {tab.label}
             </button>
           ))}

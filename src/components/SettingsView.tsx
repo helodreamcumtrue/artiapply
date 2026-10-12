@@ -271,22 +271,28 @@ REDIS_URL=redis://localhost:6379`;
         <div className="flex items-center p-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm self-start sm:self-auto">
           <button
             onClick={() => setActiveTab('simple')}
-            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition ${
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition flex items-center ${
               activeTab === 'simple'
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
+                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-white/10'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            Essentials
+            {activeTab === 'simple' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] mr-1.5 animate-pulse" />
+            )}
+            <span>Essentials</span>
           </button>
           <button
             onClick={() => setActiveTab('advanced')}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition flex items-center space-x-1.5 ${
               activeTab === 'advanced'
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
+                ? 'bg-slate-950 text-white shadow-sm ring-1 ring-white/10'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
+            {activeTab === 'advanced' && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[#d4f933] mr-1.5 animate-pulse" />
+            )}
             <Code2 className="w-3.5 h-3.5" />
             <span>Developer / IT</span>
           </button>
@@ -446,7 +452,7 @@ REDIS_URL=redis://localhost:6379`;
               <button
                 type="button"
                 onClick={() => handleSaveSmtp()}
-                className="px-5 py-2 rounded-full bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-semibold shadow-sm transition self-end sm:self-auto"
+                className="px-5 py-2.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 text-xs font-extrabold shadow-md shadow-[#d4f933]/25 transition self-end sm:self-auto active:scale-95"
               >
                 {smtpSavedSuccess ? '✓ Credentials Saved' : 'Save Email Credentials'}
               </button>
