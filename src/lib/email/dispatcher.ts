@@ -17,6 +17,7 @@ export interface SendEmailPayload {
   subject: string;
   htmlBody: string;
   textBody?: string;
+  unsubscribeUrl?: string;
   fromName?: string;
   fromEmail?: string;
   attachments?: EmailAttachment[];
@@ -102,6 +103,7 @@ export async function dispatchRealEmail({
   subject,
   htmlBody,
   textBody,
+  unsubscribeUrl,
   fromName,
   fromEmail,
   attachments,
@@ -109,6 +111,9 @@ export async function dispatchRealEmail({
   googleTokens,
   userId = '00000000-0000-0000-0000-000000000001',
 }: SendEmailPayload): Promise<{ success: boolean; messageId?: string; error?: string; provider: 'smtp' | 'gmail_oauth' | 'unconfigured' }> {
+  // Guarantee clean RFC 2822 subject without any HTML tags or newlines
+  const cleanSubject = subject.replace(/<[^>]*>/g, '').replace(/[\r\n]+/g, ' ').trim();
+
   // 1. Check SMTP / Gmail App Password
   const smtp = getActiveSmtpConfig(smtpConfig);
 
@@ -127,12 +132,21 @@ export async function dispatchRealEmail({
       const senderDisplayName = fromName || smtp.fromName || 'ArticlO Outreach';
       const senderAddress = fromEmail || smtp.fromEmail || smtp.user;
 
+      const headers: Record<string, string> = {
+        'X-Mailer': 'ArticlO Verified Engine',
+      };
+      if (unsubscribeUrl) {
+        headers['List-Unsubscribe'] = `<${unsubscribeUrl}>`;
+        headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
+      }
+
       const mailOptions: any = {
         from: `"${senderDisplayName.replace(/"/g, '')}" <${senderAddress}>`,
         to,
-        subject,
+        subject: cleanSubject,
         html: htmlBody,
-        text: textBody || htmlBody.replace(/<[^>]*>/g, ''),
+        text: textBody || htmlBody.replace(/<[^>]*>/g, '').replace(/\n\s*\n/g, '\n'),
+        headers,
       };
 
       if (attachments && attachments.length > 0) {
@@ -168,8 +182,10 @@ export async function dispatchRealEmail({
         userId,
         tokens: googleTokens,
         to,
-        subject,
+        subject: cleanSubject,
         htmlBody,
+        textBody,
+        unsubscribeUrl,
         fromName,
         fromEmail,
         attachments,

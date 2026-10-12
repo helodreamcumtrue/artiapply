@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { dispatchRealEmail } from '@/lib/email/dispatcher';
-import { replaceVariables } from '@/lib/gmail/service';
+import { formatEmailSubject, formatEmailBody } from '@/lib/gmail/service';
 import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
@@ -22,22 +22,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Personalize subject and body
-    const personalizedSubject = replaceVariables(subject, contact);
-    const personalizedBody = replaceVariables(bodyTemplate, contact);
+    // Safeguard against duplicate sends: If already marked sent and not a follow-up, do not resend!
+    if (contact.status === 'sent' && !isFollowUp && contact.sent_at) {
+      return NextResponse.json({
+        success: true,
+        contactId: contact.id,
+        email: contact.email,
+        skipped: true,
+        message: 'Email already delivered to this contact.',
+        status: 'sent',
+      });
+    }
 
-    // 2. Dispatch real email with attachments if present
+    // 1. Personalize subject - 100% clean plain text, no HTML tags, no newlines, no footer
+    const personalizedSubject = formatEmailSubject(subject, contact);
+
+    // 2. Personalize body - formats into clean paragraphs and matching plain text with subtle opt-out footer
+    const { html: formattedHtmlBody, text: formattedTextBody, unsubscribeUrl } = formatEmailBody({
+      bodyTemplate,
+      contact,
+      includeUnsubscribe: true,
+    });
+
+    // 3. Dispatch real email with attachments and deliverability headers
     const result = await dispatchRealEmail({
       to: contact.email,
       subject: personalizedSubject,
-      htmlBody: personalizedBody,
+      htmlBody: formattedHtmlBody,
+      textBody: formattedTextBody,
+      unsubscribeUrl,
       fromName: senderName,
       fromEmail: senderEmail,
       attachments,
       smtpConfig,
     });
 
-    // 3. Update in Supabase if configured
+    // 4. Update in Supabase if configured
     if (isAdminConfigured() && contact.id) {
       try {
         const contactUpdates: Record<string, any> = {
@@ -60,14 +80,21 @@ export async function POST(request: NextRequest) {
         if (result.success && campaignId) {
           const { data: camp } = await supabaseAdmin
             .from('campaigns')
-            .select('sent_count, followup_count')
+            .select('sent_count, total_contacts, followup_count')
             .eq('id', campaignId)
             .single();
 
           if (camp) {
+            const nextSentCount = (camp.sent_count || 0) + 1;
+            const isCompleted = !isFollowUp && camp.total_contacts > 0 && nextSentCount >= camp.total_contacts;
+
             const campUpdates: Record<string, any> = {
-              sent_count: (camp.sent_count || 0) + 1,
+              sent_count: nextSentCount,
+              updated_at: new Date().toISOString(),
             };
+            if (isCompleted) {
+              campUpdates.status = 'completed';
+            }
             if (isFollowUp) {
               campUpdates.followup_count = (camp.followup_count || 0) + 1;
               campUpdates.last_followup_at = new Date().toISOString();

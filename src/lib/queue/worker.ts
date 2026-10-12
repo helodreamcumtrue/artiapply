@@ -2,7 +2,7 @@ import { Worker, Job } from 'bullmq';
 import { getRedisConnection, QUEUE_NAME } from './client';
 import { EmailJobData } from '@/types/database';
 import { supabaseAdmin, isAdminConfigured } from '../supabase/admin';
-import { replaceVariables } from '../gmail/service';
+import { formatEmailSubject, formatEmailBody } from '../gmail/service';
 import { dispatchRealEmail } from '../email/dispatcher';
 
 let emailWorker: Worker<EmailJobData> | null = null;
@@ -28,9 +28,13 @@ export function initWorker(): Worker<EmailJobData> {
           .eq('id', contactId);
       }
 
-      // 2. Personalize email template
-      const personalizedBody = replaceVariables(bodyTemplate, contactData);
-      const personalizedSubject = replaceVariables(subject, contactData);
+      // 2. Personalize email template - clean subject and clean paragraphs
+      const personalizedSubject = formatEmailSubject(subject, contactData);
+      const { html: personalizedBody, text: plainTextBody, unsubscribeUrl } = formatEmailBody({
+        bodyTemplate,
+        contact: contactData,
+        includeUnsubscribe: true,
+      });
 
       // 3. Fetch user's Google tokens from public.users table
       let userTokens = null;
@@ -65,6 +69,8 @@ export function initWorker(): Worker<EmailJobData> {
         to,
         subject: personalizedSubject,
         htmlBody: personalizedBody,
+        textBody: plainTextBody,
+        unsubscribeUrl,
         fromName: userProfile?.name || undefined,
         fromEmail: userProfile?.email || undefined,
         attachments,

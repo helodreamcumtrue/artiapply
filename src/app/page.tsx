@@ -11,7 +11,7 @@ import { OnboardingTourModal } from '@/components/OnboardingTourModal';
 import { TakeFollowUpModal } from '@/components/TakeFollowUpModal';
 import { LandingPage } from '@/components/LandingPage';
 import { useRealtimeCampaign } from '@/hooks/useRealtimeCampaign';
-import { Campaign, Contact } from '@/types/database';
+import { Campaign, Contact, CampaignStatus, ContactStatus } from '@/types/database';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
@@ -104,19 +104,34 @@ export default function Home() {
 
       // Load saved campaigns and contacts from localStorage
       try {
+        const savedContacts = localStorage.getItem('artiapply_contacts');
+        let loadedContacts: Contact[] = [];
+        if (savedContacts) {
+          const parsed = JSON.parse(savedContacts);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            loadedContacts = parsed;
+            setContacts(parsed);
+          }
+        }
+
         const savedCamps = localStorage.getItem('artiapply_campaigns');
         if (savedCamps) {
           const parsed = JSON.parse(savedCamps);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setCampaigns(parsed);
-            setActiveCampaign(parsed[0]);
-          }
-        }
-        const savedContacts = localStorage.getItem('artiapply_contacts');
-        if (savedContacts) {
-          const parsed = JSON.parse(savedContacts);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setContacts(parsed);
+            // Reconcile status: if contacts are sent, ensure campaign is marked completed so it never resets to pending on refresh
+            const reconciled = parsed.map((c: Campaign) => {
+              const campContacts = loadedContacts.filter((ct) => ct.campaign_id === c.id);
+              const sentContacts = campContacts.filter((ct) => ct.status === 'sent');
+              if (campContacts.length > 0 && sentContacts.length >= campContacts.length) {
+                return { ...c, status: 'completed' as const, sent_count: sentContacts.length };
+              }
+              return c;
+            });
+            setCampaigns(reconciled);
+            setActiveCampaign(reconciled[0]);
+            try {
+              localStorage.setItem('artiapply_campaigns', JSON.stringify(reconciled));
+            } catch {}
           }
         }
       } catch {}
@@ -156,16 +171,31 @@ export default function Home() {
         })
         .catch(() => {});
 
-      // Fetch live campaigns from database if available
+      // Fetch live campaigns from database if available (preserve local completed/sent state)
       fetch('/api/campaigns')
         .then((res) => res.json())
         .then((data) => {
           if (data.campaigns && data.campaigns.length > 0) {
-            setCampaigns(data.campaigns);
-            setActiveCampaign(data.campaigns[0]);
-            try {
-              localStorage.setItem('artiapply_campaigns', JSON.stringify(data.campaigns));
-            } catch {}
+            setCampaigns((prev) => {
+              const dbCamps: Campaign[] = data.campaigns;
+              const merged = dbCamps.map((dbc) => {
+                const local = prev.find((lc) => lc.id === dbc.id);
+                if (local && (local.sent_count > dbc.sent_count || local.status === 'completed')) {
+                  return { ...dbc, sent_count: local.sent_count, status: local.status };
+                }
+                return dbc;
+              });
+              prev.forEach((lc) => {
+                if (!merged.some((m) => m.id === lc.id)) {
+                  merged.push(lc);
+                }
+              });
+              try {
+                localStorage.setItem('artiapply_campaigns', JSON.stringify(merged));
+              } catch {}
+              return merged;
+            });
+            setActiveCampaign((prev) => prev || data.campaigns[0]);
           }
         })
         .catch(() => {});
@@ -265,29 +295,37 @@ export default function Home() {
 
         if (sendResult.success) {
           actualSentCount++;
-          setContacts((prev) =>
-            prev.map((c) =>
+          setContacts((prev) => {
+            const next = prev.map((c) =>
               c.id === target.id || c.email === target.email
                 ? {
                     ...c,
-                    status: 'sent',
+                    status: 'sent' as ContactStatus,
                     sent_at: new Date().toISOString(),
                   }
                 : c
-            )
-          );
+            );
+            try {
+              localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+            } catch {}
+            return next;
+          });
         } else {
           actualFailedCount++;
-          setContacts((prev) =>
-            prev.map((c) =>
+          setContacts((prev) => {
+            const next = prev.map((c) =>
               c.id === target.id || c.email === target.email
                 ? {
                     ...c,
-                    status: 'failed',
+                    status: 'failed' as ContactStatus,
                   }
                 : c
-            )
-          );
+            );
+            try {
+              localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+            } catch {}
+            return next;
+          });
 
           if (processedIndex === 1) {
             showToast(
@@ -298,28 +336,64 @@ export default function Home() {
         }
       } catch (err: any) {
         actualFailedCount++;
-        setContacts((prev) =>
-          prev.map((c) =>
-            c.id === target.id || c.email === target.email ? { ...c, status: 'failed' } : c
-          )
-        );
+        setContacts((prev) => {
+          const next = prev.map((c) =>
+            c.id === target.id || c.email === target.email
+              ? { ...c, status: 'failed' as ContactStatus }
+              : c
+          );
+          try {
+            localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
       }
 
-      // Update campaign stats
-      setCampaigns((prev) =>
-        prev.map((c) => {
+      // Update campaign stats and persist to localStorage
+      const isFinished = processedIndex >= contactsList.length;
+      setCampaigns((prev) => {
+        const next = prev.map((c) => {
           if (c.id === newCamp.id) {
-            const isFinished = processedIndex >= contactsList.length;
+            const finalStatus: CampaignStatus = isFinished ? (actualSentCount > 0 ? 'completed' : 'failed') : 'in_progress';
             return {
               ...c,
               sent_count: actualSentCount,
               failed_count: actualFailedCount,
-              status: isFinished ? (actualSentCount > 0 ? 'completed' : 'failed') : 'in_progress',
+              status: finalStatus,
             };
           }
           return c;
-        })
-      );
+        });
+        try {
+          localStorage.setItem('artiapply_campaigns', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+
+      if (isFinished) {
+        setActiveCampaign((prev) =>
+          prev && prev.id === newCamp.id
+            ? {
+                ...prev,
+                sent_count: actualSentCount,
+                failed_count: actualFailedCount,
+                status: actualSentCount > 0 ? 'completed' : 'failed',
+              }
+            : prev
+        );
+
+        // Sync final status to server database so it never resets on refresh
+        fetch('/api/campaigns', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: newCamp.id,
+            status: actualSentCount > 0 ? 'completed' : 'failed',
+            sent_count: actualSentCount,
+            failed_count: actualFailedCount,
+          }),
+        }).catch(() => {});
+      }
 
       if (processedIndex < contactsList.length) {
         setTimeout(dispatchNextEmail, 500); // 2 emails/sec pace
@@ -365,20 +439,30 @@ export default function Home() {
   const handleFollowUpSuccess = (campaignId: string, updatedContactsList: Contact[]) => {
     setContacts((prev) => {
       const updatedMap = new Map(updatedContactsList.map((c) => [c.id, c]));
-      return prev.map((c) => updatedMap.get(c.id) || c);
+      const next = prev.map((c) => updatedMap.get(c.id) || c);
+      try {
+        localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+      } catch {}
+      return next;
     });
 
-    setCampaigns((prev) =>
-      prev.map((c) => {
+    setCampaigns((prev) => {
+      const next = prev.map((c) => {
         if (c.id === campaignId) {
           return {
             ...c,
-            status: 'in_progress',
+            status: 'completed' as const,
+            followup_count: (c.followup_count || 0) + 1,
+            last_followup_at: new Date().toISOString(),
           };
         }
         return c;
-      })
-    );
+      });
+      try {
+        localStorage.setItem('artiapply_campaigns', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
 
     showToast(`Follow-up sent successfully to ${updatedContactsList.length} contact${updatedContactsList.length === 1 ? '' : 's'}!`);
   };

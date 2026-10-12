@@ -71,11 +71,11 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   const [bodyTemplate, setBodyTemplate] = useState(
 `Hi {{first_name}},
 
-I came across {{company}} and noticed your focus on scaling outreach. As {{role}}, you likely know how frustrating it is when emails land in spam or trigger Google API limits.
+I came across {{company}} and noticed your focus on scaling outreach. As {{role}}, I imagine streamlining communication workflows and achieving high response rates is a key priority.
 
-We built ArticlO to send personalized cold emails directly through your Gmail with a strict rate limiter (2 emails/sec) ensuring 100% spam-safe deliverability.
+We built ArticlO to help teams send personalized 1-on-1 emails directly through authentic sender accounts with a calibrated human delivery cadence—ensuring every message lands safely in the primary inbox.
 
-Would you be open to a 5-minute chat this week?
+Would you be open to a brief 5-minute chat this week?
 
 Best regards,
 ${senderName}`
@@ -399,6 +399,13 @@ ${senderName}`
         attachments,
         follow_ups: enableFollowUps ? followUps : [],
       });
+
+      // Reset form so contacts and step don't remain pending to launch again
+      setContacts([]);
+      setCsvFileName(null);
+      setVerificationStats(null);
+      setCurrentStep(1);
+      setCampaignName('');
     } catch (err: any) {
       setLaunchError(err.message || 'An error occurred while launching.');
       setIsLaunching(false);

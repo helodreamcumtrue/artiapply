@@ -42,13 +42,13 @@ LinkedIn: {{linkedin_link}}`,
     name: 'B2B Problem-Agitate-Solve (PAS)',
     category: 'sales',
     categoryLabel: 'B2B Sales Outbound',
-    description: 'Proven cold outbound structure identifying pain points, offering clear value and low friction CTA.',
+    description: 'Proven outreach structure identifying pain points, offering clear value and low friction CTA.',
     subject: 'Quick question regarding {{company}} outreach workflow',
     body: `Hi {{first_name}},
 
-I noticed your work leading initiatives at {{company}}. Usually when speaking with someone in your role, the biggest hurdle is scaling personalized outreach without landing in spam or burning domain reputation.
+I noticed your work leading initiatives at {{company}}. Usually when speaking with someone in your role, the biggest hurdle is scaling personalized outreach while maintaining peak deliverability and high reply rates.
 
-We built an engine that sends verified 1-to-1 emails directly through authentic sender accounts with strict rate limiting (2 emails/sec)—achieving a 99.4% inbox placement rate.
+We built an engine that sends verified 1-to-1 emails directly through authentic sender accounts with calibrated human pacing (2 emails/sec)—achieving a 99.4% primary inbox placement rate.
 
 I put together a quick 1-pager on how teams like {{company}} improved their meeting book rates by 34% (attached).
 

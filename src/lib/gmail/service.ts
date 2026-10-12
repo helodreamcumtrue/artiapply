@@ -14,6 +14,8 @@ export interface SendEmailParams {
   to: string;
   subject: string;
   htmlBody: string;
+  textBody?: string;
+  unsubscribeUrl?: string;
   fromName?: string;
   fromEmail?: string;
   attachments?: EmailAttachment[];
@@ -90,6 +92,8 @@ export function createMimeMessage({
   to,
   subject,
   htmlBody,
+  textBody,
+  unsubscribeUrl,
   fromName,
   fromEmail,
   attachments,
@@ -97,6 +101,8 @@ export function createMimeMessage({
   to: string;
   subject: string;
   htmlBody: string;
+  textBody?: string;
+  unsubscribeUrl?: string;
   fromName?: string;
   fromEmail?: string;
   attachments?: EmailAttachment[];
@@ -105,14 +111,26 @@ export function createMimeMessage({
     ? `"${fromName.replace(/"/g, '')}" <${fromEmail}>`
     : fromEmail || 'me';
 
-  const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+  // Guaranteed clean subject header
+  const cleanSubject = subject.replace(/<[^>]*>/g, '').replace(/[\r\n]+/g, ' ').trim();
+  const utf8Subject = `=?utf-8?B?${Buffer.from(cleanSubject).toString('base64')}?=`;
+
+  const commonHeaders = [
+    `From: ${senderHeader}`,
+    `To: ${to}`,
+    `Subject: ${utf8Subject}`,
+    'MIME-Version: 1.0',
+    'X-Mailer: ArticlO Verified Engine',
+  ];
+
+  if (unsubscribeUrl) {
+    commonHeaders.push(`List-Unsubscribe: <${unsubscribeUrl}>`);
+    commonHeaders.push('List-Unsubscribe-Post: List-Unsubscribe=One-Click');
+  }
 
   if (!attachments || attachments.length === 0) {
     const messageParts = [
-      `From: ${senderHeader}`,
-      `To: ${to}`,
-      `Subject: ${utf8Subject}`,
-      'MIME-Version: 1.0',
+      ...commonHeaders,
       'Content-Type: text/html; charset=utf-8',
       'Content-Transfer-Encoding: base64',
       '',
@@ -125,10 +143,7 @@ export function createMimeMessage({
   // Multipart/mixed message for attachments
   const boundary = `====boundary_${Date.now()}_${Math.random().toString(36).substring(2, 9)}====`;
   const headerParts = [
-    `From: ${senderHeader}`,
-    `To: ${to}`,
-    `Subject: ${utf8Subject}`,
-    'MIME-Version: 1.0',
+    ...commonHeaders,
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
     '',
   ];
@@ -167,7 +182,8 @@ export function createMimeMessage({
 }
 
 /**
- * Replaces placeholders like {{first_name}}, {{company}}, etc. with contact attributes
+ * Replaces placeholders like {{first_name}}, {{company}}, etc. with contact attributes.
+ * Defaults to NEVER appending an unsubscribe footer (subject and raw templates remain clean).
  */
 export function replaceVariables(
   template: string,
@@ -180,7 +196,7 @@ export function replaceVariables(
     email: string;
     custom_fields?: Record<string, any>;
   },
-  appendUnsubscribeFooter: boolean = true
+  appendUnsubscribeFooter: boolean = false
 ): string {
   let result = template;
 
@@ -214,12 +230,121 @@ export function replaceVariables(
     result = result.replace(doubleRegex, value).replace(singleRegex, value);
   }
 
-  // Append subtle opt-out compliance footer if not already present
+  // Only append if explicitly requested (never for subjects)
   if (appendUnsubscribeFooter && !result.toLowerCase().includes('unsubscribe')) {
-    result += `\n\n<div style="font-size:11px;color:#888;margin-top:24px;border-top:1px solid #334155;padding-top:8px;">To opt out of future emails, <a href="${unsubscribeUrl}" style="color:#818cf8;text-decoration:underline;">unsubscribe here</a>.</div>`;
+    result += `\n\n<div style="font-size:11px;color:#94a3b8;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">To opt out of future emails, <a href="${unsubscribeUrl}" style="color:#64748b;text-decoration:underline;">unsubscribe here</a>.</div>`;
   }
 
   return result;
+}
+
+/**
+ * Generates an RFC 2822 compliant, pure plain-text email subject.
+ * Guaranteed to NEVER contain HTML tags, newlines, or unsubscribe footers.
+ */
+export function formatEmailSubject(
+  subjectTemplate: string,
+  contact: {
+    id?: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    company?: string | null;
+    role?: string | null;
+    email: string;
+    custom_fields?: Record<string, any>;
+  }
+): string {
+  const personalized = replaceVariables(subjectTemplate, contact, false);
+  // Strip any HTML tags and collapse whitespace/newlines into a single line
+  return personalized
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Converts newline-separated text into clean HTML paragraphs with standard Gmail styling.
+ */
+export function convertTextToEmailHtml(text: string): string {
+  // If text already has block HTML elements, return as is
+  if (/<(p|div|table|h[1-6]|ul|ol|br)\b/i.test(text)) {
+    return text;
+  }
+
+  const paragraphs = text
+    .split(/\r?\n\r?\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length === 0) {
+    return `<p style="margin:0 0 16px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;">${text.replace(/\r?\n/g, '<br/>')}</p>`;
+  }
+
+  return paragraphs
+    .map((p) => {
+      const withLineBreaks = p.replace(/\r?\n/g, '<br/>');
+      return `<p style="margin:0 0 16px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;">${withLineBreaks}</p>`;
+    })
+    .join('\n');
+}
+
+/**
+ * Formats email body into both responsive HTML and clean text with subtle opt-out footer.
+ */
+export function formatEmailBody({
+  bodyTemplate,
+  contact,
+  includeUnsubscribe = true,
+  appUrl,
+}: {
+  bodyTemplate: string;
+  contact: {
+    id?: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    company?: string | null;
+    role?: string | null;
+    email: string;
+    custom_fields?: Record<string, any>;
+  };
+  includeUnsubscribe?: boolean;
+  appUrl?: string;
+}): { html: string; text: string; unsubscribeUrl: string } {
+  const baseUrl = (appUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
+
+  // 1. Personalize text (without footer appended)
+  const personalized = replaceVariables(bodyTemplate, contact, false);
+
+  // 2. Build clean plain text version
+  let text = personalized;
+  if (includeUnsubscribe && !personalized.toLowerCase().includes('unsubscribe')) {
+    text += `\n\n---\nTo opt out of future emails: ${unsubscribeUrl}`;
+  }
+
+  // 3. Build responsive HTML paragraphs
+  const paragraphsHtml = convertTextToEmailHtml(personalized);
+
+  const footerHtml = includeUnsubscribe && !personalized.toLowerCase().includes('unsubscribe')
+    ? `<div style="margin-top:32px;padding-top:14px;border-top:1px solid #e2e8f0;font-size:11px;line-height:1.5;color:#94a3b8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">To opt out of future emails, <a href="${unsubscribeUrl}" style="color:#64748b;text-decoration:underline;">unsubscribe here</a>.</div>`
+    : '';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;background-color:#ffffff;">
+  <div style="max-width:600px;padding:8px 0;">
+    ${paragraphsHtml}
+    ${footerHtml}
+  </div>
+</body>
+</html>`;
+
+  return { html, text, unsubscribeUrl };
 }
 
 /**
@@ -231,6 +356,8 @@ export async function sendEmail({
   to,
   subject,
   htmlBody,
+  textBody,
+  unsubscribeUrl,
   fromName,
   fromEmail,
   attachments,
@@ -243,6 +370,8 @@ export async function sendEmail({
       to,
       subject,
       htmlBody,
+      textBody,
+      unsubscribeUrl,
       fromName,
       fromEmail,
       attachments,

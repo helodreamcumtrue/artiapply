@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       attachments = [],
       follow_ups = [],
       userId = '00000000-0000-0000-0000-000000000001',
+      mode = 'client_dispatch',
     } = body;
 
     if (!name || !subject || !bodyTemplate) {
@@ -144,26 +145,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Prepare jobs for BullMQ email-queue
-    const jobs: EmailJobData[] = insertedContacts.map((contact) => ({
-      campaignId,
-      contactId: contact.id,
-      userId,
-      to: contact.email,
-      subject,
-      bodyTemplate,
-      contactData: {
-        email: contact.email,
-        first_name: contact.first_name,
-        last_name: contact.last_name,
-        company: contact.company,
-        role: contact.role,
-        custom_fields: contact.custom_fields,
-      },
-    }));
+    // 2. Prepare and conditionally enqueue jobs for BullMQ email-queue
+    let queueSuccess = false;
+    if (mode === 'queue') {
+      const jobs: EmailJobData[] = insertedContacts.map((contact) => ({
+        campaignId,
+        contactId: contact.id,
+        userId,
+        to: contact.email,
+        subject,
+        bodyTemplate,
+        contactData: {
+          email: contact.email,
+          first_name: contact.first_name,
+          last_name: contact.last_name,
+          company: contact.company,
+          role: contact.role,
+          custom_fields: contact.custom_fields,
+        },
+      }));
 
-    // 3. Enqueue to BullMQ
-    const queueSuccess = await enqueueEmailJobs(jobs);
+      queueSuccess = await enqueueEmailJobs(jobs);
+    }
 
     return NextResponse.json({
       success: true,
