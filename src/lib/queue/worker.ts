@@ -2,7 +2,8 @@ import { Worker, Job } from 'bullmq';
 import { getRedisConnection, QUEUE_NAME } from './client';
 import { EmailJobData } from '@/types/database';
 import { supabaseAdmin, isAdminConfigured } from '../supabase/admin';
-import { sendEmail, replaceVariables } from '../gmail/service';
+import { replaceVariables } from '../gmail/service';
+import { dispatchRealEmail } from '../email/dispatcher';
 
 let emailWorker: Worker<EmailJobData> | null = null;
 
@@ -16,7 +17,7 @@ export function initWorker(): Worker<EmailJobData> {
   emailWorker = new Worker<EmailJobData>(
     QUEUE_NAME,
     async (job: Job<EmailJobData>) => {
-      const { campaignId, contactId, userId, to, subject, bodyTemplate, contactData } = job.data;
+      const { campaignId, contactId, userId, to, subject, bodyTemplate, contactData, attachments } = job.data;
       console.log(`[Worker] Processing email job ${job.id} for ${to} in campaign ${campaignId}`);
 
       // 1. Mark contact as 'sending' in Supabase
@@ -54,25 +55,32 @@ export function initWorker(): Worker<EmailJobData> {
         }
       }
 
-      // 4. Send email via Gmail API or mock if credentials not provided
+      // 4. Send email via SMTP, Gmail OAuth API, or mock if credentials not provided
       let sendResult: { success: boolean; error?: string; messageId?: string } = {
         success: false,
       };
 
-      if (userTokens?.refresh_token || userTokens?.access_token) {
-        sendResult = await sendEmail({
-          userId,
-          tokens: userTokens,
-          to,
-          subject: personalizedSubject,
-          htmlBody: personalizedBody,
-          fromName: userProfile?.name || undefined,
-          fromEmail: userProfile?.email || undefined,
-        });
+      const dispatchResult = await dispatchRealEmail({
+        userId,
+        to,
+        subject: personalizedSubject,
+        htmlBody: personalizedBody,
+        fromName: userProfile?.name || undefined,
+        fromEmail: userProfile?.email || undefined,
+        attachments,
+        googleTokens: userTokens || undefined,
+      });
+
+      if (dispatchResult.provider !== 'unconfigured') {
+        sendResult = {
+          success: dispatchResult.success,
+          error: dispatchResult.error,
+          messageId: dispatchResult.messageId,
+        };
       } else {
         // Fallback / local dev simulation
         console.log(`[Worker - Simulation] Simulated sending email to ${to}: "${personalizedSubject}"`);
-        // Artificial small latency to simulate Gmail API network call
+        // Artificial small latency to simulate email dispatch network call
         await new Promise((resolve) => setTimeout(resolve, 400));
         sendResult = {
           success: true,

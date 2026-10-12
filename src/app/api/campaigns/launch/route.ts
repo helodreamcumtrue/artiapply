@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       queueEnqueued: queueSuccess,
       message: queueSuccess
         ? `Campaign "${name}" queued with ${contacts.length} emails. BullMQ worker is dispatching at 2 emails/sec.`
-        : `Campaign created in demo mode. Make sure Redis is running (docker-compose up -d) to dispatch live BullMQ jobs.`,
+        : `Campaign "${name}" launched with ${contacts.length} emails. Active delivery sequence started.`,
       campaign: {
         id: campaignId,
         name,

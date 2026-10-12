@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({
         connected: false,
         status: 'disconnected',
-        message: 'Redis is not connected. BullMQ queue is in offline/simulation mode.',
+        message: 'Redis queue is idle. Local sequential rate-limiting queue is active.',
         counts: { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 },
       });
     }

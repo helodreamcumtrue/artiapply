@@ -41,24 +41,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onConnectGoogle,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [activeDemoTab, setActiveDemoTab] = useState<'composer' | 'limiter' | 'followup'>('composer');
+  const [activePreviewTab, setActivePreviewTab] = useState<'composer' | 'limiter' | 'followup'>('composer');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [quickEmail, setQuickEmail] = useState('');
   const [quickName, setQuickName] = useState('');
 
-  // Rate Limiter Demo Animation State
+  // Rate Limiter Showcase Animation State
   const [simulatedProgress, setSimulatedProgress] = useState(3);
   const totalSimulated = 6;
 
   useEffect(() => {
-    if (activeDemoTab === 'limiter') {
+    if (activePreviewTab === 'limiter') {
       const interval = setInterval(() => {
         setSimulatedProgress((prev) => (prev >= totalSimulated ? 1 : prev + 1));
       }, 2000);
       return () => clearInterval(interval);
     }
-  }, [activeDemoTab]);
+  }, [activePreviewTab]);
 
   // Sync dark mode from document
   useEffect(() => {
@@ -152,7 +152,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <a href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
               Features
             </a>
-            <a href="#demo" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+            <a href="#preview" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
               Live Showcase
             </a>
             <a href="#deliverability" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
@@ -305,7 +305,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* ========================================================================= */}
       {/* 3. INTERACTIVE PRODUCT SHOWCASE (Live Mockup Browser)                     */}
       {/* ========================================================================= */}
-      <section id="demo" className="py-12 sm:py-16 relative">
+      <section id="preview" className="py-12 sm:py-16 relative">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center space-y-2 mb-8">
             <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
@@ -320,9 +320,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex items-center justify-center mb-6">
             <div className="inline-flex p-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
               <button
-                onClick={() => setActiveDemoTab('composer')}
+                onClick={() => setActivePreviewTab('composer')}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-1.5 ${
-                  activeDemoTab === 'composer'
+                  activePreviewTab === 'composer'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
@@ -332,9 +332,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
 
               <button
-                onClick={() => setActiveDemoTab('limiter')}
+                onClick={() => setActivePreviewTab('limiter')}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-1.5 ${
-                  activeDemoTab === 'limiter'
+                  activePreviewTab === 'limiter'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
@@ -344,9 +344,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
 
               <button
-                onClick={() => setActiveDemoTab('followup')}
+                onClick={() => setActivePreviewTab('followup')}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition flex items-center space-x-1.5 ${
-                  activeDemoTab === 'followup'
+                  activePreviewTab === 'followup'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
@@ -374,7 +374,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* TAB 1: Gmail Compose View */}
-            {activeDemoTab === 'composer' && (
+            {activePreviewTab === 'composer' && (
               <div className="p-5 sm:p-7 space-y-4 animate-in fade-in duration-200">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5 text-xs">
@@ -439,8 +439,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
             )}
 
-            {/* TAB 2: Anti-Spam Rate Limiter Demo */}
-            {activeDemoTab === 'limiter' && (
+            {/* TAB 2: Anti-Spam Rate Limiter Showcase */}
+            {activePreviewTab === 'limiter' && (
               <div className="p-5 sm:p-7 space-y-5 animate-in fade-in duration-200">
                 <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-between">
                   <div>
@@ -504,7 +504,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             )}
 
             {/* TAB 3: Automated Follow-Up Sequence */}
-            {activeDemoTab === 'followup' && (
+            {activePreviewTab === 'followup' && (
               <div className="p-5 sm:p-7 space-y-4 animate-in fade-in duration-200">
                 <div className="space-y-3">
                   <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
@@ -944,7 +944,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               className="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition flex items-center justify-center space-x-2"
             >
               <Zap className="w-4 h-4" />
-              <span>Launch App (Direct Demo Access)</span>
+              <span>Enter Outreach Command Center</span>
             </button>
 
             {/* Google OAuth Option */}

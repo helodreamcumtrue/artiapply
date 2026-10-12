@@ -132,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="text-[11px]">Gmail API</span>
           </span>
           <span className="text-[10px] text-slate-400">
-            {isGoogleConnected ? 'Connected' : 'Demo Mode'}
+            {isGoogleConnected ? 'Connected' : 'Configure Sender'}
           </span>
         </div>
 
@@ -179,10 +179,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
           <div className="truncate">
             <p className="text-xs font-medium text-slate-200 truncate">
-              {userName || 'Demo Marketer'}
+              {userName || 'Workspace Member'}
             </p>
             <p className="text-[11px] text-slate-400 truncate">
-              {userEmail || 'user@articleapply.io'}
+              {userEmail || 'outreach@artiapply.io'}
             </p>
           </div>
         </div>

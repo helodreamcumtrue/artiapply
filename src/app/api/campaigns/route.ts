@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     if (!isAdminConfigured()) {
       return NextResponse.json({
-        isDemo: true,
+        success: true,
         campaigns: [],
       });
     }

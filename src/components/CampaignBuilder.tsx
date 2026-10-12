@@ -59,7 +59,7 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
 
   // Step 1: Details
   const [campaignName, setCampaignName] = useState('');
-  const [senderName, setSenderName] = useState(userName || 'Alex Outreach');
+  const [senderName, setSenderName] = useState(userName || 'Campaign Manager');
   const [targetAudience, setTargetAudience] = useState('B2B SaaS Founders & Growth Leads');
 
   // Step 2: Email Template
@@ -344,7 +344,7 @@ ${senderName}`
   };
 
   // Load 50 Sample Contacts
-  const loadDemoContacts = () => {
+  const loadSampleContacts = () => {
     const sample50 = RAW_50_SAMPLE_CONTACTS.map((c, i) => ({
       id: `builder-sample-${i + 1}`,
       email: c.email,
@@ -952,10 +952,10 @@ ${senderName}`
               </button>
               <button
                 type="button"
-                onClick={loadDemoContacts}
+                onClick={loadSampleContacts}
                 className="text-xs px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-semibold transition"
               >
-                ⚡ Load 50 Samples
+                ⚡ Load Sample Leads
               </button>
             </div>
           </div>

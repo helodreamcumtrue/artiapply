@@ -169,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Active Campaign Spotlight Card */}
-      {currentCamp && (
+      {currentCamp ? (
         <div className="bg-white p-6 sm:p-7 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_6px_20px_-4px_rgba(15,23,42,0.04)] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -243,6 +243,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </span>
             </div>
           </div>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-[28px] shadow-lg border border-indigo-900/40 flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="inline-flex items-center space-x-2 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-1">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Workspace Ready</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold font-poppins text-white">Ready to Launch Your Outreach</h3>
+            <p className="text-xs text-slate-300 max-w-lg leading-relaxed">
+              Create your cold email sequence with Google Gemini AI copywriting, strict 2 emails/sec rate limiting, and zero spam flags.
+            </p>
+          </div>
+          <button
+            onClick={onNewCampaign}
+            className="px-6 py-3 rounded-full bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition active:scale-95 whitespace-nowrap flex items-center space-x-2 shrink-0"
+          >
+            <Plus className="w-4 h-4 text-slate-900" />
+            <span>Create First Campaign</span>
+          </button>
         </div>
       )}
 

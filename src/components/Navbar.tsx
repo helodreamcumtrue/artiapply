@@ -293,15 +293,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {/* Account Summary */}
                   <div className="px-3 py-2 border-b border-slate-100 mb-1">
                     <p className="text-xs font-bold text-slate-900 truncate">
-                      {userName || 'John Smith'}
+                      {userName || 'Workspace Manager'}
                     </p>
                     <p className="text-[11px] text-slate-500 truncate font-mono">
-                      {userEmail || 'user@articleapply.io'}
+                      {userEmail || 'outreach@artiapply.io'}
                     </p>
                     <div className="flex items-center space-x-1.5 mt-1.5">
-                      <span className={`w-2 h-2 rounded-full ${isGoogleConnected ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                      <span className={`w-2 h-2 rounded-full ${isGoogleConnected ? 'bg-emerald-500' : 'bg-slate-500'}`} />
                       <span className="text-[10px] text-slate-600 font-medium">
-                        {isGoogleConnected ? 'Google Gmail Connected' : 'Demo Sending Mode'}
+                        {isGoogleConnected ? 'Google Gmail Connected' : 'Direct SMTP Dispatch'}
                       </span>
                     </div>
                   </div>

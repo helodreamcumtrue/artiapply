@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const redirectUri = `${baseUrl}/auth/callback`;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(`${baseUrl}?auth_notice=demo_mode`);
+    return NextResponse.redirect(`${baseUrl}?auth_notice=google_setup_required`);
   }
 
   const oauth2Client = new google.auth.OAuth2(

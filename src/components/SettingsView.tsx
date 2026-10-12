@@ -694,7 +694,7 @@ REDIS_URL=redis://localhost:6379`;
                           : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
                       }`}
                     >
-                      {isGoogleConnected ? 'OAuth Active' : 'Demo Mode'}
+                      {isGoogleConnected ? 'OAuth Active' : 'Not Connected'}
                     </span>
                   </div>
                 </div>
@@ -733,7 +733,7 @@ REDIS_URL=redis://localhost:6379`;
                     Need Sample Leads?
                   </h4>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                    50 verified mock prospects
+                    50 sample B2B leads template
                   </span>
                 </div>
               </div>
@@ -786,7 +786,7 @@ REDIS_URL=redis://localhost:6379`;
                           : 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800'
                       }`}
                     >
-                      {queueStatus?.connected ? 'Redis Online' : 'Simulation Mode Active'}
+                      {queueStatus?.connected ? 'Redis Online' : 'Local Queue Active'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

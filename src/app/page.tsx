@@ -19,115 +19,16 @@ export default function Home() {
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
   const [followUpCampaign, setFollowUpCampaign] = useState<Campaign | null>(null);
 
-  // Initial seed campaigns for instant demonstration
-  const [campaigns, setCampaigns] = useState<Campaign[]>([
-    {
-      id: 'camp-seed-1',
-      user_id: 'user-1',
-      name: 'Y-Combinator Tech Founders Cold Outreach',
-      subject: 'Quick question regarding {{company}} outreach workflow',
-      body_template: 'Hi {{first_name}},\n\nLoved your recent launch at {{company}}. Would love to share how ArticlO scales outreach with zero spam flags.\n\nBest,\nAlex',
-      status: 'in_progress',
-      total_contacts: 24,
-      sent_count: 14,
-      failed_count: 0,
-      created_at: '2026-09-22T12:00:00.000Z',
-      updated_at: '2026-09-22T12:00:00.000Z',
-    },
-    {
-      id: 'camp-seed-2',
-      user_id: 'user-1',
-      name: 'B2B SaaS Growth Directors Q3',
-      subject: 'Personalized cold outbound for {{company}}',
-      body_template: 'Hi {{first_name}},\n\nSaw your role as {{role}} at {{company}}...',
-      status: 'completed',
-      total_contacts: 85,
-      sent_count: 84,
-      failed_count: 1,
-      created_at: '2026-09-21T09:30:00.000Z',
-      updated_at: '2026-09-21T14:45:00.000Z',
-    },
-    {
-      id: 'camp-seed-3',
-      user_id: 'user-1',
-      name: 'Enterprise CTO Outreach Series',
-      subject: 'Security & deliverability review for {{company}}',
-      body_template: 'Hi {{first_name}},\n\n...',
-      status: 'queued',
-      total_contacts: 40,
-      sent_count: 0,
-      failed_count: 0,
-      created_at: '2026-09-22T08:15:00.000Z',
-      updated_at: '2026-09-22T08:15:00.000Z',
-    },
-  ]);
+  // Campaigns & Contacts State (Persisted in localStorage & Supabase)
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
 
-  // Initial recent contacts feed
-  const [contacts, setContacts] = useState<Contact[]>([
-    {
-      id: 'c1',
-      campaign_id: 'camp-seed-1',
-      user_id: 'user-1',
-      email: 'jordan.bell@stratasys.io',
-      first_name: 'Jordan',
-      last_name: 'Bell',
-      company: 'StrataSys',
-      role: 'Chief Technology Officer',
-      status: 'pending',
-      sent_at: null,
-      created_at: '2026-09-22T12:00:00.000Z',
-      updated_at: '2026-09-22T12:15:00.000Z',
-    },
-    {
-      id: 'c2',
-      campaign_id: 'camp-seed-1',
-      user_id: 'user-1',
-      email: 'samantha.v@novatech.co',
-      first_name: 'Samantha',
-      last_name: 'Vance',
-      company: 'NovaTech',
-      role: 'VP Marketing',
-      status: 'pending',
-      sent_at: null,
-      created_at: '2026-09-22T12:00:00.000Z',
-      updated_at: '2026-09-22T12:14:00.000Z',
-    },
-    {
-      id: 'c3',
-      campaign_id: 'camp-seed-1',
-      user_id: 'user-1',
-      email: 'matthew.z@hypergrowth.ai',
-      first_name: 'Matthew',
-      last_name: 'Zhang',
-      company: 'HyperGrowth AI',
-      role: 'Growth Lead',
-      status: 'sending',
-      sent_at: null,
-      created_at: '2026-09-22T12:00:00.000Z',
-      updated_at: '2026-09-22T12:16:00.000Z',
-    },
-    {
-      id: 'c4',
-      campaign_id: 'camp-seed-1',
-      user_id: 'user-1',
-      email: 'claire.morris@apexcloud.dev',
-      first_name: 'Claire',
-      last_name: 'Morris',
-      company: 'Apex Cloud',
-      role: 'Founder',
-      status: 'pending',
-      sent_at: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ]);
-
-  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(campaigns[0]);
+  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [isRedisConnected, setIsRedisConnected] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>('marketer@articleapply.io');
-  const [userName, setUserName] = useState<string | null>('Alex Outreach');
+  const [userEmail, setUserEmail] = useState<string | null>('outreach@artiapply.io');
+  const [userName, setUserName] = useState<string | null>('Workspace Manager');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -192,6 +93,34 @@ export default function Home() {
       if (storedEmail) setUserEmail(storedEmail);
       if (storedName) setUserName(storedName);
 
+      try {
+        const storedSmtp = localStorage.getItem('artiapply_smtp_config');
+        if (storedSmtp) {
+          const parsed = JSON.parse(storedSmtp);
+          if (parsed.fromEmail && !storedEmail) setUserEmail(parsed.fromEmail);
+          if (parsed.fromName && !storedName) setUserName(parsed.fromName);
+        }
+      } catch {}
+
+      // Load saved campaigns and contacts from localStorage
+      try {
+        const savedCamps = localStorage.getItem('artiapply_campaigns');
+        if (savedCamps) {
+          const parsed = JSON.parse(savedCamps);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCampaigns(parsed);
+            setActiveCampaign(parsed[0]);
+          }
+        }
+        const savedContacts = localStorage.getItem('artiapply_contacts');
+        if (savedContacts) {
+          const parsed = JSON.parse(savedContacts);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setContacts(parsed);
+          }
+        }
+      } catch {}
+
       const params = new URLSearchParams(window.location.search);
       const authSuccess = params.get('auth_success');
       const authNotice = params.get('auth_notice');
@@ -214,8 +143,8 @@ export default function Home() {
         setIsLoggedIn(false);
       }
 
-      if (authNotice === 'demo_mode') {
-        showToast('Demo Mode Active: Set GOOGLE_CLIENT_ID & SECRET in .env.local for live Gmail sending.');
+      if (authNotice === 'google_setup_required') {
+        showToast('Google OAuth is not configured yet. You can use Direct SMTP in Settings to send immediately.');
         window.history.replaceState({}, '', window.location.pathname);
       }
 
@@ -234,6 +163,9 @@ export default function Home() {
           if (data.campaigns && data.campaigns.length > 0) {
             setCampaigns(data.campaigns);
             setActiveCampaign(data.campaigns[0]);
+            try {
+              localStorage.setItem('artiapply_campaigns', JSON.stringify(data.campaigns));
+            } catch {}
           }
         })
         .catch(() => {});
@@ -266,12 +198,24 @@ export default function Home() {
       updated_at: new Date().toISOString(),
     };
 
-    setCampaigns((prev) => [newCamp, ...prev]);
+    setCampaigns((prev) => {
+      const updated = [newCamp, ...prev.filter((c) => c.id !== newCamp.id)];
+      try {
+        localStorage.setItem('artiapply_campaigns', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     setActiveCampaign(newCamp);
 
-    // If new contacts returned, prepend them
+    // If new contacts returned, prepend them and persist
     if (data.contacts && Array.isArray(data.contacts)) {
-      setContacts((prev) => [...data.contacts, ...prev]);
+      setContacts((prev) => {
+        const updated = [...data.contacts, ...prev];
+        try {
+          localStorage.setItem('artiapply_contacts', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
     }
 
     // Switch to dashboard so user can watch the live queue
@@ -394,10 +338,23 @@ export default function Home() {
   };
 
   const handleDeleteCampaign = (id: string) => {
-    setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    setCampaigns((prev) => {
+      const updated = prev.filter((c) => c.id !== id);
+      try {
+        localStorage.setItem('artiapply_campaigns', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     if (activeCampaign?.id === id) {
       setActiveCampaign(campaigns.find((c) => c.id !== id) || null);
     }
+    // Delete in database if Supabase configured
+    fetch('/api/campaigns', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    }).catch(() => {});
+    showToast('Campaign removed.');
   };
 
   const handleOpenFollowUp = (camp: Campaign) => {
@@ -498,17 +455,33 @@ export default function Home() {
             <SimpleContactsList
               contacts={contacts}
               onUpdateContact={(updated) => {
-                setContacts((prev) =>
-                  prev.map((c) => (c.id === updated.id || c.email === updated.email ? updated : c))
-                );
+                setContacts((prev) => {
+                  const next = prev.map((c) => (c.id === updated.id || c.email === updated.email ? updated : c));
+                  try {
+                    localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+                  } catch {}
+                  return next;
+                });
                 showToast(`Contact updated successfully.`);
               }}
               onDeleteContact={(id) => {
-                setContacts((prev) => prev.filter((c) => c.id !== id));
+                setContacts((prev) => {
+                  const next = prev.filter((c) => c.id !== id);
+                  try {
+                    localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+                  } catch {}
+                  return next;
+                });
                 showToast(`Contact deleted.`);
               }}
               onAddContact={(newContact) => {
-                setContacts((prev) => [newContact, ...prev]);
+                setContacts((prev) => {
+                  const next = [newContact, ...prev];
+                  try {
+                    localStorage.setItem('artiapply_contacts', JSON.stringify(next));
+                  } catch {}
+                  return next;
+                });
                 showToast(`Contact added to platform.`);
               }}
               onNewCampaign={() => setActiveTab('builder')}
