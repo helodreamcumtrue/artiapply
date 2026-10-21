@@ -66,7 +66,7 @@ function UnsubscribeContent() {
               Unsubscribed Successfully
             </h1>
             <p className="text-xs text-slate-600 leading-relaxed">
-              <strong className="text-slate-900">{email}</strong> has been permanently removed from this sender’s cold outreach campaigns. You will receive no further emails.
+              <strong className="text-slate-900">{email}</strong> has been permanently removed from this sender’s campaigns and registered in our global suppression list. You will receive no further emails.
             </p>
             <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-500">
               Powered by ArticlO Compliance Engine (CAN-SPAM & GDPR)
@@ -76,7 +76,7 @@ function UnsubscribeContent() {
           <form onSubmit={handleUnsubscribe} className="space-y-4">
             <div>
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                Opt-Out of Outreach
+                Opt-Out of Campaigns
               </h1>
               <p className="text-xs text-slate-600 mt-1">
                 Please confirm your email address below to unsubscribe from this sequence.

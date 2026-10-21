@@ -77,14 +77,14 @@ export const SampleCsvModal: React.FC<SampleCsvModalProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-lg font-bold text-slate-900 font-poppins">
-                  Articleship HR Contacts & CSV Templates
+                  Sample CSV Formatting Templates
                 </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
-                  4 Curated Tiers
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+                  Formatting Guides
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Choose from 4 tiers of CA firms with active HR recruiter mail IDs and ATS-ready formatting.
+                Download or inspect example CSV column layouts to format your own recruiter and employer contact lists.
               </p>
             </div>
           </div>
@@ -126,7 +126,7 @@ export const SampleCsvModal: React.FC<SampleCsvModalProps> = ({
                       {cat.shortName}
                     </h4>
                     <span className="text-[10px] text-slate-500 block truncate">
-                      {cat.contacts.length} HR Recruiter Leads
+                      {cat.contacts.length} Example Rows
                     </span>
                   </div>
                 </button>
@@ -144,14 +144,14 @@ export const SampleCsvModal: React.FC<SampleCsvModalProps> = ({
                   {currentCategoryInfo.name}
                 </span>
                 <span className="text-[10px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200">
-                  {currentCategoryInfo.contacts.length} Verified Contacts
+                  {currentCategoryInfo.contacts.length} Demo Rows
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 max-w-xl leading-relaxed">
                 {currentCategoryInfo.description}
               </p>
               <div className="text-[11px] text-slate-500 pt-1">
-                <strong>Featured Firms:</strong> {currentCategoryInfo.highlightFirms}
+                <strong>Practice Focus:</strong> {currentCategoryInfo.highlightFirms}
               </div>
             </div>
 
@@ -181,10 +181,10 @@ export const SampleCsvModal: React.FC<SampleCsvModalProps> = ({
         <div className="p-5 sm:p-6 pt-2 flex-1 overflow-y-auto space-y-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">
-              Recruiter Mail IDs Preview ({currentCategoryInfo.contacts.length} entries)
+              Template Preview ({currentCategoryInfo.contacts.length} example entries)
             </span>
             <span className="text-[11px] text-slate-400">
-              CSV file: <code className="font-mono text-slate-700">{currentCategoryInfo.filename}</code>
+              Template file: <code className="font-mono text-slate-700">{currentCategoryInfo.filename}</code>
             </span>
           </div>
 
@@ -196,7 +196,7 @@ export const SampleCsvModal: React.FC<SampleCsvModalProps> = ({
                     <th className="px-3.5 py-2">first_name</th>
                     <th className="px-3.5 py-2">last_name</th>
                     <th className="px-3.5 py-2">email</th>
-                    <th className="px-3.5 py-2">company (Firm)</th>
+                    <th className="px-3.5 py-2">company</th>
                     <th className="px-3.5 py-2">role</th>
                     <th className="px-3.5 py-2">location</th>
                   </tr>
@@ -220,10 +220,10 @@ export const SampleCsvModal: React.FC<SampleCsvModalProps> = ({
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-100 text-[11px] text-emerald-800 flex items-center space-x-2">
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>
-              All email addresses are structured to resolve directly to partner and campus hiring recruitment desks without bounce penalties.
+              <strong>Compliance Notice:</strong> ArticlO does not provide scraped leads. These templates use reserved example domains to show how to format your own recruiter lists.
             </span>
           </div>
         </div>

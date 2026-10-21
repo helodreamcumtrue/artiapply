@@ -73,22 +73,38 @@ export default function TermsOfService() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-slate-900">2. Description of Service</h2>
             <p>
-              ArticlO provides an automated cold email outreach solution that connects directly to authenticated Google Workspace and Gmail accounts via official Google APIs. Features include campaign scheduling, rate-limiting (2 emails/second), contact list management, AI-assisted template copywriting powered by Google Gemini, and real-time delivery telemetry.
+              ArticlO provides a job application and career correspondence platform that enables job seekers and students (including Chartered Accountant articleship candidates) to organize, format, and dispatch legitimate job application materials through their own authenticated email accounts (including Gmail via official Google OAuth APIs). Features include application scheduling, quota-compliant rate-limiting (2 emails/second), recipient formatting tools, AI-assisted cover letter enhancement powered by Google Gemini, and real-time delivery telemetry.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">3. Acceptable Use Policy</h2>
+            <h2 className="text-xl font-bold text-slate-900">3. Acceptable Use Policy & Google API Compliance</h2>
             <p>You agree NOT to use ArticlO to:</p>
             <ul className="list-disc pl-5 space-y-2 text-slate-600">
-              <li>Send emails containing false, misleading, or deceptive sender names, headers, or subject lines.</li>
-              <li>Transmit phishing material, malware, viruses, pyramid schemes, or illegal commercial offers.</li>
-              <li>Circumvent or tamper with opt-out requests or fail to honor unsubscribe submissions.</li>
-              <li>Harass, threaten, or violate the legal rights of any recipient.</li>
-              <li>Exceed or bypass rate limits imposed by the platform or Google API quotas.</li>
+              <li>
+                <strong>Engage in Email Warming:</strong> Email warming services, automated engagement manipulation, simulated inbox interactions (artificial opens, replies, or threads), or warm-up schedules are <strong>strictly prohibited on all Google accounts</strong> and are not supported on ArticlO.
+              </li>
+              <li>
+                <strong>Distribute Unsolicited Bulk Email (Spam):</strong> Transmit unsolicited commercial email, bulk advertising, or commercial solicitations to recipients who have not consented to receive professional communications or with whom you do not have a legitimate professional or employment interest.
+              </li>
+              <li>
+                <strong>Mislead Recipients:</strong> Send emails containing false, misleading, or deceptive sender identities, email headers, or subject lines.
+              </li>
+              <li>
+                <strong>Bypass Opt-Outs:</strong> Circumvent, tamper with, or fail to honor unsubscribe requests. All opt-out requests are permanently recorded in ArticlO’s server-side suppression list and cannot be overridden by new contact uploads or campaign launches.
+              </li>
+              <li>
+                <strong>Transmit Harmful Content:</strong> Transmit phishing material, malware, viruses, fraudulent offers, or illegal commercial schemes.
+              </li>
+              <li>
+                <strong>Bypass Provider Quotas:</strong> Exceed, circumvent, or attempt to bypass rate limits imposed by the platform or Google API quotas.
+              </li>
             </ul>
+            <p className="text-xs text-slate-600">
+              <strong>No Lead Database:</strong> ArticlO does not provide, scrape, sell, or distribute recipient email addresses, recruiter databases, or lead lists. Users are strictly responsible for providing their own verified contact lists.
+            </p>
             <p className="text-xs text-slate-500">
-              Failure to adhere to this Acceptable Use Policy will result in immediate termination of your account without refund.
+              Failure to adhere to this Acceptable Use Policy will result in immediate termination of your account without refund and permanent revocation of API access.
             </p>
           </section>
 

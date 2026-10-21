@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; rounded: 12px;">
         <h2 style="color: #0f172a; margin-top: 0;">ArticlO Email Delivery Test</h2>
         <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-          ${message || 'This is a live test email sent from your ArticlO cold email platform.'}
+          ${message || 'This is a live test email sent from your ArticlO application platform.'}
         </p>
         <div style="margin-top: 20px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 12px; color: #64748b;">
           <strong>Sent At:</strong> ${new Date().toISOString()}<br/>
-          <strong>Platform:</strong> ArticlO Article & Cold Email Engine
+          <strong>Platform:</strong> ArticlO Application Delivery Engine
         </div>
       </div>
     `;

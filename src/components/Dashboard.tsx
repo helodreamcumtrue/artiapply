@@ -81,7 +81,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
-            Automating spam-safe cold outreach directly through your verified email account.
+            Sending professional applications directly through your verified email account.
           </p>
         </div>
 
@@ -294,9 +294,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="w-2 h-2 rounded-full bg-[#d4f933] animate-pulse" />
               <span>Workspace Ready</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold font-poppins text-white">Ready to Launch Your Outreach</h3>
+            <h3 className="text-xl sm:text-2xl font-bold font-poppins text-white">Ready to Launch Your Applications</h3>
             <p className="text-xs text-slate-300 max-w-lg leading-relaxed">
-              Create your cold email sequence with Google Gemini AI copywriting, strict 2 emails/sec rate limiting, and zero spam flags.
+              Create your application sequence with Google Gemini AI cover letter crafting, strict 2 emails/sec rate limiting, and authentic delivery.
             </p>
           </div>
           <button
@@ -321,7 +321,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <h3 className="font-bold text-slate-900 text-base font-poppins">Campaigns Overview</h3>
-              <p className="text-xs text-slate-400">Outbound cold email sequences</p>
+              <p className="text-xs text-slate-400">Application email sequences</p>
             </div>
             <button
               onClick={onNewCampaign}

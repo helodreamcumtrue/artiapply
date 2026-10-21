@@ -89,24 +89,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   const faqs = [
     {
-      q: 'How does ArticlO guarantee cold emails land in the Primary inbox?',
-      a: 'Unlike bulk marketing tools (Mailchimp, Brevo) that route emails through shared, often flagged relay IPs, ArticlO dispatches emails directly through your authenticated Google Workspace or Gmail account. Combined with our strict 2 emails/sec human-cadence rate limiter, spam filters identify your messages as authentic 1-to-1 conversations.',
+      q: 'How does ArticlO ensure reliable email delivery for applications?',
+      a: 'ArticlO sends emails directly through your own authenticated Gmail account using official Google APIs rather than generic shared relays. With rate-limiting (2 emails/second) and individual addressing, your applications are sent cleanly and respect provider quota limits without triggering automated rate throttles.',
     },
     {
       q: 'Do I need developer credentials or a Google Cloud Console setup?',
-      a: 'No! You can start in 60 seconds using a standard 16-character Gmail App Password. It works with personal @gmail.com accounts and custom Google Workspace domains without any developer account or API approvals.',
+      a: 'No! You can connect easily using official Google OAuth or a standard 16-character Gmail App Password. It works with personal @gmail.com accounts and custom Google Workspace domains without complex configuration.',
     },
     {
       q: 'Why does ArticlO enforce a 2 emails/second rate limiter?',
-      a: 'Blasting 100 emails in a single second is the #1 trigger for Google and Outlook algorithms to greylist or spam-flag your domain. By enforcing a natural 2-second gap between recipients, ArticlO simulates human sending velocity, keeping your domain warm and clean.',
+      a: 'Sending too many emails simultaneously can breach email provider rate limits and cause transient quota errors. By pacing dispatches at a controlled rate (2 seconds between messages), ArticlO stays well within standard Gmail API quotas and protects your account reputation.',
     },
     {
-      q: 'Can I attach PDFs, pitch decks, and images to my campaigns?',
-      a: 'Yes! You can attach files up to 8MB (PDFs, Word documents, pitch decks, screenshots). All attachments are safely encoded into RFC-compliant base64 email streams that deliver cleanly without triggering firewall spam filters.',
+      q: 'Can I attach resumes, portfolios, and cover letters to my applications?',
+      a: 'Yes! You can attach files up to 8MB (PDFs, Word documents, portfolios). All attachments are safely encoded into RFC-compliant base64 email streams that deliver cleanly to recruiters and hiring teams.',
     },
     {
-      q: 'How does the automated follow-up sequence work?',
-      a: 'You can launch smart follow-up sequences (such as Gentle Bump, Value Add, or Breakup) with one click. When a prospect replies to your email, the sequence automatically pauses for that recipient so they are never awkwardly followed up with.',
+      q: 'Does ArticlO support email warming or lead scraping?',
+      a: 'No. In strict compliance with Google API User Data Policy and Anti-Spam regulations, ArticlO strictly prohibits email warming, automated engagement simulation, and unsolicited bulk spam on Google accounts. Users must supply their own verified contacts and legitimate application materials.',
     },
   ];
 
@@ -164,7 +164,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Executive Badge */}
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs font-semibold shadow-sm mb-1">
               <span className="w-2 h-2 rounded-full bg-[#d4f933] animate-pulse" />
-              <span>Next-Gen Outreach Engine • Powered by Gmail API & AI</span>
+              <span>Application Delivery Platform • Powered by Gmail API & AI</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-poppins text-white leading-[1.15] drop-shadow-sm">
@@ -172,13 +172,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 max-w-3xl mx-auto pt-3 pb-1">
               <div className="flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:bg-white/20">
-                <span>📬 Reach out to hundreds of HR in a click</span>
+                <span>📬 Streamlined articleship application dispatch</span>
               </div>
               <div className="flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:bg-white/20">
-                <span>📜 Get ATS free resume templates</span>
+                <span>📜 Professional ATS-friendly resume templates</span>
               </div>
               <div className="flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:bg-white/20">
-                <span>✉️ Get active mail IDs of HR</span>
+                <span>✉️ Clean CSV templates for your verified contacts</span>
               </div>
             </div>
 
@@ -292,13 +292,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div>
                   <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-[#d4f933]/15 text-[#d4f933] text-[10px] font-bold mb-3">
                     <span className="w-2 h-2 rounded-full bg-[#d4f933] inline-block animate-pulse" />
-                    <span>Outreach Engine</span>
+                    <span>Application Engine</span>
                   </div>
                   <h3 className="text-sm sm:text-base font-extrabold text-slate-100 leading-snug">
                     Authentic 1-to-1 Dispatch with Strict Cadence Throttling
                   </h3>
                   <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">
-                    Personalized cold outreach sent directly via your Google Workspace account.
+                    Personalized application emails sent directly via your authenticated Gmail account.
                   </p>
                 </div>
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
@@ -313,7 +313,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               >
                 <div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Pacing Cadence</div>
-                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">Human-Simulated Velocity</div>
+                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">Safe Quota Rate-Limiting</div>
                   
                   {/* Visual Spline Curve Graphic */}
                   <div className="mt-3 h-20 relative flex items-end">
@@ -461,7 +461,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div className="pt-4 border-t border-slate-100">
                 <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  &ldquo;Sending via direct Gmail API credentials with 500ms pacing simulates authentic 1-to-1 human behavior and keeps domains warm permanently.&rdquo;
+                  &ldquo;Sending applications via authenticated Gmail credentials with safe rate-limiting ensures clean delivery while respecting provider API quota limits.&rdquo;
                 </p>
               </div>
             </div>
@@ -712,14 +712,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
                         <span className="w-2 h-2 rounded-full bg-sky-600" />
-                        <span>Touchpoint 1: Initial Cold Pitch</span>
+                        <span>Touchpoint 1: Initial Application & Resume</span>
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Dispatched
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 line-clamp-2">
-                      Hi &#123;&#123;first_name&#125;&#125;, loved your recent launch at &#123;&#123;company&#125;&#125;...
+                      Dear &#123;&#123;first_name&#125;&#125;, I recently cleared CA Intermediate in my first attempt and am seeking an Articleship opportunity in Statutory Audit at &#123;&#123;company&#125;&#125;...
                     </p>
                   </div>
 
@@ -727,14 +727,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-sky-950 flex items-center space-x-1.5">
                         <span className="w-2 h-2 rounded-full bg-[#d4f933]" />
-                        <span>Touchpoint 2: Quick Gentle Bump (3 Days Later)</span>
+                        <span>Touchpoint 2: Polite Application Follow-Up (5 Days Later)</span>
                       </span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
                         Scheduled
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 line-clamp-2">
-                      Hi &#123;&#123;first_name&#125;&#125;, following up briefly in case my last email got buried. Open to a 5-min intro?
+                      Dear &#123;&#123;first_name&#125;&#125;, following up respectfully regarding my articleship application submitted last week for your kind consideration.
                     </p>
                   </div>
                 </div>
@@ -779,6 +779,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
             ))}
           </div>
+
+          {/* Official Google API Policy & Anti-Spam Compliance Badge */}
+          <div className="mt-12 p-6 rounded-2xl bg-white border border-slate-200 shadow-sm text-left max-w-3xl mx-auto">
+            <div className="flex items-start space-x-3.5">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                <IconShieldVerified size={20} className="text-blue-600" />
+              </div>
+              <div className="space-y-1.5 text-xs text-slate-600 leading-relaxed">
+                <div className="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                  <span>Google API User Data Policy &amp; Anti-Spam Compliance</span>
+                </div>
+                <p>
+                  ArticlO strictly adheres to the <strong>Google API Services User Data Policy</strong>, including the Limited Use requirements. ArticlO does not provide, facilitate, or support <strong>email warming services</strong>, automated inbox engagement manipulation, or unsolicited commercial email distribution.
+                </p>
+                <p>
+                  ArticlO does not provide scraped lead databases or email lists. Users must supply their own verified contacts with legitimate professional or employment interest. Recipient opt-out requests are permanently honored via our server-side suppression registry.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -793,11 +813,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 space-y-6">
           <h2 className="text-3xl sm:text-5xl font-black font-poppins tracking-tight text-white leading-tight">
-            Ready to guarantee your cold emails <br />
-            land in the Primary inbox?
+            Ready to streamline your articleship <br />
+            and career applications?
           </h2>
           <p className="text-sm sm:text-base text-white/90 max-w-xl mx-auto leading-relaxed">
-            Join thousands of sales teams scaling authentic Google Workspace outreach with 99.4% deliverability.
+            Join CA aspirants and job seekers sending verified, professional application sequences with authentic Gmail delivery.
           </p>
 
           <div className="pt-2">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin';
+import { recordUnsubscribe } from '@/lib/suppression/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Unsubscribe API] Opt-out request received for: ${email}`);
+
+    // Permanently record in server-side suppression registry (Memory, Redis, file, DB)
+    await recordUnsubscribe(email, {
+      contactId: id,
+      ip: request.headers.get('x-forwarded-for') || undefined,
+      userAgent: request.headers.get('user-agent') || undefined,
+    });
 
     if (isAdminConfigured()) {
       // Mark contact by ID or email

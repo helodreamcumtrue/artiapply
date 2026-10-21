@@ -588,7 +588,7 @@ REDIS_URL=redis://localhost:6379`;
                       className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1"
                     >
                       <HelpCircle className="w-3 h-3" />
-                      <span>Warmup Guide</span>
+                      <span>Sending Volume Guide</span>
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -608,7 +608,7 @@ REDIS_URL=redis://localhost:6379`;
                     ))}
                   </div>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
-                    Recommended: 100/day to maintain warm domain score & prevent spam flags.
+                    Recommended: 100/day to stay within provider daily quotas & prevent rate-limiting.
                   </span>
                 </div>
 
@@ -738,16 +738,16 @@ REDIS_URL=redis://localhost:6379`;
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white text-xs font-poppins">
-                    Need Sample Leads?
+                    Need a Sample CSV?
                   </h4>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                    50 sample B2B leads template
+                    Sample CSV formatting templates
                   </span>
                 </div>
               </div>
 
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                Test campaigns immediately with formatted CSV rows including first names, roles, and verified companies.
+                Download example CSV templates to ensure your own recipient contact lists have the required column headers.
               </p>
 
               <button
@@ -907,14 +907,14 @@ REDIS_URL=redis://localhost:6379`;
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-full border border-indigo-200/60 dark:border-indigo-800/60">
                   {activeGuide === 'app_password' && '60-Second Setup Guide'}
-                  {activeGuide === 'daily_limits' && 'Deliverability & Warmup Guide'}
+                  {activeGuide === 'daily_limits' && 'Sending Quotas & Best Practices'}
                   {activeGuide === 'anti_spam' && 'Anti-Spam Safeguards'}
                   {activeGuide === 'oauth_vs_password' && 'Method Comparison'}
                   {activeGuide === 'custom_smtp' && 'SMTP Configuration'}
                 </span>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-2 font-poppins">
                   {activeGuide === 'app_password' && 'How to Get a Gmail App Password'}
-                  {activeGuide === 'daily_limits' && 'Safe Daily Sending Limits & Warmup'}
+                  {activeGuide === 'daily_limits' && 'Safe Daily Sending Quotas'}
                   {activeGuide === 'anti_spam' && 'Why ArticlO Throttles Email Sends'}
                   {activeGuide === 'oauth_vs_password' && 'Google OAuth vs. App Password'}
                   {activeGuide === 'custom_smtp' && 'Custom SMTP Server & Port Settings'}
@@ -1015,36 +1015,40 @@ REDIS_URL=redis://localhost:6379`;
                 </>
               )}
 
-              {/* GUIDE 2: Daily Limits & Warmup */}
+              {/* GUIDE 2: Daily Sending Quotas */}
               {activeGuide === 'daily_limits' && (
                 <>
-                  <div className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/80 text-amber-900 dark:text-amber-200 leading-relaxed">
-                    <strong>Why do daily limits exist?</strong> Email service providers (Google, Microsoft, Yahoo) monitor send volumes to identify spam bots. Gradually increasing your volume protects your domain reputation and keeps your emails out of the Spam folder.
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <strong>Why do daily limits exist?</strong> Email service providers (Google, Microsoft) enforce daily sending quotas. Pacing your communications protects your sender reputation and ensures reliable delivery.
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-[11px] leading-relaxed">
+                    <strong>Google API Policy Notice:</strong> Email warming services, simulated email exchanges, and automated inbox engagement manipulation are strictly prohibited on Google accounts. ArticlO does not provide or permit email warming.
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="font-bold text-slate-900 dark:text-white">Recommended Warmup Schedule:</h4>
+                    <h4 className="font-bold text-slate-900 dark:text-white">Recommended Daily Sending Volumes:</h4>
                     <div className="space-y-2">
                       <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-slate-900 dark:text-white">Fresh / New Email (&lt; 2 weeks old)</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">Establish initial good sender history</p>
+                          <p className="font-bold text-slate-900 dark:text-white">New Email Account (&lt; 2 weeks old)</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">Conservative initial volume to avoid provider throttling</p>
                         </div>
                         <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-sm">30–50 / day</span>
                       </div>
 
                       <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-slate-900 dark:text-white">Active / Warmed Account (2–4 weeks)</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">Recommended standard for optimal balance</p>
+                          <p className="font-bold text-slate-900 dark:text-white">Standard Account (2–4 weeks)</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">Recommended standard for job and articleship outreach</p>
                         </div>
                         <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">100 / day</span>
                       </div>
 
                       <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-slate-900 dark:text-white">Seasoned / High Volume (1+ months)</p>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">High reputation with positive reply ratios</p>
+                          <p className="font-bold text-slate-900 dark:text-white">Established Account (1+ months)</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">Standard daily limit for high-volume recruitment cycles</p>
                         </div>
                         <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-sm">200–500 / day</span>
                       </div>
@@ -1055,8 +1059,8 @@ REDIS_URL=redis://localhost:6379`;
                     <p className="font-bold text-slate-800 dark:text-slate-200">Deliverability Golden Rules:</p>
                     <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-400">
                       <li>Use dynamic personalization variables like <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded font-mono">&#123;&#123;first_name&#125;&#125;</code> and <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded font-mono">&#123;&#123;company&#125;&#125;</code>.</li>
-                      <li>Never send to unverified email lists with bounce rates above 2%.</li>
-                      <li>Keep the automated 2-second rate limiter enabled.</li>
+                      <li>Only contact verified recruiter or corporate email addresses where you have legitimate inquiry.</li>
+                      <li>Keep the automated 2-second rate limiter enabled to stay well within provider velocity rules.</li>
                     </ul>
                   </div>
                 </>
@@ -1066,16 +1070,16 @@ REDIS_URL=redis://localhost:6379`;
               {activeGuide === 'anti_spam' && (
                 <>
                   <div className="p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/80 text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                    <strong>Algorithmic Protection:</strong> ArticlO enforces an intentional 2-second pause between each recipient. This guarantees your cold emails arrive in the Primary inbox rather than Promotions or Spam.
+                    <strong>Cadence &amp; Quota Protection:</strong> ArticlO enforces an intentional 2-second pause between each recipient. This ensures your applications stay safely within provider rate limits and arrive cleanly without transient API errors.
                   </div>
 
                   <div className="space-y-2.5">
                     <h4 className="font-bold text-slate-900 dark:text-white">Why simultaneous blasting hurts you:</h4>
                     <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                      When a script or app sends 100 emails in 1 second, recipient mail exchangers (Gmail MX, Microsoft Office 365) detect an unnatural spike and immediately trigger "Rate-Limited: Greylisted" or route your message directly into Spam.
+                      When an app sends dozens of emails simultaneously, recipient mail servers detect an unnatural spike and trigger rate limits or quota throttles.
                     </p>
                     <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                      By spacing out sends at human velocity, your account looks 100% natural and enjoys delivery rates exceeding <strong>98%+</strong>.
+                      By pacing dispatches at a controlled rate, your account stays safely within provider sending quotas and avoids automated delivery blocks.
                     </p>
                   </div>
 

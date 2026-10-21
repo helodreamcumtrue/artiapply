@@ -15,11 +15,11 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       // High-quality smart fallback generator if API key is not yet set
       const fallbackSubjects = [
-        `Quick idea for {{company}}'s outreach strategy`,
-        `Hi {{first_name}}, loved your recent work at {{company}}`,
-        `Scaling cold outreach for {{company}} (quick question)`,
+        `Application for CA Articleship - Statutory Audit | {{first_name}} {{last_name}}`,
+        `Application for Articleship Opportunity at {{company}}`,
+        `CA Intermediate Qualified - Seeking Articleship in Audit & Assurance`,
       ];
-      const fallbackBody = `Hi {{first_name}},\n\nI noticed the impressive milestones {{company}} has reached lately. In leading your team as {{role}}, I imagine optimizing outreach deliverability and engagement remains top of mind.\n\nWe built ArticlO to help high-growth teams automate personalized cold outreach through Gmail with built-in rate-limiting (2 emails/sec) to keep your domain 100% spam-free.\n\nWould you be open to a 5-minute chat this Thursday to see how this could save your team 10+ hours a week?\n\nBest regards,\n[Your Name]`;
+      const fallbackBody = `Dear {{first_name}},\n\nI hope you are doing well.\n\nI recently cleared the CA Intermediate examination in my first attempt and am seeking an Articleship opportunity in the Statutory Audit practice at {{company}}.\n\nPlease find my resume attached for your kind consideration. I would be grateful if you could consider my application for a suitable Articleship opportunity. I am eager to learn, contribute, and adhere to the highest professional standards of {{company}}.\n\nThank you for your time and consideration.\n\nWarm regards,\n[Your Name]`;
 
       return NextResponse.json({
         subjects: fallbackSubjects,
@@ -33,15 +33,15 @@ export async function POST(request: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    const systemInstruction = `You are an elite B2B cold email copywriter and outreach strategist.
-Your task is to write high-converting, personalized cold email templates for sales outreach.
+    const systemInstruction = `You are an expert career application coach and professional correspondence writer.
+Your task is to write polished, respectful, and effective job and articleship application cover letters.
 CRITICAL RULES:
 1. Preserve variable placeholders exactly as written: {{first_name}}, {{last_name}}, {{company}}, {{role}}, or any other {{variables}}.
-2. The tone should match: ${tone} (e.g., persuasive, executive concise, casual and warm, or direct value-driven).
+2. The tone should match: ${tone} (e.g., professional, concise, respectful, or value-driven).
 3. Target Audience: ${targetAudience}.
-4. Keep the body concise (under 120 words), punchy, with a single clear call-to-action (CTA).
+4. Keep the body concise (under 150 words), professional, with a polite request for interview or consideration.
 5. Output format must be valid JSON with two fields:
-   - "subjects": an array of 3 distinct, high-open-rate subject lines (can use {{first_name}} or {{company}}).
+   - "subjects": an array of 3 distinct, professional subject lines (can use {{company}} or {{role}}).
    - "body": the enhanced email body template.`;
 
     const userPrompt = `
@@ -92,10 +92,10 @@ Please return ONLY raw JSON matching:
   } catch (error: any) {
     console.error('[API /api/ai/enhance] Error:', error);
     const errorSubjects = [
-      `Quick question regarding {{company}}`,
-      `Idea for {{first_name}} at {{company}}`,
+      `Application for CA Articleship - Statutory Audit | {{first_name}}`,
+      `Application for Articleship Opportunity at {{company}}`,
     ];
-    const errorBody = `Hi {{first_name}},\n\nReaching out because I've been following {{company}}'s recent growth. As {{role}}, would you be open to a quick 5-min intro on automating your cold outreach with zero spam flags?\n\nBest,\n[Your Name]`;
+    const errorBody = `Dear {{first_name}},\n\nI hope you are doing well.\n\nI recently cleared CA Intermediate in my first attempt and am seeking an Articleship opportunity in Statutory Audit at {{company}}.\n\nPlease find my resume attached for your kind consideration.\n\nWarm regards,\n[Your Name]`;
     return NextResponse.json(
       {
         error: error.message || 'Failed to enhance email with Gemini AI',

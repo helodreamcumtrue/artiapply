@@ -10,9 +10,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'ArticlO | Your Articleship Hunt Ends Here • Reach Hundreds of HRs in a Click',
-  description: 'Reach out to hundreds of HR in a click. Get ATS-free resume templates and active mail IDs of HR for CA articleship outreach with authentic Gmail delivery and AI.',
-  keywords: ['CA articleship', 'articleship outreach', 'HR email list', 'ATS resume templates', 'Chartered Accountant articleship', 'cold email', 'Gmail API', 'ArticlO'],
+  title: 'ArticlO | Articleship & Career Application Platform for CA Aspirants',
+  description: 'Streamline your CA articleship and job applications with professional ATS-friendly resume formatting, AI-assisted cover letters, and authentic Gmail dispatch to your verified professional contacts.',
+  keywords: ['CA articleship', 'articleship application', 'ATS resume templates', 'Chartered Accountant articleship', 'career applications', 'Gmail API', 'ArticlO'],
   authors: [{ name: 'ArticlO Team' }],
   icons: {
     icon: '/logo.svg',

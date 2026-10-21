@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dispatchRealEmail } from '@/lib/email/dispatcher';
 import { formatEmailSubject, formatEmailBody } from '@/lib/gmail/service';
 import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin';
+import { isSuppressed } from '@/lib/suppression/service';
+import { validateWarmingPolicy } from '@/lib/compliance/policyGuard';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { contact, subject, bodyTemplate, senderName, senderEmail, smtpConfig, campaignId, attachments, isFollowUp } = body;
+    const { contact, subject, bodyTemplate, senderName, senderEmail, smtpConfig, campaignId, attachments, isFollowUp, purpose } = body;
 
     if (!contact || !contact.email) {
       return NextResponse.json(
@@ -18,6 +20,35 @@ export async function POST(request: NextRequest) {
     if (!subject || !bodyTemplate) {
       return NextResponse.json(
         { error: 'Subject and body template are required.' },
+        { status: 400 }
+      );
+    }
+
+    // 0a. Compliance Policy: Block any email warming requests
+    const warmingCheck = validateWarmingPolicy({
+      purpose,
+      fromEmail: senderEmail || smtpConfig?.fromEmail || smtpConfig?.user,
+      smtpHost: smtpConfig?.host,
+    });
+
+    if (!warmingCheck.allowed) {
+      return NextResponse.json(
+        { error: warmingCheck.error || 'Email warming is strictly prohibited on Google accounts.' },
+        { status: 403 }
+      );
+    }
+
+    // 0b. Suppression List Check: Never send to unsubscribed recipients
+    const recipientSuppressed = await isSuppressed(contact.email);
+    if (recipientSuppressed) {
+      console.warn(`[SendDirect] Blocked send to suppressed recipient: ${contact.email}`);
+      return NextResponse.json(
+        {
+          success: false,
+          skipped: true,
+          error: `Recipient ${contact.email} has unsubscribed and cannot be emailed.`,
+          status: 'failed',
+        },
         { status: 400 }
       );
     }

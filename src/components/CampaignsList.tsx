@@ -51,7 +51,7 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Campaigns</h1>
           <p className="text-xs text-slate-600 mt-1">
-            Manage your cold email sequences, delivery metrics, and active queues
+            Manage your application sequences, delivery metrics, and active queues
           </p>
         </div>
         <button

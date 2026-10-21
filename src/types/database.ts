@@ -80,6 +80,8 @@ export interface EmailJobData {
   attachments?: EmailAttachment[];
   isFollowUp?: boolean;
   followUpStep?: number;
+  purpose?: 'user_initiated_outreach' | 'warming' | string;
+  consentConfirmed?: boolean;
   contactData: {
     first_name?: string | null;
     last_name?: string | null;

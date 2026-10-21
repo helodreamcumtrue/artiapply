@@ -4,6 +4,8 @@ import { EmailJobData } from '@/types/database';
 import { supabaseAdmin, isAdminConfigured } from '../supabase/admin';
 import { formatEmailSubject, formatEmailBody } from '../gmail/service';
 import { dispatchRealEmail } from '../email/dispatcher';
+import { isSuppressed } from '../suppression/service';
+import { validateWarmingPolicy } from '../compliance/policyGuard';
 
 let emailWorker: Worker<EmailJobData> | null = null;
 
@@ -17,8 +19,55 @@ export function initWorker(): Worker<EmailJobData> {
   emailWorker = new Worker<EmailJobData>(
     QUEUE_NAME,
     async (job: Job<EmailJobData>) => {
-      const { campaignId, contactId, userId, to, subject, bodyTemplate, contactData, attachments } = job.data;
+      const { campaignId, contactId, userId, to, subject, bodyTemplate, contactData, attachments, purpose } = job.data;
       console.log(`[Worker] Processing email job ${job.id} for ${to} in campaign ${campaignId}`);
+
+      // 0a. Check warming policy: Reject and safely cancel any warming jobs
+      const warmingCheck = validateWarmingPolicy({
+        purpose,
+        provider: 'gmail_oauth', // Guard Gmail accounts strictly
+      });
+
+      if (!warmingCheck.allowed) {
+        console.warn(`[Worker] Job ${job.id} CANCELLED: Email warming is strictly prohibited on Google accounts.`);
+        if (isAdminConfigured()) {
+          await supabaseAdmin
+            .from('contacts')
+            .update({
+              status: 'failed',
+              error_message: 'Cancelled: Email warming is strictly prohibited for Google accounts.',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', contactId);
+        }
+        return {
+          contactId,
+          to,
+          success: false,
+          error: 'Cancelled: Email warming is prohibited on Google accounts',
+        };
+      }
+
+      // 0b. Server-side suppression list check: Never send to opted-out recipients
+      if (await isSuppressed(to)) {
+        console.warn(`[Worker] Job ${job.id} CANCELLED: Recipient ${to} is on the suppression/opt-out list.`);
+        if (isAdminConfigured()) {
+          await supabaseAdmin
+            .from('contacts')
+            .update({
+              status: 'failed',
+              error_message: 'Recipient unsubscribed',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', contactId);
+        }
+        return {
+          contactId,
+          to,
+          success: false,
+          error: 'Recipient unsubscribed',
+        };
+      }
 
       // 1. Mark contact as 'sending' in Supabase
       if (isAdminConfigured()) {
@@ -75,6 +124,7 @@ export function initWorker(): Worker<EmailJobData> {
         fromEmail: userProfile?.email || undefined,
         attachments,
         googleTokens: userTokens || undefined,
+        purpose: purpose || 'user_initiated_outreach',
       });
 
       if (dispatchResult.provider !== 'unconfigured') {

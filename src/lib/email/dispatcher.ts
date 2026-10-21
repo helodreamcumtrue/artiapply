@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { sendEmail as sendGmailOAuthEmail } from '../gmail/service';
 import { EmailAttachment } from '@/types/database';
+import { validateDispatchCompliance } from '../compliance/policyGuard';
 
 export interface SmtpConfig {
   host?: string;
@@ -28,6 +29,8 @@ export interface SendEmailPayload {
     expiry_date?: number | null;
   };
   userId?: string;
+  purpose?: string;
+  consentConfirmed?: boolean;
 }
 
 /**
@@ -110,12 +113,38 @@ export async function dispatchRealEmail({
   smtpConfig,
   googleTokens,
   userId = '00000000-0000-0000-0000-000000000001',
+  purpose = 'user_initiated_outreach',
+  consentConfirmed = true,
 }: SendEmailPayload): Promise<{ success: boolean; messageId?: string; error?: string; provider: 'smtp' | 'gmail_oauth' | 'unconfigured' }> {
+  // Resolve potential provider
+  const smtp = getActiveSmtpConfig(smtpConfig);
+  const resolvedProvider: 'smtp' | 'gmail_oauth' | 'unconfigured' =
+    smtp && smtp.user && smtp.pass
+      ? 'smtp'
+      : googleTokens?.access_token || googleTokens?.refresh_token
+      ? 'gmail_oauth'
+      : 'unconfigured';
+
+  // Strict server-side compliance check (Warming rejection & suppression list enforcement)
+  const compliance = await validateDispatchCompliance({
+    to,
+    fromEmail: fromEmail || smtp?.fromEmail || smtp?.user,
+    provider: resolvedProvider,
+    smtpHost: smtp?.host,
+    purpose,
+  });
+
+  if (!compliance.allowed) {
+    console.warn(`[EmailDispatcher] Blocked send to ${to}: ${compliance.reason} (Code: ${compliance.code})`);
+    return {
+      success: false,
+      error: compliance.reason || 'Send rejected by compliance policy',
+      provider: resolvedProvider,
+    };
+  }
+
   // Guarantee clean RFC 2822 subject without any HTML tags or newlines
   const cleanSubject = subject.replace(/<[^>]*>/g, '').replace(/[\r\n]+/g, ' ').trim();
-
-  // 1. Check SMTP / Gmail App Password
-  const smtp = getActiveSmtpConfig(smtpConfig);
 
   if (smtp && smtp.user && smtp.pass) {
     try {

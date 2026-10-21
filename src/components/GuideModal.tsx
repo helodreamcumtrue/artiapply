@@ -374,7 +374,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({
                   </div>
                   <h4 className="font-bold text-slate-900 text-sm">Job Application & Portfolio Pitch</h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Designed specifically for cold outreach to hiring managers and engineering leads. Includes attachments for resumes and work portfolios with an easy 10-minute calendar call to action.
+                    Designed specifically for direct applications to hiring managers and recruitment teams. Includes attachments for resumes and work portfolios with a polite interview request.
                   </p>
                 </div>
 
@@ -578,7 +578,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({
                 <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-1">
                   <h4 className="font-bold text-slate-900 text-xs">Why does ArticlO use a 2 emails/sec rate limit?</h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Blasting 100 emails simultaneously is the #1 reason cold outbound accounts get flagged by Google and Microsoft algorithms. By pacing dispatches at 2 emails/second via BullMQ, every email looks like authentic human activity.
+                    Sending emails simultaneously in bulk is the #1 reason outbound accounts trigger provider rate limits. By pacing dispatches at 2 emails/second via BullMQ, every email respects provider quota thresholds and delivers reliably.
                   </p>
                 </div>
 
@@ -597,7 +597,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({
         {/* Modal Footer */}
         <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between">
           <span className="text-xs text-slate-500 font-medium">
-            ArticlO Outreach Engine • Deliverability Guaranteed
+            ArticlO Application Engine • Authentic Gmail Delivery
           </span>
           <button
             onClick={onClose}

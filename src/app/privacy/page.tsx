@@ -69,77 +69,108 @@ export default function PrivacyPolicy() {
             , including the Limited Use requirements.
           </p>
           <p className="text-xs text-slate-600 leading-relaxed">
-            We specifically request access to <code className="text-slate-900 font-mono font-semibold">https://www.googleapis.com/auth/gmail.send</code> solely to transmit cold outreach emails explicitly authored and approved by you within your campaign schedules. We <strong>never</strong> read your personal emails, sell your data, or use your Gmail data to train generalized AI models.
+            We specifically request access to <code className="text-slate-900 font-mono font-semibold">https://www.googleapis.com/auth/gmail.send</code> solely to transmit job applications and professional communications explicitly authored and initiated by you within your campaigns. We <strong>never</strong> read your personal emails (we do not request or use read/inbox scopes), we do not store your private inbox messages, we never sell your data, and we never use your Gmail data to train generalized AI models.
           </p>
         </div>
 
         {/* Content Sections */}
         <div className="space-y-8 text-sm leading-relaxed text-slate-700">
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">1. Information We Collect</h2>
+            <h2 className="text-xl font-bold text-slate-900">1. Information We Collect & How It Is Handled</h2>
             <p>
-              When you use ArticlO, we collect information necessary to provide and operate our automated cold outreach platform:
+              When you use ArticlO, we collect and store only the data necessary to provide and operate our career application and correspondence platform:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-slate-600">
               <li>
-                <strong className="text-slate-900">Account Information:</strong> Name, email address, profile picture, and Google authentication identifiers.
+                <strong className="text-slate-900">Account Profile:</strong> Name, email address, profile photo, and Google account identifier (to authenticate your session).
               </li>
               <li>
-                <strong className="text-slate-900">Google OAuth Tokens:</strong> Securely encrypted access tokens and refresh tokens provided through Google OAuth to permit sending messages on your behalf.
+                <strong className="text-slate-900">Google OAuth Tokens:</strong> Encrypted access and refresh tokens provided via official Google OAuth consent to send messages on your behalf when you launch a campaign. Tokens are isolated by PostgreSQL Row Level Security (RLS).
               </li>
               <li>
-                <strong className="text-slate-900">Campaign & Contact Data:</strong> Lead spreadsheets (CSV) uploaded by you, including contact names, email addresses, company names, and email templates authored by you.
+                <strong className="text-slate-900">Contact & Template Data:</strong> Recipient lists (CSV files) uploaded directly by you (names, email addresses, companies, roles) and application email templates and resume attachments authored by you.
               </li>
               <li>
-                <strong className="text-slate-900">Technical Data:</strong> Log data, IP address, delivery timestamps, bounce rates, and queue execution metrics.
+                <strong className="text-slate-900">Delivery Status Logs:</strong> Timestamps, delivery status (queued, sent, failed), recipient addresses, and system error codes for delivery monitoring.
+              </li>
+              <li>
+                <strong className="text-slate-900">Permanent Suppression Registry:</strong> Email addresses of recipients who have opted out via unsubscribe links, stored permanently to ensure they are never emailed again.
               </li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">2. How We Use Your Information</h2>
+            <h2 className="text-xl font-bold text-slate-900">2. Strict Prohibition of Email Warming</h2>
+            <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 space-y-2 leading-relaxed">
+              <p>
+                <strong>Email Warming Is Strictly Prohibited on Google Accounts:</strong> In compliance with Google API User Data Policy and Anti-Spam Guidelines, ArticlO does not provide, operate, or permit email warming services, automated engagement manipulation, or simulated conversations on any Google or Gmail-connected accounts.
+              </p>
+              <p>
+                Our server-side dispatch engine and background queue processors enforce strict provider checks. Any attempt to queue or execute an email warming job on a Google account is automatically rejected, flagged, and permanently cancelled.
+              </p>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-bold text-slate-900">3. Anti-Spam Policy, Recipient Consent & No Lead Sourcing</h2>
+            <p>ArticlO enforces strict anti-spam standards across all features:</p>
+            <ul className="list-disc pl-5 space-y-2 text-slate-600">
+              <li>
+                <strong className="text-slate-900">No Lead Databases:</strong> ArticlO does not sell, rent, scrape, or distribute recipient email addresses, recruiter databases, or lead lists. Sample files provided in the application are strictly RFC-compliant demonstration templates (using <code>.example.com</code> domains).
+              </li>
+              <li>
+                <strong className="text-slate-900">Mandatory Recipient Consent:</strong> Users are required to confirm that their recipients are verified contacts who have consented to receive professional communications or with whom the user has a legitimate employment or business interest.
+              </li>
+              <li>
+                <strong className="text-slate-900">Server-Side Unsubscribe Suppression:</strong> All campaign emails include an unsubscribe mechanism. Once a recipient unsubscribes, their address is permanently added to our multi-tier suppression registry (Memory, JSON, Redis, and Supabase). The platform strictly blocks future sends to suppressed recipients across all campaigns, background queues, direct sends, and new CSV imports.
+              </li>
+            </ul>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-bold text-slate-900">4. How We Use Your Information</h2>
             <p>We use your information exclusively for the following purposes:</p>
             <ul className="list-disc pl-5 space-y-2 text-slate-600">
-              <li>Pacing and dispatching scheduled email campaigns through the native Gmail API at a controlled rate (2 emails/second) to protect your sender reputation.</li>
+              <li>Pacing and dispatching your user-initiated email campaigns through the native Gmail API at a controlled rate (2 emails/second) to stay within Google API quotas.</li>
               <li>Providing real-time tracking of email delivery statuses (queued, sending, sent, failed) via Supabase Realtime.</li>
-              <li>Enhancing your email copy and subject lines using Google Gemini AI upon your request.</li>
+              <li>Polishing your cover letter templates using Google Gemini AI upon your explicit request.</li>
               <li>Enforcing opt-out and unsubscribe requests to ensure full compliance with CAN-SPAM and GDPR.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">3. Data Security & Storage</h2>
+            <h2 className="text-xl font-bold text-slate-900">5. Data Security & Storage</h2>
             <p>
               We implement industry-standard administrative, physical, and technical safeguards. All communications with our servers, Supabase PostgreSQL, and Google APIs use TLS 1.3 encryption. Your Google OAuth tokens are stored securely in database rows protected by PostgreSQL Row Level Security (RLS) policies, ensuring only your authenticated user account can access them.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">4. Data Sharing & Third Parties</h2>
+            <h2 className="text-xl font-bold text-slate-900">6. Data Sharing & Third Parties</h2>
             <p>
               ArticlO does not sell, rent, or lease your personal data or your contact lists to third parties. We share data only with trusted service providers essential for platform operations:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-slate-600">
-              <li><strong className="text-slate-900">Google APIs:</strong> For email transmission and Google Gemini AI copywriting inference.</li>
+              <li><strong className="text-slate-900">Google APIs:</strong> For email transmission via Gmail API and cover letter drafting via Google Gemini AI.</li>
               <li><strong className="text-slate-900">Supabase:</strong> For managed, encrypted PostgreSQL hosting and real-time WebSocket state management.</li>
               <li><strong className="text-slate-900">Redis (Upstash):</strong> For ephemeral message queue state and rate-limiting.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">5. Your Rights & Data Deletion</h2>
+            <h2 className="text-xl font-bold text-slate-900">7. Your Rights & Data Deletion</h2>
             <p>
-              You maintain complete ownership of your data. You may delete any contact, campaign, or disconnect your Google Workspace account at any time directly through the ArticlO dashboard or via your Google Security Account settings. Upon disconnection, your OAuth tokens and campaign data are permanently purged from our systems.
+              You maintain complete ownership of your data. You may delete any contact, campaign, or disconnect your Google account at any time directly through the ArticlO dashboard or via your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" className="text-slate-900 underline font-semibold">Google Account Security permissions</a>. Upon disconnection, your OAuth tokens and campaign data are permanently purged from our systems.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-slate-900">6. Contact Us</h2>
+            <h2 className="text-xl font-bold text-slate-900">8. Contact Us</h2>
             <p>
               If you have any questions regarding this Privacy Policy or ArticlO’s privacy practices, please contact us at:
             </p>
             <div className="p-4 rounded-xl bg-white border border-slate-200 text-xs font-mono text-slate-700 shadow-sm">
-              Email: support@articleapply.io
+              Email: privacy@articleapply.io
             </div>
           </section>
         </div>

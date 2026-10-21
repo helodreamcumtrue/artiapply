@@ -72,6 +72,7 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   const [subject, setSubject] = useState(CA_ARTICLESHIP_DEMO_TEMPLATE.subject);
   const [bodyTemplate, setBodyTemplate] = useState(CA_ARTICLESHIP_DEMO_TEMPLATE.body);
   const [showSampleCsvModal, setShowSampleCsvModal] = useState(false);
+  const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState<'editor' | 'preview'>('editor');
   const [isEnhancingWithAI, setIsEnhancingWithAI] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
@@ -359,6 +360,8 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
           userEmail,
           userName: senderName,
           senderName,
+          consentConfirmed: true,
+          purpose: 'user_initiated_outreach',
         }),
       });
 
@@ -940,10 +943,10 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
                 type="button"
                 onClick={() => setShowSampleCsvModal(true)}
                 className="text-xs px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold transition flex items-center space-x-2 shadow-sm active:scale-95"
-                title="Browse & download HR recruiter leads for Big 4, Top 10, Mid-size, and Boutique CA firms"
+                title="Browse & download example CSV format templates for Big 4, Top 10, Mid-size, and Boutique firm applications"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-[#d4f933]" />
-                <span>Download Sample CSVs (4 Tiers)</span>
+                <span>Sample CSV Templates (4 Tiers)</span>
               </button>
             </div>
           </div>
@@ -1164,8 +1167,23 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
             </div>
           )}
 
+          {/* Recipient Consent & Anti-Spam Affirmation */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consentConfirmed}
+                onChange={(e) => setConsentConfirmed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-slate-950 focus:ring-slate-950 border-slate-300 cursor-pointer shrink-0"
+              />
+              <span className="text-xs text-slate-700 leading-relaxed">
+                <strong>Recipient Consent & Anti-Spam Confirmation:</strong> I confirm that these recipients are verified contacts who have consented to receive professional communications or with whom I have legitimate employment interest. I understand that ArticlO strictly prohibits unsolicited commercial spam and does not support email warming.
+              </span>
+            </label>
+          </div>
+
           {/* Launch Buttons */}
-          <div className="pt-4 flex items-center justify-between">
+          <div className="pt-2 flex items-center justify-between">
             <button
               onClick={() => setCurrentStep(3)}
               className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium transition flex items-center space-x-2"
@@ -1175,8 +1193,9 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
             </button>
             <button
               onClick={handleLaunchClick}
-              disabled={isLaunching}
-              className="px-8 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-sm shadow-lg shadow-[#d4f933]/30 transition-all duration-200 active:scale-95 flex items-center space-x-2 disabled:opacity-50"
+              disabled={isLaunching || !consentConfirmed}
+              title={!consentConfirmed ? 'Please confirm recipient consent before launching' : undefined}
+              className="px-8 py-3 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 font-extrabold text-sm shadow-lg shadow-[#d4f933]/30 transition-all duration-200 active:scale-95 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLaunching ? (
                 <>

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin';
 import { enqueueEmailJobs } from '@/lib/queue/client';
 import { EmailJobData } from '@/types/database';
+import { filterSuppressedContacts } from '@/lib/suppression/service';
+import { validateWarmingPolicy } from '@/lib/compliance/policyGuard';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +17,21 @@ export async function POST(request: NextRequest) {
       follow_ups = [],
       userId = '00000000-0000-0000-0000-000000000001',
       mode = 'client_dispatch',
+      purpose = 'user_initiated_outreach',
     } = body;
+
+    // 0a. Compliance Policy: Block any email warming requests
+    const warmingCheck = validateWarmingPolicy({
+      purpose,
+      fromEmail: body.senderEmail || body.userEmail,
+    });
+
+    if (!warmingCheck.allowed) {
+      return NextResponse.json(
+        { error: warmingCheck.error || 'Email warming is strictly prohibited on Google accounts.' },
+        { status: 403 }
+      );
+    }
 
     if (!name || !subject || !bodyTemplate) {
       return NextResponse.json(
@@ -31,10 +47,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`[Launch API] Launching campaign "${name}" with ${contacts.length} contacts`);
+    // 0b. Server-side suppression filtering: Exclude any opted-out / unsubscribed email
+    const { allowed: eligibleContacts, suppressed: suppressedContacts } = await filterSuppressedContacts(contacts);
+
+    if (eligibleContacts.length === 0) {
+      return NextResponse.json(
+        { error: 'All provided contacts have unsubscribed and cannot be emailed.' },
+        { status: 400 }
+      );
+    }
+
+    if (suppressedContacts.length > 0) {
+      console.log(`[Launch API] Auto-excluded ${suppressedContacts.length} unsubscribed contacts from campaign "${name}"`);
+    }
+
+    console.log(`[Launch API] Launching campaign "${name}" with ${eligibleContacts.length} eligible contacts (${suppressedContacts.length} suppressed)`);
 
     let campaignId = `camp-${Date.now()}`;
-    let insertedContacts = contacts.map((c, index) => ({
+    let insertedContacts = eligibleContacts.map((c, index) => ({
       id: `cont-${Date.now()}-${index}`,
       campaign_id: campaignId,
       user_id: userId,
@@ -155,6 +185,8 @@ export async function POST(request: NextRequest) {
         to: contact.email,
         subject,
         bodyTemplate,
+        purpose: 'user_initiated_outreach',
+        consentConfirmed: true,
         contactData: {
           email: contact.email,
           first_name: contact.first_name,

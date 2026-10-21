@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 PRO
               </span>
             </div>
-            <p className="text-xs text-slate-400">Cold Outreach System</p>
+            <p className="text-xs text-slate-400">Application Dispatch Hub</p>
           </div>
         </div>
       </div>

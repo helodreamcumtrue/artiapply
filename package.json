@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "worker": "tsx scripts/run-worker.ts"
+    "worker": "tsx scripts/run-worker.ts",
+    "test:compliance": "tsx scripts/test-compliance.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
