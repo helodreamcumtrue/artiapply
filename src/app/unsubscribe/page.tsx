@@ -10,10 +10,12 @@ function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email') || '';
   const idParam = searchParams.get('id') || '';
+  const tokenParam = searchParams.get('token') || '';
 
   const [email, setEmail] = useState(emailParam);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [unsubscribed, setUnsubscribed] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (emailParam) {
@@ -26,17 +28,21 @@ function UnsubscribeContent() {
     if (!email) return;
 
     setIsSubmitting(true);
+    setErrorMessage('');
     try {
-      await fetch('/api/contacts/unsubscribe', {
+      const res = await fetch('/api/contacts/unsubscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, id: idParam }),
+        body: JSON.stringify({ email, id: idParam, token: tokenParam }),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        setErrorMessage(data.error || 'Failed to authenticate opt-out request.');
+        return;
+      }
       setUnsubscribed(true);
-    } catch (err) {
-      console.error(err);
-      // Still set unsubscribed so recipient feels confirmed
-      setUnsubscribed(true);
+    } catch {
+      setErrorMessage('A network error occurred while processing your opt-out. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -100,9 +106,21 @@ function UnsubscribeContent() {
               </div>
             </div>
 
+            {errorMessage && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs text-left leading-relaxed">
+                <strong>Error:</strong> {errorMessage}
+              </div>
+            )}
+
+            {!tokenParam && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs text-left leading-relaxed">
+                <strong>Notice:</strong> This request is missing a cryptographic verification token. To opt out, please click the direct unsubscribe link located in the footer of the email you received.
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !tokenParam}
               className="w-full py-2.5 px-4 rounded-full bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-semibold text-xs transition flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {isSubmitting ? (

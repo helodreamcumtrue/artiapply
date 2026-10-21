@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import { supabaseAdmin } from '../supabase/admin';
 import { EmailAttachment } from '@/types/database';
+import { generateUnsubscribeUrls, isUnsubscribeSecretConfigured } from '../suppression/unsubscribeToken';
 
 export interface GoogleTokens {
   access_token?: string | null;
@@ -16,6 +17,7 @@ export interface SendEmailParams {
   htmlBody: string;
   textBody?: string;
   unsubscribeUrl?: string;
+  oneClickUrl?: string;
   fromName?: string;
   fromEmail?: string;
   attachments?: EmailAttachment[];
@@ -94,6 +96,7 @@ export function createMimeMessage({
   htmlBody,
   textBody,
   unsubscribeUrl,
+  oneClickUrl,
   fromName,
   fromEmail,
   attachments,
@@ -103,6 +106,7 @@ export function createMimeMessage({
   htmlBody: string;
   textBody?: string;
   unsubscribeUrl?: string;
+  oneClickUrl?: string;
   fromName?: string;
   fromEmail?: string;
   attachments?: EmailAttachment[];
@@ -120,40 +124,59 @@ export function createMimeMessage({
     `To: ${to}`,
     `Subject: ${utf8Subject}`,
     'MIME-Version: 1.0',
-    'X-Mailer: ArticlO Verified Engine',
   ];
 
-  if (unsubscribeUrl) {
-    commonHeaders.push(`List-Unsubscribe: <${unsubscribeUrl}>`);
+  const targetUnsubscribe = oneClickUrl || unsubscribeUrl;
+  if (targetUnsubscribe) {
+    commonHeaders.push(`List-Unsubscribe: <${targetUnsubscribe}>`);
     commonHeaders.push('List-Unsubscribe-Post: List-Unsubscribe=One-Click');
   }
+
+  // Derive high-quality textBody if not provided
+  const plainText = textBody || htmlBody.replace(/<[^>]*>/g, '').replace(/\n\s*\n/g, '\n').trim();
+
+  // Construct multipart/alternative body (text/plain + text/html) to satisfy spam filters (eliminates HTML_MIME_NO_TEXT)
+  const altBoundary = `====alt_boundary_${Date.now()}_${Math.random().toString(36).substring(2, 9)}====`;
+  const altBody = [
+    `--${altBoundary}`,
+    'Content-Type: text/plain; charset=utf-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    Buffer.from(plainText).toString('base64'),
+    '',
+    `--${altBoundary}`,
+    'Content-Type: text/html; charset=utf-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    Buffer.from(htmlBody).toString('base64'),
+    '',
+    `--${altBoundary}--`,
+  ].join('\r\n');
 
   if (!attachments || attachments.length === 0) {
     const messageParts = [
       ...commonHeaders,
-      'Content-Type: text/html; charset=utf-8',
-      'Content-Transfer-Encoding: base64',
+      `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
       '',
-      Buffer.from(htmlBody).toString('base64'),
+      altBody,
     ];
 
     return base64UrlEncode(messageParts.join('\r\n'));
   }
 
-  // Multipart/mixed message for attachments
-  const boundary = `====boundary_${Date.now()}_${Math.random().toString(36).substring(2, 9)}====`;
+  // Multipart/mixed message containing multipart/alternative + attachments
+  const mixedBoundary = `====mixed_boundary_${Date.now()}_${Math.random().toString(36).substring(2, 9)}====`;
   const headerParts = [
     ...commonHeaders,
-    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    `Content-Type: multipart/mixed; boundary="${mixedBoundary}"`,
     '',
   ];
 
-  const bodyPart = [
-    `--${boundary}`,
-    'Content-Type: text/html; charset=utf-8',
-    'Content-Transfer-Encoding: base64',
+  const mixedBodyPart = [
+    `--${mixedBoundary}`,
+    `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
     '',
-    Buffer.from(htmlBody).toString('base64'),
+    altBody,
     '',
   ];
 
@@ -161,7 +184,7 @@ export function createMimeMessage({
   for (const att of attachments) {
     const cleanBase64 = att.data.replace(/^data:.*?;base64,/, '');
     attachmentParts.push(
-      `--${boundary}`,
+      `--${mixedBoundary}`,
       `Content-Type: ${att.contentType || 'application/octet-stream'}; name="${att.filename}"`,
       'Content-Transfer-Encoding: base64',
       `Content-Disposition: attachment; filename="${att.filename}"`,
@@ -173,9 +196,9 @@ export function createMimeMessage({
 
   const finalMessage = [
     ...headerParts,
-    ...bodyPart,
+    ...mixedBodyPart,
     ...attachmentParts,
-    `--${boundary}--`,
+    `--${mixedBoundary}--`,
   ].join('\r\n');
 
   return base64UrlEncode(finalMessage);
@@ -200,8 +223,14 @@ export function replaceVariables(
 ): string {
   let result = template;
 
-  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
-  const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
+  let unsubscribeUrl: string;
+  if (isUnsubscribeSecretConfigured()) {
+    const urls = generateUnsubscribeUrls(contact.email, contact.id || '');
+    unsubscribeUrl = urls.webUrl;
+  } else {
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+    unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
+  }
 
   const replacements: Record<string, string> = {
     first_name: contact.first_name || '',
@@ -278,13 +307,13 @@ export function convertTextToEmailHtml(text: string): string {
     .filter(Boolean);
 
   if (paragraphs.length === 0) {
-    return `<p style="margin:0 0 16px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;">${text.replace(/\r?\n/g, '<br/>')}</p>`;
+    return `<p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;">${text.replace(/\r?\n/g, '<br/>')}</p>`;
   }
 
   return paragraphs
     .map((p) => {
       const withLineBreaks = p.replace(/\r?\n/g, '<br/>');
-      return `<p style="margin:0 0 16px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;">${withLineBreaks}</p>`;
+      return `<p style="margin:0 0 14px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;">${withLineBreaks}</p>`;
     })
     .join('\n');
 }
@@ -310,9 +339,19 @@ export function formatEmailBody({
   };
   includeUnsubscribe?: boolean;
   appUrl?: string;
-}): { html: string; text: string; unsubscribeUrl: string } {
-  const baseUrl = (appUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
-  const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
+}): { html: string; text: string; unsubscribeUrl: string; oneClickUrl: string } {
+  let unsubscribeUrl: string;
+  let oneClickUrl: string;
+
+  if (isUnsubscribeSecretConfigured()) {
+    const urls = generateUnsubscribeUrls(contact.email, contact.id || '', { baseUrl: appUrl });
+    unsubscribeUrl = urls.webUrl;
+    oneClickUrl = urls.oneClickUrl;
+  } else {
+    const baseUrl = (appUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
+    unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
+    oneClickUrl = `${baseUrl}/api/contacts/unsubscribe?email=${encodeURIComponent(contact.email)}&id=${contact.id || ''}`;
+  }
 
   // 1. Personalize text (without footer appended)
   const personalized = replaceVariables(bodyTemplate, contact, false);
@@ -327,24 +366,15 @@ export function formatEmailBody({
   const paragraphsHtml = convertTextToEmailHtml(personalized);
 
   const footerHtml = includeUnsubscribe && !personalized.toLowerCase().includes('unsubscribe')
-    ? `<div style="margin-top:32px;padding-top:14px;border-top:1px solid #e2e8f0;font-size:11px;line-height:1.5;color:#94a3b8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">To opt out of future emails, <a href="${unsubscribeUrl}" style="color:#64748b;text-decoration:underline;">unsubscribe here</a>.</div>`
+    ? `<div style="margin-top:28px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;line-height:1.5;color:#64748b;font-family:Arial,Helvetica,sans-serif;">To opt out of future emails, <a href="${unsubscribeUrl}" style="color:#64748b;text-decoration:underline;">unsubscribe here</a>.</div>`
     : '';
 
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;background-color:#ffffff;">
-  <div style="max-width:600px;padding:8px 0;">
-    ${paragraphsHtml}
-    ${footerHtml}
-  </div>
-</body>
-</html>`;
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;max-width:650px;">
+  ${paragraphsHtml}
+  ${footerHtml}
+</div>`;
 
-  return { html, text, unsubscribeUrl };
+  return { html, text, unsubscribeUrl, oneClickUrl };
 }
 
 /**
@@ -358,6 +388,7 @@ export async function sendEmail({
   htmlBody,
   textBody,
   unsubscribeUrl,
+  oneClickUrl,
   fromName,
   fromEmail,
   attachments,
@@ -372,6 +403,7 @@ export async function sendEmail({
       htmlBody,
       textBody,
       unsubscribeUrl,
+      oneClickUrl,
       fromName,
       fromEmail,
       attachments,

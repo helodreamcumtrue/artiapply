@@ -19,6 +19,7 @@ export interface SendEmailPayload {
   htmlBody: string;
   textBody?: string;
   unsubscribeUrl?: string;
+  oneClickUrl?: string;
   fromName?: string;
   fromEmail?: string;
   attachments?: EmailAttachment[];
@@ -107,6 +108,7 @@ export async function dispatchRealEmail({
   htmlBody,
   textBody,
   unsubscribeUrl,
+  oneClickUrl,
   fromName,
   fromEmail,
   attachments,
@@ -161,11 +163,10 @@ export async function dispatchRealEmail({
       const senderDisplayName = fromName || smtp.fromName || 'ArticlO Outreach';
       const senderAddress = fromEmail || smtp.fromEmail || smtp.user;
 
-      const headers: Record<string, string> = {
-        'X-Mailer': 'ArticlO Verified Engine',
-      };
-      if (unsubscribeUrl) {
-        headers['List-Unsubscribe'] = `<${unsubscribeUrl}>`;
+      const headers: Record<string, string> = {};
+      const targetUnsubscribe = oneClickUrl || unsubscribeUrl;
+      if (targetUnsubscribe) {
+        headers['List-Unsubscribe'] = `<${targetUnsubscribe}>`;
         headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
       }
 
@@ -215,6 +216,7 @@ export async function dispatchRealEmail({
         htmlBody,
         textBody,
         unsubscribeUrl,
+        oneClickUrl,
         fromName,
         fromEmail,
         attachments,

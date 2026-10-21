@@ -66,7 +66,7 @@ export default function TermsOfService() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-slate-900">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using the ArticlO software platform, website, and related APIs (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the terms, you may not access or use the Service.
+              By accessing or using the ArticlO software platform, website, and related APIs (the &quot;Service&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you disagree with any part of the terms, you may not access or use the Service.
             </p>
           </section>
 
@@ -139,7 +139,7 @@ export default function TermsOfService() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-slate-900">8. Contact Information</h2>
             <div className="p-4 rounded-xl bg-white border border-slate-200 text-xs font-mono text-slate-700 shadow-sm">
-              ArticlO Legal Team: legal@articleapply.io
+              ArticlO Legal Team: legal@articlo.online
             </div>
           </section>
         </div>

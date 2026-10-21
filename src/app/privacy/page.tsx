@@ -57,7 +57,7 @@ export default function PrivacyPolicy() {
             <span>Google API Services User Data Policy Disclosure</span>
           </h2>
           <p className="text-xs text-slate-600 leading-relaxed">
-            ArticlO's use and transfer to any other app of information received from Google APIs will adhere to the{' '}
+            ArticlO&apos;s use and transfer to any other app of information received from Google APIs will adhere to the{' '}
             <a
               href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes"
               target="_blank"
@@ -170,7 +170,7 @@ export default function PrivacyPolicy() {
               If you have any questions regarding this Privacy Policy or ArticlO’s privacy practices, please contact us at:
             </p>
             <div className="p-4 rounded-xl bg-white border border-slate-200 text-xs font-mono text-slate-700 shadow-sm">
-              Email: privacy@articleapply.io
+              Email: privacy@articlo.online
             </div>
           </section>
         </div>

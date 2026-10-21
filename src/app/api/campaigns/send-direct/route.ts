@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const personalizedSubject = formatEmailSubject(subject, contact);
 
     // 2. Personalize body - formats into clean paragraphs and matching plain text with subtle opt-out footer
-    const { html: formattedHtmlBody, text: formattedTextBody, unsubscribeUrl } = formatEmailBody({
+    const { html: formattedHtmlBody, text: formattedTextBody, unsubscribeUrl, oneClickUrl } = formatEmailBody({
       bodyTemplate,
       contact,
       includeUnsubscribe: true,
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
       htmlBody: formattedHtmlBody,
       textBody: formattedTextBody,
       unsubscribeUrl,
+      oneClickUrl,
       fromName: senderName,
       fromEmail: senderEmail,
       attachments,

@@ -92,3 +92,15 @@ export interface EmailJobData {
   };
 }
 
+export interface SuppressedEmail {
+  email: string;
+  reason?: string;
+  source?: string;
+  contact_id?: string | null;
+  campaign_id?: string | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  suppressed_at: string;
+  created_at?: string;
+}
+

@@ -66,7 +66,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   // Simple Settings State
   const [name, setName] = useState(userName || 'John Smith');
-  const [email, setEmail] = useState(userEmail || 'user@articleapply.io');
+  const [email, setEmail] = useState(userEmail || 'user@articlo.online');
   const [dailyLimit, setDailyLimit] = useState<'50' | '100' | '200' | '500'>('100');
   const [autoPauseReplies, setAutoPauseReplies] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
@@ -967,7 +967,7 @@ REDIS_URL=redis://localhost:6379`;
                           2
                         </span>
                         <div>
-                          <span>Open Google's App Passwords page directly at{' '}</span>
+                          <span>Open Google&apos;s App Passwords page directly at{' '}</span>
                           <a
                             href="https://myaccount.google.com/apppasswords"
                             target="_blank"
@@ -985,7 +985,7 @@ REDIS_URL=redis://localhost:6379`;
                           3
                         </span>
                         <div>
-                          <span>Under "App name", type <strong>ArticlO</strong> and click <strong>Create</strong>.</span>
+                          <span>Under &quot;App name&quot;, type <strong>ArticlO</strong> and click <strong>Create</strong>.</span>
                         </div>
                       </li>
 
@@ -1135,7 +1135,7 @@ REDIS_URL=redis://localhost:6379`;
                 <>
                   <div className="space-y-3">
                     <p className="leading-relaxed">
-                      If you're not using standard Gmail, enter your provider's SMTP host and port below:
+                      If you&apos;re not using standard Gmail, enter your provider&apos;s SMTP host and port below:
                     </p>
 
                     <div className="space-y-2 text-[11px]">

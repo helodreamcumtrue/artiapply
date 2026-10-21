@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
           const { data: newUser } = await supabaseAdmin
             .from('users')
             .insert({
-              email: activeEmail || 'outreach@articleapply.io',
+              email: activeEmail || 'outreach@articlo.online',
               name: body.userName || 'Campaign Manager',
             })
             .select('id')

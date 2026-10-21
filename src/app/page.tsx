@@ -134,12 +134,20 @@ export default function Home() {
         if (savedCamps) {
           const parsed = JSON.parse(savedCamps);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Reconcile status: if contacts are sent, ensure campaign is marked completed so it never resets to pending on refresh
+            // Reconcile status and exact counts directly from contacts state to avoid data mismatch
             const reconciled = parsed.map((c: Campaign) => {
               const campContacts = loadedContacts.filter((ct) => ct.campaign_id === c.id);
-              const sentContacts = campContacts.filter((ct) => ct.status === 'sent');
-              if (campContacts.length > 0 && sentContacts.length >= campContacts.length) {
-                return { ...c, status: 'completed' as const, sent_count: sentContacts.length };
+              if (campContacts.length > 0) {
+                const sentContacts = campContacts.filter((ct) => ct.status === 'sent').length;
+                const failedContacts = campContacts.filter((ct) => ct.status === 'failed').length;
+                const isAllProcessed = (sentContacts + failedContacts) >= campContacts.length;
+                return {
+                  ...c,
+                  total_contacts: campContacts.length,
+                  sent_count: Math.max(c.sent_count || 0, sentContacts),
+                  failed_count: Math.max(c.failed_count || 0, failedContacts),
+                  status: isAllProcessed ? ('completed' as const) : c.status,
+                };
               }
               return c;
             });
@@ -368,21 +376,26 @@ export default function Home() {
         });
       }
 
-      // Update campaign stats and persist to localStorage
+      // Live update campaign stats and persist to localStorage
       const isFinished = processedIndex >= contactsList.length;
+      const currentStatus: CampaignStatus = isFinished
+        ? actualSentCount > 0
+          ? 'completed'
+          : 'failed'
+        : 'in_progress';
+
+      const updatedCampData: Campaign = {
+        ...newCamp,
+        sent_count: actualSentCount,
+        failed_count: actualFailedCount,
+        status: currentStatus,
+      };
+
+      // Real-time update for the active campaign so Dashboard progress bar and stats update live on every send
+      setActiveCampaign(updatedCampData);
+
       setCampaigns((prev) => {
-        const next = prev.map((c) => {
-          if (c.id === newCamp.id) {
-            const finalStatus: CampaignStatus = isFinished ? (actualSentCount > 0 ? 'completed' : 'failed') : 'in_progress';
-            return {
-              ...c,
-              sent_count: actualSentCount,
-              failed_count: actualFailedCount,
-              status: finalStatus,
-            };
-          }
-          return c;
-        });
+        const next = prev.map((c) => (c.id === newCamp.id ? updatedCampData : c));
         try {
           localStorage.setItem('artiapply_campaigns', JSON.stringify(next));
         } catch {}
@@ -390,17 +403,6 @@ export default function Home() {
       });
 
       if (isFinished) {
-        setActiveCampaign((prev) =>
-          prev && prev.id === newCamp.id
-            ? {
-                ...prev,
-                sent_count: actualSentCount,
-                failed_count: actualFailedCount,
-                status: actualSentCount > 0 ? 'completed' : 'failed',
-              }
-            : prev
-        );
-
         // Sync final status to server database so it never resets on refresh
         fetch('/api/campaigns', {
           method: 'PATCH',
@@ -481,6 +483,18 @@ export default function Home() {
         localStorage.setItem('artiapply_campaigns', JSON.stringify(next));
       } catch {}
       return next;
+    });
+
+    setActiveCampaign((prev) => {
+      if (prev && prev.id === campaignId) {
+        return {
+          ...prev,
+          status: 'completed' as const,
+          followup_count: (prev.followup_count || 0) + 1,
+          last_followup_at: new Date().toISOString(),
+        };
+      }
+      return prev;
     });
 
     showToast(`Follow-up sent successfully to ${updatedContactsList.length} contact${updatedContactsList.length === 1 ? '' : 's'}!`);

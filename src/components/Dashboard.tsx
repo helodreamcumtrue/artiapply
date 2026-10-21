@@ -56,16 +56,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Aggregate stats across campaigns
   const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
   const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
+  const totalProcessed = totalSent + totalFailed;
   const activeCount = campaigns.filter((c) => c.status === 'in_progress' || c.status === 'queued').length;
 
-  const deliveryRate = totalSent + totalFailed > 0
-    ? ((totalSent / (totalSent + totalFailed)) * 100).toFixed(1)
-    : '99.4';
+  const deliveryRate = totalProcessed > 0
+    ? ((totalSent / totalProcessed) * 100).toFixed(1)
+    : '100.0';
 
-  const currentCamp = activeCampaign || campaigns.find((c) => c.status === 'in_progress') || campaigns[0];
-  const progressPercent = currentCamp && currentCamp.total_contacts > 0
-    ? Math.min(100, Math.round(((currentCamp.sent_count + currentCamp.failed_count) / currentCamp.total_contacts) * 100))
+  // Always resolve to the most up-to-date campaign object from the campaigns array
+  const currentCamp = campaigns.find((c) => c.id === activeCampaign?.id) || activeCampaign || campaigns.find((c) => c.status === 'in_progress') || campaigns[0];
+  const sentCount = currentCamp?.sent_count || 0;
+  const failedCount = currentCamp?.failed_count || 0;
+  const totalContacts = currentCamp?.total_contacts || 0;
+  const processedCount = sentCount + failedCount;
+  const progressPercent = totalContacts > 0
+    ? Math.min(100, Math.round((processedCount / totalContacts) * 100))
     : 0;
+  const remainingCount = Math.max(0, totalContacts - processedCount);
 
   return (
     <div className="space-y-6 pb-12">
@@ -244,7 +251,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="text-right mr-2">
                 <span className="text-2xl sm:text-3xl font-bold text-slate-900 font-mono">{progressPercent}%</span>
                 <p className="text-[11px] text-slate-400">
-                  {currentCamp.sent_count} of {currentCamp.total_contacts} delivered
+                  {failedCount > 0
+                    ? `${sentCount} delivered, ${failedCount} failed of ${totalContacts}`
+                    : `${sentCount} of ${totalContacts} delivered`}
                 </p>
               </div>
 
@@ -279,10 +288,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
               <span className="text-emerald-700 flex items-center font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-                {currentCamp.sent_count} Delivered
+                {sentCount} Delivered{failedCount > 0 ? ` (${failedCount} failed)` : ''}
               </span>
               <span>
-                {Math.max(0, currentCamp.total_contacts - currentCamp.sent_count - currentCamp.failed_count)} Remaining
+                {remainingCount} Remaining
               </span>
             </div>
           </div>

@@ -58,7 +58,7 @@ export function normalizeEmail(email: string): string {
 
 /**
  * Checks if an email address is on the global suppression / opt-out list.
- * Checks Memory Cache -> Redis -> Supabase.
+ * Checks Memory Cache -> Redis -> Supabase public.suppressed_emails.
  */
 export async function isSuppressed(email: string): Promise<boolean> {
   const normalized = normalizeEmail(email);
@@ -81,10 +81,23 @@ export async function isSuppressed(email: string): Promise<boolean> {
     // Redis offline, proceed to database
   }
 
-  // 3. Check Supabase if configured
+  // 3. Check Supabase dedicated suppressed_emails table if configured
   if (isAdminConfigured()) {
     try {
-      // Check contacts marked as unsubscribed
+      // Primary: Dedicated standalone suppression table (uncoupled from campaign cascade)
+      const { data: suppressedRecord, error: supErr } = await supabaseAdmin
+        .from('suppressed_emails')
+        .select('email')
+        .eq('email', normalized)
+        .limit(1)
+        .maybeSingle();
+
+      if (!supErr && suppressedRecord?.email) {
+        inMemorySuppressionSet.add(normalized);
+        return true;
+      }
+
+      // Backward-compatible fallback: Check legacy contacts table
       const { data: unsubContact } = await supabaseAdmin
         .from('contacts')
         .select('id')
@@ -107,12 +120,14 @@ export async function isSuppressed(email: string): Promise<boolean> {
 
 /**
  * Permanently adds an email to the server-side suppression list.
- * This cannot be undone by frontend CSV re-uploads or campaign relaunch.
+ * Writes to Supabase public.suppressed_emails, Redis, local memory, and persistent file.
+ * Fails closed if durable persistence fails.
  */
 export async function recordUnsubscribe(
   email: string,
   metadata?: {
     reason?: string;
+    source?: string;
     contactId?: string;
     campaignId?: string;
     ip?: string;
@@ -124,20 +139,37 @@ export async function recordUnsubscribe(
     throw new Error('Valid email address is required to record unsubscribe');
   }
 
-  // 1. Add to in-memory set and write to persistent file
-  inMemorySuppressionSet.add(normalized);
-  persistSuppressionFile();
-
-  // 2. Add to Redis set
-  try {
-    const redis = getRedisConnection();
-    await redis.sadd('artiapply:suppressed_emails', normalized);
-  } catch {
-    // Redis offline
+  // 1. Enforce durable storage in production: Must have Supabase or Redis
+  if (process.env.NODE_ENV === 'production' && !isAdminConfigured() && !process.env.REDIS_URL) {
+    throw new Error(
+      'Durable suppression storage (Supabase or Redis) is not configured in production environment.'
+    );
   }
 
-  // 3. Update Supabase records
+  // 2. Persist to dedicated Supabase suppressed_emails table (DURABLE SOURCE OF TRUTH)
   if (isAdminConfigured()) {
+    const { error: insertError } = await supabaseAdmin
+      .from('suppressed_emails')
+      .upsert(
+        {
+          email: normalized,
+          reason: metadata?.reason || 'unsubscribed',
+          source: metadata?.source || 'user_opt_out',
+          contact_id: metadata?.contactId || null,
+          campaign_id: metadata?.campaignId || null,
+          ip_address: metadata?.ip || null,
+          user_agent: metadata?.userAgent || null,
+          suppressed_at: new Date().toISOString(),
+        },
+        { onConflict: 'email' }
+      );
+
+    if (insertError) {
+      console.error('[SuppressionService] Failed to insert into suppressed_emails table:', insertError.message);
+      throw new Error(`Durable database suppression failed: ${insertError.message}`);
+    }
+
+    // Also update active contacts across campaigns (best effort)
     try {
       if (metadata?.contactId) {
         await supabaseAdmin
@@ -150,7 +182,6 @@ export async function recordUnsubscribe(
           .eq('id', metadata.contactId);
       }
 
-      // Mark all contacts across all campaigns with this email
       await supabaseAdmin
         .from('contacts')
         .update({
@@ -161,9 +192,21 @@ export async function recordUnsubscribe(
         .eq('email', normalized)
         .in('status', ['pending', 'queued']);
     } catch (err) {
-      console.warn('[SuppressionService] Database update notice:', err);
+      console.warn('[SuppressionService] Contact status update notice:', err);
     }
   }
+
+  // 3. Persist to Redis cluster set
+  try {
+    const redis = getRedisConnection();
+    await redis.sadd('artiapply:suppressed_emails', normalized);
+  } catch {
+    // Redis offline
+  }
+
+  // 4. Update in-memory set and persistent fallback file
+  inMemorySuppressionSet.add(normalized);
+  persistSuppressionFile();
 
   console.log(`[SuppressionService] Email permanently suppressed: ${normalized}`);
   return { success: true, email: normalized };

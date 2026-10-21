@@ -413,7 +413,7 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
                     <Users className="w-8 h-8 mx-auto text-slate-400 mb-2" />
                     <p className="font-semibold text-slate-800 font-poppins">No contacts found</p>
                     <p className="text-xs text-slate-500 mt-1">
-                      Click <strong className="text-slate-900">"Load 50 Samples"</strong> or <strong className="text-slate-900">"Upload Your CSV"</strong> to add contacts.
+                      Click <strong className="text-slate-900">&quot;Load 50 Samples&quot;</strong> or <strong className="text-slate-900">&quot;Upload Your CSV&quot;</strong> to add contacts.
                     </p>
                   </td>
                 </tr>

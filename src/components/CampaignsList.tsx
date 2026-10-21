@@ -200,7 +200,9 @@ export const CampaignsList: React.FC<CampaignsListProps> = ({
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
                     <span className="font-medium">
-                      {camp.sent_count} / {camp.total_contacts} contacts ({progress}%)
+                      {camp.failed_count && camp.failed_count > 0
+                        ? `${camp.sent_count} sent, ${camp.failed_count} failed of ${camp.total_contacts} (${progress}%)`
+                        : `${camp.sent_count} / ${camp.total_contacts} delivered (${progress}%)`}
                     </span>
                     <span suppressHydrationWarning>Created: {formatDate(camp.created_at)}</span>
                   </div>

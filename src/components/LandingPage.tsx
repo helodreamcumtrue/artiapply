@@ -59,8 +59,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [activePreviewTab, setActivePreviewTab] = useState<'composer' | 'limiter' | 'followup'>('composer');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [quickEmail, setQuickEmail] = useState('');
-  const [quickName, setQuickName] = useState('');
 
   // Rate Limiter Showcase Animation State
   const [simulatedProgress, setSimulatedProgress] = useState(3);
@@ -74,18 +72,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       return () => clearInterval(interval);
     }
   }, [activePreviewTab]);
-
-  const handleQuickLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (quickEmail.trim()) {
-      localStorage.setItem('artiapply_user_email', quickEmail.trim());
-      if (quickName.trim()) {
-        localStorage.setItem('artiapply_user_name', quickName.trim());
-      }
-    }
-    setShowAuthModal(false);
-    onLogin();
-  };
 
   const faqs = [
     {
@@ -846,13 +832,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="bg-white w-full max-w-md rounded-[28px] p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-5 animate-in zoom-in-95 duration-150 relative">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full">
-                  Instant Access
-                </span>
-                <h3 className="text-xl font-bold text-slate-900 mt-1 font-poppins">
-                  Enter ArticlO Command Center
-                </h3>
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800">
+                  <ArticloLogo size={18} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 font-poppins">
+                    Sign in to ArticlO
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Application Delivery Command Center
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
@@ -863,25 +854,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
             </div>
 
-            {/* 1-Click Launch Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowAuthModal(false);
-                onLogin();
-              }}
-              className="w-full py-3.5 rounded-full bg-[#d4f933] hover:bg-[#c6f627] text-slate-950 text-xs font-black uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2"
-            >
-              <Zap className="w-4 h-4 text-slate-950" />
-              <span>Launch Outreach Hub (Direct Entry)</span>
-            </button>
+            <div className="text-center py-2 space-y-1.5">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Connect your verified Google Workspace or Gmail account to author, personalize, and dispatch applications directly from your inbox.
+              </p>
+            </div>
 
-            {/* Google OAuth Option */}
+            {/* Google OAuth Option (Sole Authentication Method) */}
             <a
               href="/api/auth/google"
-              className="w-full py-3 rounded-full bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-200 shadow-sm transition flex items-center justify-center space-x-2"
+              className="w-full py-3.5 px-4 rounded-full bg-white hover:bg-slate-50 text-slate-900 text-xs font-bold border border-slate-300 shadow-sm hover:shadow transition-all flex items-center justify-center space-x-3 group active:scale-[0.99]"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
@@ -890,47 +874,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Connect with Google Workspace</span>
             </a>
 
-            <div className="flex items-center space-x-3 text-slate-400 text-[11px]">
-              <div className="flex-1 border-t border-slate-200" />
-              <span>Or personalize your workspace</span>
-              <div className="flex-1 border-t border-slate-200" />
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <div className="flex items-center justify-center space-x-1.5 text-[11px] text-slate-500 font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Official Google OAuth 2.0 • Send-only scope</span>
+              </div>
+              <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+                ArticlO never reads private inboxes. By continuing, you agree to our{' '}
+                <a href="/terms" className="underline hover:text-slate-600">Terms</a> and{' '}
+                <a href="/privacy" className="underline hover:text-slate-600">Privacy Policy</a>.
+              </p>
             </div>
-
-            {/* Custom Email Form */}
-            <form onSubmit={handleQuickLoginSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-semibold text-slate-700 block mb-1">
-                  Your Full Name
-                </label>
-                <input
-                  type="text"
-                  value={quickName}
-                  onChange={(e) => setQuickName(e.target.value)}
-                  placeholder="e.g. Alex Outreach"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 transition"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold text-slate-700 block mb-1">
-                  Your Sender Email
-                </label>
-                <input
-                  type="email"
-                  value={quickEmail}
-                  onChange={(e) => setQuickEmail(e.target.value)}
-                  placeholder="e.g. alex@yourcompany.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-600 transition"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-sm"
-              >
-                Enter Command Center
-              </button>
-            </form>
           </div>
         </div>
       )}

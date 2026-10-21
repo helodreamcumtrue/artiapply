@@ -79,7 +79,7 @@ export function initWorker(): Worker<EmailJobData> {
 
       // 2. Personalize email template - clean subject and clean paragraphs
       const personalizedSubject = formatEmailSubject(subject, contactData);
-      const { html: personalizedBody, text: plainTextBody, unsubscribeUrl } = formatEmailBody({
+      const { html: personalizedBody, text: plainTextBody, unsubscribeUrl, oneClickUrl } = formatEmailBody({
         bodyTemplate,
         contact: contactData,
         includeUnsubscribe: true,
@@ -120,6 +120,7 @@ export function initWorker(): Worker<EmailJobData> {
         htmlBody: personalizedBody,
         textBody: plainTextBody,
         unsubscribeUrl,
+        oneClickUrl,
         fromName: userProfile?.name || undefined,
         fromEmail: userProfile?.email || undefined,
         attachments,
@@ -132,6 +133,12 @@ export function initWorker(): Worker<EmailJobData> {
           success: dispatchResult.success,
           error: dispatchResult.error,
           messageId: dispatchResult.messageId,
+        };
+      } else if (!dispatchResult.success) {
+        // Even if unconfigured, if compliance policy blocked the dispatch (warming or suppression), never simulate success
+        sendResult = {
+          success: false,
+          error: dispatchResult.error,
         };
       } else {
         // Fallback / local dev simulation
