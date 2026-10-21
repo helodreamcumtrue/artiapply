@@ -18,12 +18,14 @@ interface OnboardingTourModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateToTab?: (tab: 'dashboard' | 'builder' | 'campaigns' | 'contacts' | 'settings') => void;
+  onFinishTour?: () => void;
 }
 
 export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
   isOpen,
   onClose,
   onNavigateToTab,
+  onFinishTour,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -31,9 +33,9 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
     {
       step: 1,
       badge: 'Welcome to ArticlO',
-      title: 'Your Command Center for High-Deliverability Outreach',
+      title: 'Your Articleship Outreach Command Center',
       description:
-        'ArticlO sends personalized cold emails directly through your email account with an enforced 2 emails/sec rate limiter to guarantee optimal inbox placement and zero spam flags.',
+        'ArticlO helps CA students reach hundreds of HRs and audit partners with calibrated human delivery (2 emails/sec) to ensure 99.4% primary inbox placement and zero spam flags.',
       tip: 'Click "Create Campaign" on the dashboard whenever you are ready to begin.',
       icon: Rocket,
       iconBg: 'bg-indigo-600 text-white',
@@ -45,7 +47,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       badge: 'Familiar & Fast',
       title: 'Gmail-Style Email Crafter & AI Assistant',
       description:
-        'Compose your emails in a clean, distraction-free Gmail Compose window. Use the "✨ Describe your message" pill to prompt Gemini AI, or click the templates button to load 10 battle-tested outreach formats in 1-click.',
+        'Compose your emails in a clean, distraction-free Gmail Compose window. Load the official CA Articleship Statutory Audit demo format in 1 click or personalize with Gemini AI.',
       tip: 'Personalize each email dynamically using {{first_name}}, {{company}}, and {{role}}.',
       icon: Mail,
       iconBg: 'bg-blue-600 text-white',
@@ -54,26 +56,26 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
     },
     {
       step: 3,
-      badge: 'Portfolios & Decks',
-      title: 'Attach Photos, Resumes & Pitch Decks',
+      badge: 'Resumes & Marksheets',
+      title: 'Attach Resumes & Certificates Safely',
       description:
-        'Easily attach PDF portfolios, Word docs, spreadsheets, or photo screenshots (up to 8MB) using the paperclip icon. Attachments are encoded automatically into RFC-compliant email streams.',
-      tip: 'Keep attachments under 8MB to ensure ultra-fast primary inbox delivery.',
+        'Easily attach your ATS-ready resume PDF, marksheets, or portfolios (up to 8MB). Attachments are safely encoded automatically into RFC-compliant email streams.',
+      tip: 'Keep PDF files under 8MB to ensure ultra-fast primary inbox delivery.',
       icon: Paperclip,
       iconBg: 'bg-emerald-600 text-white',
-      actionText: 'Next: Contacts & Follow-ups',
+      actionText: 'Next: Email Sending Setup',
       actionTab: 'contacts' as const,
     },
     {
       step: 4,
-      badge: 'High Reply Rates',
-      title: 'Contact Control & 1-Click Follow-Ups',
+      badge: 'Final Step: Email Setup',
+      title: 'Email Sending Account Setup',
       description:
-        'View only the contacts added to your platform with full control to modify details or delete them anytime. Once emails are sent, boost your reply rate by 3x using our 1-click "Take Follow-up" engine.',
-      tip: 'Choose from 4 follow-up sequence presets: Gentle Bump, Value-Add, Breakup, or Custom.',
+        'To send your CA articleship applications directly from your own Gmail address (so HR replies arrive straight to your personal inbox), you will connect your account in the next 60 seconds using a secure Google App Password.',
+      tip: 'Requires only a 16-character Google App Password. 100% free, safe, and takes 1 minute.',
       icon: RotateCcw,
       iconBg: 'bg-purple-600 text-white',
-      actionText: 'Get Started 🚀',
+      actionText: 'Setup Email Account Now 🚀',
       actionTab: 'dashboard' as const,
     },
   ];
@@ -99,6 +101,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
       localStorage.setItem('artiapply_onboarded_v2', 'true');
     }
     onClose();
+    onFinishTour?.();
   };
 
   if (!isOpen) return null;

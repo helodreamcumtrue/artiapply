@@ -11,12 +11,15 @@ import { OnboardingTourModal } from '@/components/OnboardingTourModal';
 import { TakeFollowUpModal } from '@/components/TakeFollowUpModal';
 import { LandingPage } from '@/components/LandingPage';
 import { Footer } from '@/components/Footer';
+import { EmailAccountSetupModal } from '@/components/EmailAccountSetupModal';
 import { useRealtimeCampaign } from '@/hooks/useRealtimeCampaign';
 import { Campaign, Contact, CampaignStatus, ContactStatus } from '@/types/database';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isEmailSetupOpen, setIsEmailSetupOpen] = useState(false);
+  const [isEmailConfigured, setIsEmailConfigured] = useState(false);
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
   const [followUpCampaign, setFollowUpCampaign] = useState<Campaign | null>(null);
 
@@ -48,6 +51,15 @@ export default function Home() {
       if (customName) {
         setUserName(customName);
         localStorage.setItem('artiapply_user_name', customName);
+      }
+
+      // Check onboarding & email setup status upon login
+      const hasOnboarded = localStorage.getItem('artiapply_onboarded_v2');
+      const storedSmtp = localStorage.getItem('artiapply_smtp_config');
+      if (!hasOnboarded) {
+        setIsTourOpen(true);
+      } else if (!storedSmtp) {
+        setIsEmailSetupOpen(true);
       }
     }
     showToast('Welcome to ArticlO Command Center!');
@@ -98,6 +110,9 @@ export default function Home() {
         const storedSmtp = localStorage.getItem('artiapply_smtp_config');
         if (storedSmtp) {
           const parsed = JSON.parse(storedSmtp);
+          if (parsed.user && parsed.pass) {
+            setIsEmailConfigured(true);
+          }
           if (parsed.fromEmail && !storedEmail) setUserEmail(parsed.fromEmail);
           if (parsed.fromName && !storedName) setUserName(parsed.fromName);
         }
@@ -201,11 +216,14 @@ export default function Home() {
         })
         .catch(() => {});
 
-      // Auto-show onboarding tour pop-up for first-time visitors
+      // Auto-show onboarding tour pop-up for first-time visitors, or Email Setup if tour done but unconfigured
       try {
         const hasOnboarded = localStorage.getItem('artiapply_onboarded_v2');
+        const storedSmtp = localStorage.getItem('artiapply_smtp_config');
         if (!hasOnboarded) {
           setIsTourOpen(true);
+        } else if (!storedSmtp) {
+          setIsEmailSetupOpen(true);
         }
       } catch {}
     }
@@ -493,6 +511,8 @@ export default function Home() {
         activeCampaignCount={campaigns.filter((c) => c.status === 'in_progress').length}
         onOpenTour={() => setIsTourOpen(true)}
         onSignOut={handleSignOut}
+        isEmailConfigured={isEmailConfigured}
+        onOpenEmailSetup={() => setIsEmailSetupOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -511,6 +531,8 @@ export default function Home() {
               onViewContacts={() => setActiveTab('contacts')}
               onTakeFollowUp={handleOpenFollowUp}
               onOpenTour={() => setIsTourOpen(true)}
+              isEmailConfigured={isEmailConfigured}
+              onOpenEmailSetup={() => setIsEmailSetupOpen(true)}
             />
           )}
 
@@ -521,6 +543,7 @@ export default function Home() {
               userEmail={userEmail}
               userName={userName}
               onNavigateToSettings={() => setActiveTab('settings')}
+              onOpenEmailSetup={() => setIsEmailSetupOpen(true)}
             />
           )}
 
@@ -591,10 +614,38 @@ export default function Home() {
       {/* Step-by-Step Interactive Onboarding Pop-up */}
       <OnboardingTourModal
         isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
+        onClose={() => {
+          setIsTourOpen(false);
+          const storedSmtp = typeof window !== 'undefined' ? localStorage.getItem('artiapply_smtp_config') : null;
+          if (!storedSmtp) {
+            setIsEmailSetupOpen(true);
+          }
+        }}
+        onFinishTour={() => {
+          setIsTourOpen(false);
+          const storedSmtp = typeof window !== 'undefined' ? localStorage.getItem('artiapply_smtp_config') : null;
+          if (!storedSmtp) {
+            setIsEmailSetupOpen(true);
+          }
+        }}
         onNavigateToTab={(tab) => {
           setActiveTab(tab as NavTab);
           setIsTourOpen(false);
+        }}
+      />
+
+      {/* Guided 60-Second Email Sending Account Setup Modal (Post-Onboarding) */}
+      <EmailAccountSetupModal
+        isOpen={isEmailSetupOpen}
+        onClose={() => setIsEmailSetupOpen(false)}
+        initialEmail={userEmail}
+        initialName={userName}
+        onSuccess={(savedEmail, savedName) => {
+          setIsEmailConfigured(true);
+          setUserEmail(savedEmail);
+          setUserName(savedName);
+          setIsEmailSetupOpen(false);
+          showToast('Email sending account connected & verified! 🚀');
         }}
       />
 

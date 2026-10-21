@@ -36,6 +36,8 @@ interface DashboardProps {
   onTakeFollowUp?: (campaign: Campaign) => void;
   onOpenTour?: () => void;
   isSimulatingSending?: boolean;
+  isEmailConfigured?: boolean;
+  onOpenEmailSetup?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -48,6 +50,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onTakeFollowUp,
   onOpenTour,
   isSimulatingSending = false,
+  isEmailConfigured = true,
+  onOpenEmailSetup,
 }) => {
   // Aggregate stats across campaigns
   const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
@@ -114,6 +118,42 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Email Sending Account Setup Required Banner (if not yet configured) */}
+      {!isEmailConfigured && onOpenEmailSetup && (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-300/80 p-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start space-x-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
+                ⚡
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-base font-bold text-slate-900">
+                    Email Sending Account Required to Launch Campaigns
+                  </h3>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                    Takes 60 seconds
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                  Before ArtiApply can dispatch emails to HRs from your personal address, connect your Gmail App Password.
+                  Zero OAuth hurdles, 100% spam-safe, and dispatches directly from your personal mailbox.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={onOpenEmailSetup}
+              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex-shrink-0"
+            >
+              <Zap className="w-4 h-4 text-[#d4f933]" />
+              <span>Connect Sending Email</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 3 Streamlined Metric Cards (Total Leads removed as requested) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

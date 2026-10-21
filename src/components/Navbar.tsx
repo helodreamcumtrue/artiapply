@@ -37,6 +37,8 @@ interface NavbarProps {
   activeCampaignCount?: number;
   onOpenTour?: () => void;
   onSignOut?: () => void;
+  isEmailConfigured?: boolean;
+  onOpenEmailSetup?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -50,6 +52,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeCampaignCount = 0,
   onOpenTour,
   onSignOut,
+  isEmailConfigured = true,
+  onOpenEmailSetup,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -234,6 +238,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
+            {/* Quick Email Setup Indicator if not configured */}
+            {!isEmailConfigured && onOpenEmailSetup && (
+              <button
+                onClick={onOpenEmailSetup}
+                title="Email sending account setup required"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow-sm shadow-amber-500/20"
+              >
+                <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                <span>Setup Email</span>
+              </button>
+            )}
+
             {/* Onboarding Tour Trigger */}
             {onOpenTour && (
               <button
@@ -305,9 +321,30 @@ export const Navbar: React.FC<NavbarProps> = ({
                   >
                     <div className="flex items-center space-x-2.5">
                       <Settings className="w-4 h-4 text-slate-500" />
-                      <span>Settings & Email Setup</span>
+                      <span>Settings & Preferences</span>
                     </div>
                   </button>
+
+                  {/* 1-Click Email Sending Setup Modal Trigger */}
+                  {onOpenEmailSetup && (
+                    <button
+                      onClick={() => {
+                        onOpenEmailSetup();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        <span>Email Sending Account</span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        isEmailConfigured ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {isEmailConfigured ? 'Connected' : 'Setup Required'}
+                      </span>
+                    </button>
+                  )}
 
                   {/* Interactive Walkthrough Tour */}
                   {onOpenTour && (

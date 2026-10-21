@@ -41,7 +41,7 @@ import { verifyLeadList } from '@/lib/utils/verifyEmail';
 import { RAW_50_SAMPLE_CONTACTS, downloadSampleCSVFile } from '@/lib/data/sampleContacts';
 import { EmailTemplatesModal } from './EmailTemplatesModal';
 import { EmailTemplate, CA_ARTICLESHIP_DEMO_TEMPLATE } from '@/lib/data/emailTemplates';
-import { LaunchAuthRequiredModal } from './LaunchAuthRequiredModal';
+import { EmailAccountSetupModal } from './EmailAccountSetupModal';
 import { SampleCsvModal } from './SampleCsvModal';
 
 interface CampaignBuilderProps {
@@ -50,6 +50,7 @@ interface CampaignBuilderProps {
   userEmail?: string | null;
   userName?: string | null;
   onNavigateToSettings?: () => void;
+  onOpenEmailSetup?: () => void;
 }
 
 export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
@@ -58,6 +59,7 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   userEmail,
   userName,
   onNavigateToSettings,
+  onOpenEmailSetup,
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
@@ -1311,23 +1313,18 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
         senderName={senderName}
       />
 
-      {/* LOGIN & SETTINGS CONFIGURATION REQUIRED POPUP */}
-      <LaunchAuthRequiredModal
+      {/* 60-SECOND EMAIL SENDING ACCOUNT SETUP MODAL */}
+      <EmailAccountSetupModal
         isOpen={showAuthRequiredModal}
         onClose={() => setShowAuthRequiredModal(false)}
-        onNavigateToSettings={() => {
+        initialEmail={userEmail}
+        initialName={senderName || userName}
+        campaignContext={campaignName || 'your campaign'}
+        onSuccess={(savedEmail, savedName) => {
           setShowAuthRequiredModal(false);
-          onNavigateToSettings?.();
-        }}
-        onLoginSuccess={(newEmail, newName) => {
-          setShowAuthRequiredModal(false);
-          if (newName) setSenderName(newName);
+          if (savedName) setSenderName(savedName);
           handleLaunch();
         }}
-        currentEmail={userEmail}
-        currentName={userName}
-        campaignName={campaignName}
-        totalContacts={contacts.length}
       />
     </div>
   );
