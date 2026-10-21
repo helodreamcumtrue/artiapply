@@ -31,6 +31,7 @@ import {
   downloadSampleCSVFile,
   getSample50Contacts,
 } from '@/lib/data/sampleContacts';
+import { SampleCsvModal } from './SampleCsvModal';
 
 interface ContactsDirectoryProps {
   contacts: Contact[];
@@ -50,6 +51,7 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'pending' | 'failed' | 'sending'>('all');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showSampleCsvModal, setShowSampleCsvModal] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [parsedPreview, setParsedPreview] = useState<any[]>([]);
@@ -258,26 +260,16 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
           </p>
         </div>
 
-        {/* Action Buttons: Sample Download, Load 50 Sample, and Upload CSV */}
+        {/* Action Buttons: Sample Download and Upload CSV */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* 1. Download Sample CSV File */}
+          {/* 1. Download Sample CSV File Pop-up */}
           <button
-            onClick={downloadSampleCSVFile}
-            title="Download ready-to-use sample CSV with 50 verified B2B leads"
-            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium transition shadow-sm"
+            onClick={() => setShowSampleCsvModal(true)}
+            title="Download ready-to-use sample CSV with 50 verified leads"
+            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium transition shadow-sm active:scale-95"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Download Sample File (50 entries)</span>
-          </button>
-
-          {/* 2. Instant One-Click Load 50 Sample Contacts */}
-          <button
-            onClick={handleLoadSampleContacts}
-            title="Populate directory instantly with 50 sample leads"
-            className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-semibold transition shadow-sm"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-slate-600" />
-            <span>Load 50 Samples</span>
           </button>
 
           {/* 3. Self Upload CSV Button */}
@@ -612,6 +604,15 @@ export const ContactsDirectory: React.FC<ContactsDirectoryProps> = ({
           </div>
         </div>
       )}
+
+      {/* Sample CSV Modal */}
+      <SampleCsvModal
+        isOpen={showSampleCsvModal}
+        onClose={() => setShowSampleCsvModal(false)}
+        onLoadContacts={(loaded) => {
+          onAddContacts?.(loaded);
+        }}
+      />
     </div>
   );
 };

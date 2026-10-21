@@ -10,6 +10,7 @@ import { SettingsView } from '@/components/SettingsView';
 import { OnboardingTourModal } from '@/components/OnboardingTourModal';
 import { TakeFollowUpModal } from '@/components/TakeFollowUpModal';
 import { LandingPage } from '@/components/LandingPage';
+import { Footer } from '@/components/Footer';
 import { useRealtimeCampaign } from '@/hooks/useRealtimeCampaign';
 import { Campaign, Contact, CampaignStatus, ContactStatus } from '@/types/database';
 
@@ -583,6 +584,9 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Unified Platform Footer */}
+      <Footer />
 
       {/* Step-by-Step Interactive Onboarding Pop-up */}
       <OnboardingTourModal

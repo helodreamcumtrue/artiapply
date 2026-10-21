@@ -10,9 +10,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'ArticlO | Automated Cold Email & Article Outreach with Google & Gemini AI',
-  description: 'Scale personalized cold outreach safely. High deliverability via Gmail API, AI personalization with Gemini, and BullMQ rate-limited queue.',
-  keywords: ['cold email', 'outreach', 'SaaS', 'Gmail API', 'Gemini AI', 'BullMQ', 'email automation', 'ArticlO'],
+  title: 'ArticlO | Your Articleship Hunt Ends Here • Reach Hundreds of HRs in a Click',
+  description: 'Reach out to hundreds of HR in a click. Get ATS-free resume templates and active mail IDs of HR for CA articleship outreach with authentic Gmail delivery and AI.',
+  keywords: ['CA articleship', 'articleship outreach', 'HR email list', 'ATS resume templates', 'Chartered Accountant articleship', 'cold email', 'Gmail API', 'ArticlO'],
   authors: [{ name: 'ArticlO Team' }],
   icons: {
     icon: '/logo.svg',

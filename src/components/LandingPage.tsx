@@ -45,6 +45,7 @@ import {
   IconAnalyticsPulse,
   IconAdaptiveGear,
 } from './icons/CustomIcons';
+import { Footer } from './Footer';
 
 interface LandingPageProps {
   onLogin: () => void;
@@ -166,13 +167,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Next-Gen Outreach Engine • Powered by Gmail API & AI</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-poppins text-white leading-[1.1] drop-shadow-sm">
-              Building the future with <br className="hidden sm:inline" />
-              AI and strategy
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-poppins text-white leading-[1.15] drop-shadow-sm">
+              Your articleship hunt ends here
             </h1>
-            <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-2xl mx-auto font-normal leading-relaxed pt-1">
-              We help organizations unlock growth and efficiency through data-driven consulting, authentic Gmail delivery, and intelligent automation.
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 max-w-3xl mx-auto pt-3 pb-1">
+              <div className="flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:bg-white/20">
+                <span>📬 Reach out to hundreds of HR in a click</span>
+              </div>
+              <div className="flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:bg-white/20">
+                <span>📜 Get ATS free resume templates</span>
+              </div>
+              <div className="flex items-center space-x-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs sm:text-sm font-semibold shadow-sm transition hover:bg-white/20">
+                <span>✉️ Get active mail IDs of HR</span>
+              </div>
+            </div>
 
             {/* Hero Dual Action Buttons */}
             <div className="flex flex-row items-center justify-center gap-3.5 pt-4">
@@ -807,29 +815,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* ========================================================================= */}
-      {/* 7. CLEAN EDITORIAL FOOTER                                                 */}
+      {/* 7. UNIFIED PLATFORM FOOTER                                                */}
       {/* ========================================================================= */}
-      <footer className="bg-white border-t border-slate-200 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-500">
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-lg bg-sky-600 flex items-center justify-center text-white text-[10px] font-bold">
-              A
-            </div>
-            <span className="font-bold text-slate-900 font-poppins text-sm">ArticlO</span>
-            <span>• High-Deliverability Cold Email SaaS</span>
-          </div>
-
-          <div className="flex items-center space-x-6 font-medium">
-            <a href="/privacy" className="hover:text-slate-900 transition">Privacy Policy</a>
-            <a href="/terms" className="hover:text-slate-900 transition">Terms of Service</a>
-            <a href="/unsubscribe" className="hover:text-slate-900 transition">Opt-Out</a>
-          </div>
-
-          <div>
-            &copy; {new Date().getFullYear()} ArticlO. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* ========================================================================= */}
       {/* 8. AUTHENTICATION / QUICK ACCESS MODAL                                    */}

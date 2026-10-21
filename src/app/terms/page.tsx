@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { FileText, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
 import { ArticloLogo } from '@/components/icons/CustomIcons';
+import { Footer } from '@/components/Footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -126,14 +127,10 @@ export default function TermsOfService() {
             </div>
           </section>
         </div>
+      </div>
 
-        {/* Footer */}
-        <div className="pt-8 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
-          <span>&copy; {new Date().getFullYear()} ArticlO Inc. All rights reserved.</span>
-          <Link href="/privacy" className="text-slate-700 font-medium hover:underline">
-            Privacy Policy
-          </Link>
-        </div>
+      <div className="mt-16 -mx-4 sm:-mx-6 lg:-mx-8">
+        <Footer />
       </div>
     </div>
   );

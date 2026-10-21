@@ -34,6 +34,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { downloadSampleCSVFile } from '@/lib/data/sampleContacts';
+import { SampleCsvModal } from './SampleCsvModal';
 
 interface SettingsViewProps {
   isGoogleConnected: boolean;
@@ -61,6 +62,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   // Active guide popup modal state
   const [activeGuide, setActiveGuide] = useState<HelpGuideType>(null);
+  const [showSampleCsvModal, setShowSampleCsvModal] = useState(false);
 
   // Simple Settings State
   const [name, setName] = useState(userName || 'John Smith');
@@ -750,8 +752,8 @@ REDIS_URL=redis://localhost:6379`;
 
               <button
                 type="button"
-                onClick={downloadSampleCSVFile}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition shadow-sm"
+                onClick={() => setShowSampleCsvModal(true)}
+                className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition shadow-sm active:scale-95"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download Sample CSV</span>
@@ -1184,6 +1186,12 @@ REDIS_URL=redis://localhost:6379`;
           </div>
         </div>
       )}
+
+      {/* Sample CSV Modal */}
+      <SampleCsvModal
+        isOpen={showSampleCsvModal}
+        onClose={() => setShowSampleCsvModal(false)}
+      />
     </div>
   );
 };

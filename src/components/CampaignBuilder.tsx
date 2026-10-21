@@ -40,8 +40,9 @@ import { Contact, EmailAttachment, CampaignFollowUp } from '@/types/database';
 import { verifyLeadList } from '@/lib/utils/verifyEmail';
 import { RAW_50_SAMPLE_CONTACTS, downloadSampleCSVFile } from '@/lib/data/sampleContacts';
 import { EmailTemplatesModal } from './EmailTemplatesModal';
-import { EmailTemplate } from '@/lib/data/emailTemplates';
+import { EmailTemplate, CA_ARTICLESHIP_DEMO_TEMPLATE } from '@/lib/data/emailTemplates';
 import { LaunchAuthRequiredModal } from './LaunchAuthRequiredModal';
+import { SampleCsvModal } from './SampleCsvModal';
 
 interface CampaignBuilderProps {
   onLaunchSuccess: (campaignData: any) => void;
@@ -63,23 +64,12 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
 
   // Step 1: Details
   const [campaignName, setCampaignName] = useState('');
-  const [senderName, setSenderName] = useState(userName || 'Campaign Manager');
-  const [targetAudience, setTargetAudience] = useState('B2B SaaS Founders & Growth Leads');
+  const [senderName, setSenderName] = useState(userName || 'Applicant');
 
-  // Step 2: Email Template
-  const [subject, setSubject] = useState('Quick question regarding {{company}}');
-  const [bodyTemplate, setBodyTemplate] = useState(
-`Hi {{first_name}},
-
-I came across {{company}} and noticed your focus on scaling outreach. As {{role}}, I imagine streamlining communication workflows and achieving high response rates is a key priority.
-
-We built ArticlO to help teams send personalized 1-on-1 emails directly through authentic sender accounts with a calibrated human delivery cadence—ensuring every message lands safely in the primary inbox.
-
-Would you be open to a brief 5-minute chat this week?
-
-Best regards,
-${senderName}`
-  );
+  // Step 2: Email Template (Default CA Articleship Statutory Audit format)
+  const [subject, setSubject] = useState(CA_ARTICLESHIP_DEMO_TEMPLATE.subject);
+  const [bodyTemplate, setBodyTemplate] = useState(CA_ARTICLESHIP_DEMO_TEMPLATE.body);
+  const [showSampleCsvModal, setShowSampleCsvModal] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState<'editor' | 'preview'>('editor');
   const [isEnhancingWithAI, setIsEnhancingWithAI] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
@@ -347,25 +337,6 @@ ${senderName}`
     });
   };
 
-  // Load 50 Sample Contacts
-  const loadSampleContacts = () => {
-    const sample50 = RAW_50_SAMPLE_CONTACTS.map((c, i) => ({
-      id: `builder-sample-${i + 1}`,
-      email: c.email,
-      first_name: c.first_name,
-      last_name: c.last_name,
-      company: c.company,
-      role: c.role,
-    }));
-    const { verified, risky, invalid } = verifyLeadList(sample50);
-    setVerificationStats({
-      verified: verified.length,
-      risky: risky.length,
-      invalid: invalid.length,
-    });
-    setContacts(sample50);
-    setCsvFileName('artiapply_50_sample_contacts.csv');
-  };
 
   // Launch Campaign
   const handleLaunch = async () => {
@@ -507,20 +478,7 @@ ${senderName}`
                 type="text"
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
-                placeholder="e.g. Q4 SaaS Founders Outreach"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900 shadow-sm transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Target Audience <span className="text-slate-400 font-normal">(Optional)</span>
-              </label>
-              <input
-                type="text"
-                value={targetAudience}
-                onChange={(e) => setTargetAudience(e.target.value)}
-                placeholder="e.g. B2B CEOs, Growth Directors"
+                placeholder="e.g. CA Articleship - Statutory Audit Outreach"
                 className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-slate-900 shadow-sm transition"
               />
             </div>
@@ -558,11 +516,15 @@ ${senderName}`
             <div className="flex items-center space-x-2">
               <button
                 type="button"
-                onClick={() => setShowTemplatesModal(true)}
+                onClick={() => {
+                  setSubject(CA_ARTICLESHIP_DEMO_TEMPLATE.subject);
+                  setBodyTemplate(CA_ARTICLESHIP_DEMO_TEMPLATE.body);
+                }}
                 className="px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition flex items-center space-x-1.5 shadow-sm active:scale-95"
+                title="Reset or load the CA Articleship demo format"
               >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
-                <span>10 Pro Formats</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#d4f933]" />
+                <span>Demo Format</span>
               </button>
             </div>
           </div>
@@ -796,11 +758,14 @@ ${senderName}`
                   )}
                 </div>
 
-                {/* ✨ Templates Browser */}
+                {/* ✨ Demo Format Loader */}
                 <button
                   type="button"
-                  onClick={() => setShowTemplatesModal(true)}
-                  title="Browse 10 Professional Email Formats"
+                  onClick={() => {
+                    setSubject(CA_ARTICLESHIP_DEMO_TEMPLATE.subject);
+                    setBodyTemplate(CA_ARTICLESHIP_DEMO_TEMPLATE.body);
+                  }}
+                  title="Load CA Articleship Demo Format"
                   className="p-2 rounded-full hover:bg-slate-100 text-[#0b57d0] hover:text-[#0842a0] transition"
                 >
                   <Sparkles className="w-4 h-4" />
@@ -971,18 +936,12 @@ ${senderName}`
             <div className="flex items-center space-x-2">
               <button
                 type="button"
-                onClick={downloadSampleCSVFile}
-                className="text-xs px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium transition flex items-center space-x-1.5 shadow-sm"
+                onClick={() => setShowSampleCsvModal(true)}
+                className="text-xs px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold transition flex items-center space-x-2 shadow-sm active:scale-95"
+                title="Browse & download HR recruiter leads for Big 4, Top 10, Mid-size, and Boutique CA firms"
               >
-                <Download className="w-3.5 h-3.5 text-slate-500" />
-                <span>Download Sample (50)</span>
-              </button>
-              <button
-                type="button"
-                onClick={loadSampleContacts}
-                className="text-xs px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-semibold transition"
-              >
-                ⚡ Load Sample Leads
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#d4f933]" />
+                <span>Download Sample CSVs (4 Tiers)</span>
               </button>
             </div>
           </div>
@@ -1127,10 +1086,6 @@ ${senderName}`
                 <div className="flex justify-between text-slate-700">
                   <span className="text-slate-500">Sender:</span>
                   <span>{senderName}</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span className="text-slate-500">Audience:</span>
-                  <span>{targetAudience}</span>
                 </div>
                 <div className="flex justify-between text-slate-700">
                   <span className="text-slate-500">Recipients:</span>
@@ -1331,6 +1286,22 @@ ${senderName}`
           </div>
         </div>
       )}
+
+      {/* SAMPLE CSV DOWNLOAD / LOAD MODAL (4 TIERS) */}
+      <SampleCsvModal
+        isOpen={showSampleCsvModal}
+        onClose={() => setShowSampleCsvModal(false)}
+        onLoadContacts={(loaded, filename) => {
+          const { verified, risky, invalid } = verifyLeadList(loaded);
+          setVerificationStats({
+            verified: verified.length,
+            risky: risky.length,
+            invalid: invalid.length,
+          });
+          setContacts(loaded);
+          setCsvFileName(filename);
+        }}
+      />
 
       {/* PROFESSIONAL EMAIL FORMATS MODAL */}
       <EmailTemplatesModal

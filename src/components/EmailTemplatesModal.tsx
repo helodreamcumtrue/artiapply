@@ -37,14 +37,7 @@ export const EmailTemplatesModal: React.FC<EmailTemplatesModalProps> = ({
   if (!isOpen) return null;
 
   const categories = [
-    { id: 'all', label: 'All Formats (10)' },
-    { id: 'job_application', label: '🎯 Job Application' },
-    { id: 'sales', label: '💼 B2B Sales Outbound' },
-    { id: 'executive', label: '⚡ Executive / C-Suite' },
-    { id: 'investor', label: '🚀 Investor Pitch' },
-    { id: 'agency', label: '🛠️ Freelance & Agency' },
-    { id: 'partnership', label: '🤝 Partnership & BD' },
-    { id: 'followup', label: '🔄 Follow-up Sequences' },
+    { id: 'all', label: 'CA Articleship Format' },
   ];
 
   const filteredTemplates = PROFESSIONAL_EMAIL_TEMPLATES.filter((tmpl) => {
@@ -71,17 +64,17 @@ export const EmailTemplatesModal: React.FC<EmailTemplatesModalProps> = ({
         <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 via-white to-purple-50/40">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
-              <Sparkles className="w-5 h-5 text-purple-300" />
+              <Sparkles className="w-5 h-5 text-[#d4f933]" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-xl font-bold text-slate-900 font-poppins">Professional Email Formats</h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wider">
-                  Proven Playbook
+                <h2 className="text-xl font-bold text-slate-900 font-poppins">Articleship Email Format</h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
+                  Recommended Demo
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Curated high-conversion templates with auto-personalized variables and attachment recommendations.
+                Official CA Articleship Statutory Audit outreach format with ATS-ready structure.
               </p>
             </div>
           </div>

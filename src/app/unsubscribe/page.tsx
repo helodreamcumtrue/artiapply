@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, ShieldOff, Mail, RefreshCw } from 'lucide-react';
 import { ArticloLogo } from '@/components/icons/CustomIcons';
+import { Footer } from '@/components/Footer';
 
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
@@ -42,8 +43,9 @@ function UnsubscribeContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white p-8 sm:p-9 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_12px_36px_-6px_rgba(15,23,42,0.08)] text-center space-y-6">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col justify-between">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white p-8 sm:p-9 rounded-[28px] border border-slate-200/90 shadow-[0_1px_3px_rgba(15,23,42,0.03),0_12px_36px_-6px_rgba(15,23,42,0.08)] text-center space-y-6">
         {/* Brand Mark */}
         <div className="flex items-center justify-center space-x-2">
           <div className="w-8 h-8 rounded-xl bg-slate-950 text-white flex items-center justify-center shadow-sm border border-slate-800">
@@ -118,7 +120,9 @@ function UnsubscribeContent() {
             </div>
           </form>
         )}
+        </div>
       </div>
+      <Footer variant="minimal" />
     </div>
   );
 }
